@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="astitle asdesc">
+  <title id="astitle">Assignments screenshot mock</title>
+  <desc id="asdesc">Mock screenshot showing assignments list and grading interface.</desc>
+  <rect width="1200" height="720" fill="#ffffff"/>
+  <rect x="40" y="30" width="1120" height="120" rx="12" fill="#fff" stroke="#eef2ff"/>
+  <g transform="translate(60,200)">
+      <rect width='560' height='56' rx='8' fill='#fff' stroke='#fdeecf'/>
+      <text x='16' y='36' font-family='Inter, Arial' font-size='16' fill='#0f172a' font-weight='700'>Quản lý bài tập</text>
+      <g transform='translate(0,72)'>
+        <rect width='400' height='200' rx='8' fill='#fff' stroke='#f5e7d6'/>
+        <text x='16' y='28' font-size='14' fill='#0f172a' font-weight='700'>Quiz: Ôn tập chương 1</text>
+        <text x='16' y='54' font-size='12' fill='#6b7280'>Hạn nộp: 25/04/2026</text>
+        <rect x='16' y='80' width='120' height='12' rx='6' fill='#eef2ff'/>
+        <rect x='16' y='104' width='280' height='12' rx='6' fill='#eef2ff'/>
+      </g>
+      <g transform='translate(420,72)'>
+        <rect width='120' height='200' rx='8' fill='#fff' stroke='#f5e7d6'/>
+        <text x='12' y='28' font-size='13' fill='#0f172a' font-weight='700'>Trạng thái</text>
+        <text x='12' y='54' font-size='12' fill='#065f46'>Chấm xong: 80%</text>
+        <text x='12' y='74' font-size='12' fill='#6b7280'>Chưa nộp: 6</text>
+      </g>
+  </g>
+</svg>

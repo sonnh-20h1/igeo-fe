@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="76" y1="42" x2="1111" y2="639" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#0B3B37"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#123B7A"/>
+      <stop offset="1" stop-color="#0E766E"/>
+    </linearGradient>
+    <linearGradient id="metricBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#EEF2FF"/>
+      <stop offset="1" stop-color="#DBEAFE"/>
+    </linearGradient>
+    <linearGradient id="metricGreen" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ECFDF5"/>
+      <stop offset="1" stop-color="#D1FAE5"/>
+    </linearGradient>
+    <linearGradient id="metricAmber" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFF7ED"/>
+      <stop offset="1" stop-color="#FDE68A"/>
+    </linearGradient>
+    <filter id="shadow" x="20" y="16" width="1160" height="668" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="18"/>
+      <feGaussianBlur stdDeviation="20"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0588235 0 0 0 0 0.0941176 0 0 0 0 0.156863 0 0 0 0.24 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="700" rx="34" fill="url(#bg)"/>
+  <circle cx="1062" cy="108" r="150" fill="#F59E0B" fill-opacity="0.10"/>
+  <circle cx="164" cy="618" r="140" fill="#38BDF8" fill-opacity="0.08"/>
+
+  <g filter="url(#shadow)">
+    <rect x="60" y="34" width="1080" height="608" rx="28" fill="#F8FAFC"/>
+    <rect x="60" y="34" width="1080" height="608" rx="28" stroke="#E2E8F0"/>
+
+    <rect x="60" y="34" width="248" height="608" rx="28" fill="#0F172A"/>
+    <text x="116" y="94" fill="#F8FAFC" font-size="24" font-family="Arial, Helvetica, sans-serif" font-weight="700">Lumio</text>
+    <text x="116" y="121" fill="#94A3B8" font-size="12" font-family="Arial, Helvetica, sans-serif" letter-spacing="2.4">TEACHER HUB</text>
+    <circle cx="98" cy="88" r="22" fill="#F8FAFC"/>
+    <path d="M98 72C103.6 72 108 76.4 108 82C108 87.6 103.6 92 98 92C92.4 92 88 87.6 88 82C88 76.4 92.4 72 98 72ZM98 94C105.8 94 112 100.2 112 108V110H84V108C84 100.2 90.2 94 98 94Z" fill="#0F172A"/>
+
+    <rect x="84" y="168" width="200" height="56" rx="18" fill="#F8FAFC"/>
+    <text x="116" y="202" fill="#0F172A" font-size="15" font-family="Arial, Helvetica, sans-serif" font-weight="700">Tổng quan</text>
+    <rect x="96" y="188" width="10" height="10" rx="5" fill="#0E766E"/>
+
+    <text x="116" y="274" fill="#CBD5E1" font-size="14" font-family="Arial, Helvetica, sans-serif">Lớp học</text>
+    <text x="116" y="322" fill="#CBD5E1" font-size="14" font-family="Arial, Helvetica, sans-serif">Học viên</text>
+    <text x="116" y="370" fill="#CBD5E1" font-size="14" font-family="Arial, Helvetica, sans-serif">Giáo trình</text>
+    <text x="116" y="418" fill="#CBD5E1" font-size="14" font-family="Arial, Helvetica, sans-serif">Bài luyện</text>
+    <text x="116" y="466" fill="#CBD5E1" font-size="14" font-family="Arial, Helvetica, sans-serif">Điểm số</text>
+
+    <rect x="84" y="536" width="200" height="78" rx="20" fill="#111827"/>
+    <text x="108" y="566" fill="#E2E8F0" font-size="14" font-family="Arial, Helvetica, sans-serif" font-weight="700">Ms Thủy</text>
+    <text x="108" y="589" fill="#94A3B8" font-size="12" font-family="Arial, Helvetica, sans-serif">Giáo viên tiếng Anh</text>
+    <text x="108" y="608" fill="#64748B" font-size="11" font-family="Arial, Helvetica, sans-serif">8 lớp • 126 học viên</text>
+
+    <text x="344" y="90" fill="#0F172A" font-size="28" font-family="Arial, Helvetica, sans-serif" font-weight="700">Tổng quan giảng dạy</text>
+    <text x="344" y="118" fill="#64748B" font-size="14" font-family="Arial, Helvetica, sans-serif">Theo dõi lớp tiếng Anh, giáo trình và bài luyện trong một nơi.</text>
+
+    <rect x="930" y="60" width="174" height="52" rx="18" fill="#FFFFFF"/>
+    <rect x="930" y="60" width="174" height="52" rx="18" stroke="#E2E8F0"/>
+    <text x="958" y="82" fill="#64748B" font-size="11" font-family="Arial, Helvetica, sans-serif">Hôm nay</text>
+    <text x="958" y="101" fill="#0F172A" font-size="15" font-family="Arial, Helvetica, sans-serif" font-weight="700">17/04/2026</text>
+
+    <rect x="344" y="146" width="474" height="158" rx="28" fill="url(#hero)"/>
+    <text x="376" y="184" fill="#D1FAE5" font-size="11" font-family="Arial, Helvetica, sans-serif" letter-spacing="2.2">TRUNG TÂM TIẾNG ANH</text>
+    <text x="376" y="222" fill="#FFFFFF" font-size="30" font-family="Arial, Helvetica, sans-serif" font-weight="700">Mọi lớp học, giáo trình và bộ luyện</text>
+    <text x="376" y="256" fill="#D7F9F1" font-size="15" font-family="Arial, Helvetica, sans-serif">Sẵn sàng để giao xuống lớp và theo dõi kết quả học viên theo thời gian thực.</text>
+
+    <rect x="376" y="272" width="128" height="10" rx="5" fill="#FFFFFF" fill-opacity="0.16"/>
+    <rect x="514" y="272" width="96" height="10" rx="5" fill="#FFFFFF" fill-opacity="0.16"/>
+    <rect x="620" y="272" width="78" height="10" rx="5" fill="#FFFFFF" fill-opacity="0.16"/>
+
+    <rect x="842" y="146" width="262" height="158" rx="28" fill="#FFFFFF"/>
+    <rect x="842" y="146" width="262" height="158" rx="28" stroke="#E2E8F0"/>
+    <text x="870" y="182" fill="#64748B" font-size="12" font-family="Arial, Helvetica, sans-serif">Lớp đang phụ trách</text>
+    <text x="870" y="214" fill="#0F172A" font-size="34" font-family="Arial, Helvetica, sans-serif" font-weight="700">8</text>
+    <text x="870" y="238" fill="#0F172A" font-size="14" font-family="Arial, Helvetica, sans-serif" font-weight="700">126 học viên đang học</text>
+    <text x="870" y="261" fill="#64748B" font-size="12" font-family="Arial, Helvetica, sans-serif">12 học viên cần theo dõi sát thêm</text>
+
+    <rect x="344" y="328" width="235" height="130" rx="24" fill="url(#metricBlue)"/>
+    <text x="372" y="364" fill="#4338CA" font-size="12" font-family="Arial, Helvetica, sans-serif">GIÁO TRÌNH TIẾNG ANH</text>
+    <text x="372" y="404" fill="#0F172A" font-size="34" font-family="Arial, Helvetica, sans-serif" font-weight="700">6 bộ</text>
+    <text x="372" y="429" fill="#334155" font-size="13" font-family="Arial, Helvetica, sans-serif">TOEIC, i-Learn, reading practice và vocab drill</text>
+
+    <rect x="604" y="328" width="235" height="130" rx="24" fill="url(#metricGreen)"/>
+    <text x="632" y="364" fill="#047857" font-size="12" font-family="Arial, Helvetica, sans-serif">BÀI LUYỆN SẴN SÀNG</text>
+    <text x="632" y="404" fill="#0F172A" font-size="34" font-family="Arial, Helvetica, sans-serif" font-weight="700">18 bài</text>
+    <text x="632" y="429" fill="#334155" font-size="13" font-family="Arial, Helvetica, sans-serif">Có thể giao ngay cho lớp hoặc từng học viên</text>
+
+    <rect x="864" y="328" width="240" height="130" rx="24" fill="url(#metricAmber)"/>
+    <text x="892" y="364" fill="#B45309" font-size="12" font-family="Arial, Helvetica, sans-serif">ĐIỂM ĐÁNH GIÁ</text>
+    <text x="892" y="404" fill="#0F172A" font-size="34" font-family="Arial, Helvetica, sans-serif" font-weight="700">42 đầu điểm</text>
+    <text x="892" y="429" fill="#334155" font-size="13" font-family="Arial, Helvetica, sans-serif">Quiz, reading test và bài tập chấm tự động</text>
+
+    <rect x="344" y="484" width="422" height="126" rx="24" fill="#FFFFFF"/>
+    <rect x="344" y="484" width="422" height="126" rx="24" stroke="#E2E8F0"/>
+    <text x="372" y="518" fill="#64748B" font-size="12" font-family="Arial, Helvetica, sans-serif">Bộ luyện sẵn sàng để giao</text>
+    <text x="372" y="546" fill="#0F172A" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700">TOEIC Reading Set 04</text>
+    <text x="372" y="568" fill="#475569" font-size="13" font-family="Arial, Helvetica, sans-serif">Reading • 25 phút • 18 câu hỏi • Lớp 8A2</text>
+    <rect x="372" y="583" width="118" height="8" rx="4" fill="#CBD5E1"/>
+    <rect x="372" y="583" width="72" height="8" rx="4" fill="#0E766E"/>
+
+    <rect x="790" y="484" width="314" height="126" rx="24" fill="#FFFFFF"/>
+    <rect x="790" y="484" width="314" height="126" rx="24" stroke="#E2E8F0"/>
+    <text x="818" y="518" fill="#64748B" font-size="12" font-family="Arial, Helvetica, sans-serif">Cập nhật nhanh</text>
+    <circle cx="825" cy="548" r="4" fill="#0E766E"/>
+    <text x="839" y="553" fill="#0F172A" font-size="13" font-family="Arial, Helvetica, sans-serif">i-Learn Smart Start vừa thêm 1 bài listening mới</text>
+    <circle cx="825" cy="578" r="4" fill="#F59E0B"/>
+    <text x="839" y="583" fill="#0F172A" font-size="13" font-family="Arial, Helvetica, sans-serif">3 học viên lớp 8A2 cần theo dõi thêm reading score</text>
+  </g>
+</svg>

@@ -1,0 +1,693 @@
+'use client';
+
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
+import { BookOpen, Download, Pencil, Plus, Search, Trash2, Upload } from 'lucide-react';
+import { adminQuestionsApi } from '@/features/admin-questions/api';
+import type {
+  CreateQuestionPayload,
+  Question,
+  QuestionDifficulty,
+  QuestionImportResult,
+  QuestionOption,
+  QuestionType,
+  UpdateQuestionPayload,
+} from '@/features/admin-questions/types';
+import { createEmptyMcqOptions, normalizeQuestionOptions } from '@/features/admin-questions/types';
+import { useI18n } from '@/features/i18n/provider';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PaginationControls } from '@/components/ui/pagination-controls';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { useNotification } from '@/components/ui/notification';
+import { Badge } from '@/components/ui/badge';
+
+type QuestionFormState = {
+  content: string;
+  type: QuestionType;
+  imageUrl: string;
+  audioUrl: string;
+  options: QuestionOption[];
+  correctAnswer: string;
+  explanation: string;
+  difficulty: QuestionDifficulty;
+  tags: string;
+};
+
+const emptyForm = (): QuestionFormState => ({
+  content: '',
+  type: 'MULTIPLE_CHOICE',
+  imageUrl: '',
+  audioUrl: '',
+  options: createEmptyMcqOptions(),
+  correctAnswer: '',
+  explanation: '',
+  difficulty: 'MEDIUM',
+  tags: '',
+});
+
+function toForm(question: Question): QuestionFormState {
+  return {
+    content: question.content ?? '',
+    type: question.type,
+    imageUrl: question.imageUrl ?? '',
+    audioUrl: question.audioUrl ?? '',
+    options: normalizeQuestionOptions(question.options),
+    correctAnswer: question.correctAnswer ?? '',
+    explanation: question.explanation ?? '',
+    difficulty: question.difficulty ?? 'MEDIUM',
+    tags: (question.tags ?? []).join(', '),
+  };
+}
+
+function parseTags(value: string) {
+  return value
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+export default function AdminQuestionsPage() {
+  const { dictionary } = useI18n();
+  const { success, error: notifyError } = useNotification();
+  const copy = dictionary.adminQuestions;
+
+  const [items, setItems] = useState<Question[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [typeFilter, setTypeFilter] = useState<QuestionType | 'ALL'>('ALL');
+  const [difficultyFilter, setDifficultyFilter] = useState<QuestionDifficulty | 'ALL'>('ALL');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [form, setForm] = useState<QuestionFormState>(emptyForm());
+  const [formError, setFormError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<QuestionImportResult | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const refresh = useCallback(() => {
+    setReloadKey((current) => current + 1);
+  }, []);
+
+  async function handleDownloadTemplate() {
+    try {
+      await adminQuestionsApi.downloadImportTemplate();
+      success(copy.templateDownloaded);
+    } catch (error) {
+      notifyError(
+        error instanceof Error ? error.message : copy.templateDownloadFailed,
+        copy.templateDownloadFailed,
+      );
+    }
+  }
+
+  async function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      notifyError(copy.importOnlyXlsx, copy.importFailed);
+      return;
+    }
+
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const result = await adminQuestionsApi.importFromExcel(file);
+      setImportResult(result);
+      if (result.failedCount > 0) {
+        notifyError(
+          copy.importPartial
+            .replace('{success}', String(result.successCount))
+            .replace('{failed}', String(result.failedCount)),
+          copy.importDone,
+        );
+      } else {
+        success(
+          copy.importSuccess.replace('{success}', String(result.successCount)),
+          copy.importDone,
+        );
+      }
+      refresh();
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : copy.importFailed, copy.importFailed);
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadQuestions() {
+      startTransition(() => {
+        if (!cancelled) setLoading(true);
+      });
+
+      try {
+        const result = await adminQuestionsApi.list({
+          page,
+          size: pageSize,
+          search: search.trim() || undefined,
+          type: typeFilter === 'ALL' ? undefined : typeFilter,
+          difficulty: difficultyFilter === 'ALL' ? undefined : difficultyFilter,
+        });
+        if (cancelled) return;
+        startTransition(() => {
+          setItems(result.items ?? []);
+          setTotal(result.pageInfo?.total ?? 0);
+          setLoading(false);
+        });
+      } catch (error) {
+        if (cancelled) return;
+        startTransition(() => setLoading(false));
+        notifyError(error instanceof Error ? error.message : copy.loadFailed, copy.loadFailed);
+      }
+    }
+
+    void loadQuestions();
+    return () => {
+      cancelled = true;
+    };
+  }, [copy.loadFailed, difficultyFilter, notifyError, page, pageSize, reloadKey, search, typeFilter]);
+
+  function openCreate() {
+    setEditingQuestion(null);
+    setForm(emptyForm());
+    setFormError(null);
+    setDialogOpen(true);
+  }
+
+  function openEdit(question: Question) {
+    setEditingQuestion(question);
+    setForm(toForm(question));
+    setFormError(null);
+    setDialogOpen(true);
+  }
+
+  function updateOptionText(key: string, text: string) {
+    setForm((current) => ({
+      ...current,
+      options: current.options.map((option) => (option.key === key ? { ...option, text } : option)),
+    }));
+  }
+
+  async function submitForm(event: React.FormEvent) {
+    event.preventDefault();
+    setFormError(null);
+
+    if (!form.content.trim()) {
+      setFormError(copy.requiredFields);
+      return;
+    }
+
+    const cleanedOptions = form.options.map((option) => ({
+      key: option.key,
+      text: option.text.trim(),
+    }));
+
+    if (form.type === 'MULTIPLE_CHOICE') {
+      if (cleanedOptions.length !== 4 || cleanedOptions.some((option) => !option.text)) {
+        setFormError(copy.optionsMin);
+        return;
+      }
+      if (!form.correctAnswer.trim() || !cleanedOptions.some((option) => option.key === form.correctAnswer)) {
+        setFormError(copy.correctAnswerInvalid);
+        return;
+      }
+    }
+
+    setSaving(true);
+    try {
+      const tags = parseTags(form.tags);
+      const basePayload = {
+        content: form.content.trim(),
+        type: form.type,
+        difficulty: form.difficulty,
+        explanation: form.explanation.trim() || undefined,
+        tags: tags.length ? tags : undefined,
+        imageUrl: form.imageUrl.trim() || undefined,
+        audioUrl: form.audioUrl.trim() || undefined,
+        options: form.type === 'MULTIPLE_CHOICE' ? cleanedOptions : undefined,
+        correctAnswer: form.type === 'MULTIPLE_CHOICE' ? form.correctAnswer.trim() : undefined,
+      };
+
+      if (editingQuestion) {
+        const payload: UpdateQuestionPayload = {
+          ...basePayload,
+          imageUrl: form.imageUrl.trim() ? form.imageUrl.trim() : null,
+          audioUrl: form.audioUrl.trim() ? form.audioUrl.trim() : null,
+          options: form.type === 'MULTIPLE_CHOICE' ? cleanedOptions : [],
+          correctAnswer: form.type === 'MULTIPLE_CHOICE' ? form.correctAnswer.trim() : undefined,
+        };
+        await adminQuestionsApi.update(editingQuestion.id, payload);
+        success(copy.updated);
+      } else {
+        const payload: CreateQuestionPayload = basePayload;
+        await adminQuestionsApi.create(payload);
+        success(copy.created);
+      }
+      setDialogOpen(false);
+      refresh();
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : copy.saveFailed);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(question: Question) {
+    const preview = question.shortId || question.content.slice(0, 60);
+    const confirmed = window.confirm(copy.deleteConfirm.replace('{name}', preview));
+    if (!confirmed) return;
+
+    try {
+      await adminQuestionsApi.remove(question.id);
+      success(copy.deleted);
+      refresh();
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : copy.deleteFailed, copy.deleteFailed);
+    }
+  }
+
+  function typeLabel(type: QuestionType) {
+    return type === 'MULTIPLE_CHOICE' ? copy.typeMultipleChoice : copy.typeEssay;
+  }
+
+  function difficultyLabel(difficulty: QuestionDifficulty) {
+    if (difficulty === 'EASY') return copy.difficultyEasy;
+    if (difficulty === 'HARD') return copy.difficultyHard;
+    return copy.difficultyMedium;
+  }
+
+  return (
+    <div className='space-y-6'>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
+        <div>
+          <p className='font-mono text-xs uppercase tracking-[0.24em] text-primary'>{copy.eyebrow}</p>
+          <h1 className='mt-2 text-2xl font-semibold sm:text-3xl'>{copy.title}</h1>
+          <p className='mt-2 max-w-2xl text-muted-foreground'>{copy.description}</p>
+        </div>
+        <div className='flex flex-wrap gap-2'>
+          <Button type='button' variant='outline' className='gap-2' onClick={() => void handleDownloadTemplate()}>
+            <Download className='size-4' />
+            {copy.downloadTemplate}
+          </Button>
+          <Button
+            type='button'
+            variant='outline'
+            className='gap-2'
+            disabled={importing}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className='size-4' />
+            {importing ? copy.importing : copy.importExcel}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type='file'
+            accept='.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            className='hidden'
+            onChange={(event) => void handleImportFile(event)}
+          />
+          <Button onClick={openCreate} className='gap-2'>
+            <Plus className='size-4' />
+            {copy.create}
+          </Button>
+        </div>
+      </div>
+
+      {importResult ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{copy.importResultTitle}</CardTitle>
+            <CardDescription>
+              {copy.importResultSummary
+                .replace('{total}', String(importResult.total))
+                .replace('{success}', String(importResult.successCount))
+                .replace('{failed}', String(importResult.failedCount))}
+            </CardDescription>
+          </CardHeader>
+          {importResult.errors?.length ? (
+            <CardContent className='space-y-2'>
+              {importResult.errors.slice(0, 8).map((item) => (
+                <p key={`${item.row}-${item.message}`} className='text-sm text-red-600'>
+                  {copy.importRowError
+                    .replace('{row}', String(item.row))
+                    .replace('{message}', item.message)}
+                </p>
+              ))}
+              {importResult.errors.length > 8 ? (
+                <p className='text-sm text-muted-foreground'>
+                  {copy.importMoreErrors.replace('{count}', String(importResult.errors.length - 8))}
+                </p>
+              ) : null}
+            </CardContent>
+          ) : null}
+        </Card>
+      ) : null}
+
+      <Card>
+        <CardHeader className='gap-4'>
+          <div>
+            <CardTitle className='flex items-center gap-2'>
+              <BookOpen className='size-5 text-primary' />
+              {copy.listTitle}
+            </CardTitle>
+            <CardDescription>{copy.listDescription}</CardDescription>
+          </div>
+          <div className='flex flex-col gap-3 lg:flex-row lg:items-center'>
+            <form
+              className='flex w-full max-w-md gap-2'
+              onSubmit={(event) => {
+                event.preventDefault();
+                setPage(1);
+                setSearch(searchInput);
+              }}
+            >
+              <div className='relative flex-1'>
+                <Search className='pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
+                <Input
+                  className='pl-9'
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  placeholder={copy.searchPlaceholder}
+                />
+              </div>
+              <Button type='submit' variant='outline'>
+                {copy.search}
+              </Button>
+            </form>
+            <div className='flex flex-wrap gap-2'>
+              <Select
+                value={typeFilter}
+                onValueChange={(value) => {
+                  setPage(1);
+                  setTypeFilter(value as QuestionType | 'ALL');
+                }}
+              >
+                <SelectTrigger className='w-[180px]'>
+                  <SelectValue placeholder={copy.filterType} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='ALL'>{copy.filterAllTypes}</SelectItem>
+                  <SelectItem value='MULTIPLE_CHOICE'>{copy.typeMultipleChoice}</SelectItem>
+                  <SelectItem value='ESSAY'>{copy.typeEssay}</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={difficultyFilter}
+                onValueChange={(value) => {
+                  setPage(1);
+                  setDifficultyFilter(value as QuestionDifficulty | 'ALL');
+                }}
+              >
+                <SelectTrigger className='w-[160px]'>
+                  <SelectValue placeholder={copy.filterDifficulty} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='ALL'>{copy.filterAllDifficulties}</SelectItem>
+                  <SelectItem value='EASY'>{copy.difficultyEasy}</SelectItem>
+                  <SelectItem value='MEDIUM'>{copy.difficultyMedium}</SelectItem>
+                  <SelectItem value='HARD'>{copy.difficultyHard}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <div className='overflow-x-auto rounded-xl border border-border/70'>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className='w-[110px]'>{copy.colShortId}</TableHead>
+                  <TableHead>{copy.colContent}</TableHead>
+                  <TableHead>{copy.colType}</TableHead>
+                  <TableHead>{copy.colDifficulty}</TableHead>
+                  <TableHead>{copy.colTags}</TableHead>
+                  <TableHead className='text-right'>{copy.colActions}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className='py-10 text-center text-muted-foreground'>
+                      {dictionary.common.loading}
+                    </TableCell>
+                  </TableRow>
+                ) : items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className='py-10 text-center text-muted-foreground'>
+                      {copy.empty}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  items.map((question) => (
+                    <TableRow key={question.id}>
+                      <TableCell>
+                        <span className='font-mono text-xs font-semibold tracking-wide text-primary'>
+                          {question.shortId || '—'}
+                        </span>
+                      </TableCell>
+                      <TableCell className='max-w-md'>
+                        <p className='line-clamp-2 font-medium'>{question.content}</p>
+                      </TableCell>
+                      <TableCell>{typeLabel(question.type)}</TableCell>
+                      <TableCell>{difficultyLabel(question.difficulty)}</TableCell>
+                      <TableCell>
+                        <div className='flex flex-wrap gap-1'>
+                          {(question.tags ?? []).slice(0, 3).map((tag) => (
+                            <Badge key={tag} variant='outline'>
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className='text-right'>
+                        <div className='inline-flex gap-2'>
+                          <Button
+                            size='icon'
+                            variant='outline'
+                            onClick={() => openEdit(question)}
+                            aria-label={copy.edit}
+                          >
+                            <Pencil className='size-4' />
+                          </Button>
+                          <Button
+                            size='icon'
+                            variant='outline'
+                            onClick={() => void handleDelete(question)}
+                            aria-label={copy.delete}
+                          >
+                            <Trash2 className='size-4' />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <PaginationControls
+            currentPage={page}
+            pageSize={pageSize}
+            totalItems={total}
+            itemLabel={copy.itemLabel}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPage(1);
+              setPageSize(size);
+            }}
+          />
+        </CardContent>
+      </Card>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-2xl'>
+          <DialogHeader>
+            <DialogTitle>{editingQuestion ? copy.editTitle : copy.createTitle}</DialogTitle>
+            <DialogDescription>
+              {editingQuestion ? copy.editDescription : copy.createDescription}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className='space-y-4' onSubmit={(event) => void submitForm(event)}>
+            {editingQuestion?.shortId ? (
+              <div className='space-y-2'>
+                <Label>{copy.fieldShortId}</Label>
+                <Input value={editingQuestion.shortId} readOnly className='font-mono' />
+              </div>
+            ) : null}
+
+            <div className='space-y-2'>
+              <Label>{copy.fieldContent}</Label>
+              <Textarea
+                value={form.content}
+                onChange={(event) => setForm((current) => ({ ...current, content: event.target.value }))}
+                rows={4}
+                required
+              />
+            </div>
+
+            <div className='grid gap-4 sm:grid-cols-2'>
+              <div className='space-y-2'>
+                <Label>{copy.fieldType}</Label>
+                <Select
+                  value={form.type}
+                  onValueChange={(value) =>
+                    setForm((current) => ({
+                      ...current,
+                      type: value as QuestionType,
+                      options:
+                        value === 'MULTIPLE_CHOICE'
+                          ? normalizeQuestionOptions(current.options)
+                          : current.options,
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='MULTIPLE_CHOICE'>{copy.typeMultipleChoice}</SelectItem>
+                    <SelectItem value='ESSAY'>{copy.typeEssay}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className='space-y-2'>
+                <Label>{copy.fieldDifficulty}</Label>
+                <Select
+                  value={form.difficulty}
+                  onValueChange={(value) =>
+                    setForm((current) => ({ ...current, difficulty: value as QuestionDifficulty }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='EASY'>{copy.difficultyEasy}</SelectItem>
+                    <SelectItem value='MEDIUM'>{copy.difficultyMedium}</SelectItem>
+                    <SelectItem value='HARD'>{copy.difficultyHard}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {form.type === 'MULTIPLE_CHOICE' ? (
+              <div className='space-y-3'>
+                <Label>{copy.fieldOptions}</Label>
+                {form.options.map((option) => (
+                  <div key={option.key} className='flex items-center gap-2'>
+                    <div className='flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40 text-sm font-semibold'>
+                      {option.key}
+                    </div>
+                    <Input
+                      value={option.text}
+                      onChange={(event) => updateOptionText(option.key, event.target.value)}
+                      placeholder={`${copy.optionPlaceholder} ${option.key}`}
+                    />
+                  </div>
+                ))}
+                <div className='space-y-2'>
+                  <Label>{copy.fieldCorrectAnswer}</Label>
+                  <Select
+                    value={form.correctAnswer || undefined}
+                    onValueChange={(value) => setForm((current) => ({ ...current, correctAnswer: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={copy.selectCorrectAnswer} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {form.options.map((option) => (
+                        <SelectItem key={option.key} value={option.key}>
+                          {option.key}
+                          {option.text.trim() ? ` — ${option.text.trim()}` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ) : null}
+
+            <div className='space-y-2'>
+              <Label>{copy.fieldExplanation}</Label>
+              <Textarea
+                value={form.explanation}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, explanation: event.target.value }))
+                }
+                rows={3}
+              />
+            </div>
+
+            <div className='grid gap-4 sm:grid-cols-2'>
+              <div className='space-y-2'>
+                <Label>{copy.fieldImageUrl}</Label>
+                <Input
+                  value={form.imageUrl}
+                  onChange={(event) => setForm((current) => ({ ...current, imageUrl: event.target.value }))}
+                  placeholder='https://...'
+                />
+              </div>
+              <div className='space-y-2'>
+                <Label>{copy.fieldAudioUrl}</Label>
+                <Input
+                  value={form.audioUrl}
+                  onChange={(event) => setForm((current) => ({ ...current, audioUrl: event.target.value }))}
+                  placeholder='https://...'
+                />
+              </div>
+            </div>
+
+            <div className='space-y-2'>
+              <Label>{copy.fieldTags}</Label>
+              <Input
+                value={form.tags}
+                onChange={(event) => setForm((current) => ({ ...current, tags: event.target.value }))}
+                placeholder={copy.tagsPlaceholder}
+              />
+            </div>
+
+            {formError ? <p className='text-sm text-red-600'>{formError}</p> : null}
+
+            <div className='flex justify-end gap-3 pt-2'>
+              <Button type='button' variant='outline' onClick={() => setDialogOpen(false)}>
+                {dictionary.profile.cancel}
+              </Button>
+              <Button type='submit' disabled={saving}>
+                {saving ? dictionary.common.loading : dictionary.common.save}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

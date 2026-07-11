@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" x2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0.06"/>
+    </linearGradient>
+    <filter id="f1" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="24" result="b"/>
+      <feBlend in="SourceGraphic" in2="b" />
+    </filter>
+  </defs>
+
+  <!-- Soft background shapes -->
+  <rect width="1200" height="800" fill="url(#g1)" opacity="0.12"/>
+  <g transform="translate(120,60)">
+    <ellipse cx="420" cy="180" rx="360" ry="140" fill="#fff" opacity="0.06"/>
+    <circle cx="970" cy="90" r="120" fill="#fff" opacity="0.06"/>
+  </g>
+
+  <!-- Dashboard card mockups -->
+  <g transform="translate(140,120)">
+    <rect x="0" y="0" rx="20" ry="20" width="540" height="320" fill="#ffffff" opacity="0.95"/>
+    <rect x="20" y="22" width="200" height="20" rx="6" fill="#f3f4f6"/>
+    <rect x="20" y="56" width="500" height="14" rx="6" fill="#eef2ff"/>
+
+    <g transform="translate(24,90)">
+      <rect x="0" y="0" width="120" height="72" rx="10" fill="#eef2ff"/>
+      <rect x="140" y="0" width="120" height="72" rx="10" fill="#fff7ed"/>
+      <rect x="280" y="0" width="120" height="72" rx="10" fill="#ecfeff"/>
+    </g>
+
+    <rect x="0" y="240" width="500" height="12" rx="6" fill="#e6eaf8"/>
+
+    <!-- small chart -->
+    <g transform="translate(560,10)">
+      <rect x="0" y="0" width="340" height="260" rx="16" fill="url(#g2)"/>
+      <path d="M12 220 L40 150 L80 170 L120 120 L160 140 L200 80 L240 100 L280 60" stroke="#7c3aed" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="280" cy="60" r="6" fill="#06b6d4"/>
+    </g>
+
+  </g>
+
+  <!-- Accent blob -->
+  <g transform="translate(760,420)">
+    <path d="M20 60 C80 -20 240 -30 320 40 C400 110 360 220 260 260 C160 300 40 220 20 60 Z" fill="#7c3aed" opacity="0.14" filter="url(#f1)"/>
+  </g>
+
+  <!-- subtle top-right sparkle -->
+  <g transform="translate(960,40)">
+    <circle cx="0" cy="0" r="36" fill="#06b6d4" opacity="0.08"/>
+  </g>
+
+</svg>

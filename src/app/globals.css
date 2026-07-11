@@ -1,0 +1,351 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=Inter:wght@300;400;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Brand palette
+     Navy  #022648
+     Gold  #E0C389
+     Cream #F2E5D2
+     White #FFFFFF
+    */
+  --background: #f2e5d2;
+  --foreground: #022648;
+  --card: #ffffff;
+  --card-foreground: #022648;
+  --popover: #ffffff;
+  --popover-foreground: #022648;
+  --primary: #022648;
+  --primary-foreground: #ffffff;
+  --secondary: #e0c389;
+  --secondary-foreground: #022648;
+  --muted: #e8d7c0;
+  --muted-foreground: #4a6480;
+  --accent: #e0c389;
+  --accent-foreground: #022648;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --border: #d4c0a4;
+  --input: #d4c0a4;
+  --ring: #e0c389;
+  --sidebar: #022648;
+  --sidebar-foreground: #ffffff;
+  --sidebar-muted: #e0c389;
+  --sidebar-border: rgba(224, 195, 137, 0.22);
+  --font-home-display: 'Fraunces', Georgia, serif;
+  --font-home-body: 'Source Sans 3', 'Avenir Next', 'Segoe UI', sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: 'Inter', "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", "Consolas", monospace;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+}
+
+* {
+  @apply border-border;
+}
+
+html {
+  background:
+    radial-gradient(circle at top left, rgba(224, 195, 137, 0.42), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(2, 38, 72, 0.12), transparent 30%),
+    var(--background);
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply min-h-screen bg-background text-foreground antialiased;
+  font-family: var(--font-sans);
+}
+
+/* Headings spacing and Vietnamese-friendly metrics */
+h1, h2, h3, h4 {
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 1.625rem; font-weight: 800; margin-bottom: 0.5rem; }
+h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 0.5rem; }
+h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+@media (min-width: 640px) {
+  h1 { font-size: 2.125rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.25rem; }
+}
+
+/* Tighter spacing for section titles */
+.section-title { margin-bottom: 0.75rem; }
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(224, 195, 137, 0.45);
+  color: #022648;
+}
+
+/* Simple reveal animation for landing elements */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 560ms ease forwards;
+}
+
+.reveal-delay-100 { animation-delay: 100ms; }
+.reveal-delay-200 { animation-delay: 200ms; }
+.reveal-delay-300 { animation-delay: 300ms; }
+.reveal-delay-400 { animation-delay: 400ms; }
+
+/* Subtle interactive focus for cards */
+.interactive-card {
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms;
+}
+.interactive-card:focus,
+.interactive-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(2, 38, 72, 0.12);
+}
+
+/* —— Homepage (GEC) —— */
+.home-page {
+  font-family: var(--font-home-body);
+  background:
+    linear-gradient(180deg, #f7efe4 0%, #f2e5d2 40%, #ebe0d0 100%);
+}
+
+.home-page h1,
+.home-page h2,
+.home-page h3,
+.home-page h4 {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.home-hero {
+  background: #022648;
+}
+
+.home-hero-atmosphere {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(224, 195, 137, 0.28), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 15% 80%, rgba(242, 229, 210, 0.12), transparent 50%),
+    linear-gradient(160deg, #022648 0%, #0a3a5c 48%, #022648 100%);
+  animation: homeAtmosphere 14s ease-in-out infinite alternate;
+}
+
+.home-hero-atmosphere::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(224, 195, 137, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(224, 195, 137, 0.35) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 60% at 60% 40%, #000 20%, transparent 75%);
+}
+
+@keyframes homeAtmosphere {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes homeReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-reveal {
+  opacity: 0;
+  animation: homeReveal 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.home-reveal-delay-1 { animation-delay: 120ms; }
+.home-reveal-delay-2 { animation-delay: 220ms; }
+.home-reveal-delay-3 { animation-delay: 320ms; }
+
+.home-cta-primary,
+.home-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.35rem;
+  border-radius: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: transform 200ms ease, background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.home-cta-primary {
+  background: #e0c389;
+  color: #022648;
+}
+
+.home-cta-primary:hover {
+  background: #ebd4a8;
+  transform: translateY(-2px);
+}
+
+.home-cta-secondary {
+  border: 1px solid rgba(242, 229, 210, 0.45);
+  color: #f2e5d2;
+  background: transparent;
+}
+
+.home-cta-secondary:hover {
+  border-color: #f2e5d2;
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+.home-section {
+  padding: 5rem 0;
+}
+
+.home-section-muted {
+  background: rgba(2, 38, 72, 0.04);
+}
+
+.home-path {
+  display: grid;
+  gap: 0;
+  max-width: 36rem;
+}
+
+.home-path-step {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 0.85rem 0;
+  position: relative;
+}
+
+.home-path-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 1.15rem;
+  top: 2.4rem;
+  bottom: -0.15rem;
+  width: 1px;
+  background: linear-gradient(180deg, #e0c389, rgba(224, 195, 137, 0.15));
+  transform-origin: top;
+  animation: homePathDraw 900ms ease forwards;
+}
+
+@keyframes homePathDraw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.home-path-index {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: #022648;
+  opacity: 0.55;
+  padding-top: 0.2rem;
+}
+
+.home-path-label {
+  font-family: var(--font-home-display);
+  font-size: 1.2rem;
+  line-height: 1.35;
+  color: #022648;
+}
+
+.home-header {
+  animation: homeReveal 500ms ease forwards;
+}
+
+.home-lang-switcher {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px;
+}
+
+.home-lang-switcher button[data-variant],
+.home-lang-switcher button {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.home-lang-switcher button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.home-lang-switcher button.bg-primary {
+  background: #e0c389 !important;
+  color: #022648 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-reveal,
+  .home-header,
+  .home-hero-atmosphere,
+  .home-path-step:not(:last-child)::before {
+    animation: none;
+  }
+
+  .home-reveal,
+  .home-header {
+    opacity: 1;
+    transform: none;
+  }
+}
