@@ -2,8 +2,13 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck, Download } from 'lucide-react';
 import { adminExamAttemptsApi } from '@/features/admin-exam-attempts/api';
+import {
+  buildAttemptPdfLabelsFromCopy,
+  exportAttemptPdf,
+  isAttemptExportable,
+} from '@/features/admin-exam-attempts/export-attempt-pdf';
 import type { ExamAttemptStatus, ExamAttemptSummary } from '@/features/user-exam-attempts/types';
 import { useI18n } from '@/features/i18n/provider';
 import { Button } from '@/components/ui/button';
@@ -18,12 +23,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useNotification } from '@/components/ui/notification';
 
+function formatDateTime(value: string | Date | null | undefined, locale: string) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString(locale === 'en' ? 'en-US' : 'vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+}
+
 export default function AdminExamAttemptsPage() {
-  const { dictionary } = useI18n();
+  const { dictionary, locale } = useI18n();
   const copy = dictionary.adminExamAttempts;
-  const { error: notifyError } = useNotification();
+  const { error: notifyError, success } = useNotification();
 
   const [items, setItems] = useState<ExamAttemptSummary[]>([]);
   const [total, setTotal] = useState(0);
@@ -33,6 +47,7 @@ export default function AdminExamAttemptsPage() {
   const [emailInput, setEmailInput] = useState('');
   const [emailFilter, setEmailFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [exportingId, setExportingId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +91,25 @@ export default function AdminExamAttemptsPage() {
     if (status === 'PENDING_REVIEW') return copy.statusPendingReview;
     if (status === 'GRADED') return copy.statusGraded;
     return copy.statusExpired;
+  }
+
+  function endedAt(attempt: ExamAttemptSummary) {
+    if (attempt.submittedAt) return attempt.submittedAt;
+    if (attempt.status === 'EXPIRED') return attempt.expiresAt;
+    return null;
+  }
+
+  async function handleExportPdf(attemptId: string) {
+    setExportingId(attemptId);
+    try {
+      const detail = await adminExamAttemptsApi.getById(attemptId);
+      await exportAttemptPdf(detail, buildAttemptPdfLabelsFromCopy(copy), locale);
+      success(copy.exportPdfDone);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : copy.exportPdfFailed, copy.exportPdfFailed);
+    } finally {
+      setExportingId(null);
+    }
   }
 
   return (
@@ -136,43 +170,92 @@ export default function AdminExamAttemptsPage() {
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          {loading ? (
-            <p className='py-10 text-center text-muted-foreground'>{dictionary.common.loading}</p>
-          ) : items.length === 0 ? (
-            <p className='py-10 text-center text-muted-foreground'>{copy.empty}</p>
-          ) : (
-            <div className='space-y-3'>
-              {items.map((attempt) => (
-                <div
-                  key={attempt.id}
-                  className='flex flex-col gap-3 rounded-2xl border border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between'
-                >
-                  <div>
-                    <div className='flex flex-wrap items-center gap-2'>
-                      <p className='font-mono text-sm font-semibold text-primary'>{attempt.shortId}</p>
-                      <Badge variant='outline'>{statusLabel(attempt.status)}</Badge>
-                    </div>
-                    <p className='mt-1 text-sm font-medium'>
-                      {attempt.examTitle || `${copy.examCode}: ${attempt.examId}`}
-                    </p>
-                    {attempt.examTitle ? (
-                      <p className='mt-0.5 text-xs text-muted-foreground'>
-                        {copy.examCode}: {attempt.examId}
-                      </p>
-                    ) : null}
-                    <p className='mt-1 text-sm'>
-                      {copy.scoreLabel
-                        .replace('{total}', String(attempt.totalScore))
-                        .replace('{max}', String(attempt.maxScore))}
-                    </p>
-                  </div>
-                  <Button asChild>
-                    <Link href={`/admin/exam-attempts/${attempt.id}`}>{copy.review}</Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className='overflow-x-auto rounded-xl border border-border/70'>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{copy.colShortId}</TableHead>
+                  <TableHead>{copy.colCandidate}</TableHead>
+                  <TableHead>{copy.colExam}</TableHead>
+                  <TableHead>{copy.colStatus}</TableHead>
+                  <TableHead>{copy.colStartedAt}</TableHead>
+                  <TableHead>{copy.colEndedAt}</TableHead>
+                  <TableHead>{copy.colScore}</TableHead>
+                  <TableHead className='text-right'>{copy.colActions}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                      {dictionary.common.loading}
+                    </TableCell>
+                  </TableRow>
+                ) : items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                      {copy.empty}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  items.map((attempt) => (
+                    <TableRow key={attempt.id}>
+                      <TableCell>
+                        <span className='font-mono text-sm font-semibold text-primary'>
+                          {attempt.shortId}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <p className='font-medium'>{attempt.userFullName || copy.unknownUser}</p>
+                        {attempt.userEmail ? (
+                          <p className='text-sm text-muted-foreground'>{attempt.userEmail}</p>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className='max-w-xs'>
+                        <p className='font-medium'>{attempt.examTitle || attempt.examId}</p>
+                        {attempt.examTitle ? (
+                          <p className='text-xs text-muted-foreground'>{attempt.examId}</p>
+                        ) : null}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant='outline'>{statusLabel(attempt.status)}</Badge>
+                      </TableCell>
+                      <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
+                        {formatDateTime(attempt.startedAt, locale)}
+                      </TableCell>
+                      <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
+                        {formatDateTime(endedAt(attempt), locale)}
+                      </TableCell>
+                      <TableCell className='whitespace-nowrap text-sm'>
+                        {copy.scoreLabel
+                          .replace('{total}', String(attempt.totalScore))
+                          .replace('{max}', String(attempt.maxScore))}
+                      </TableCell>
+                      <TableCell className='text-right'>
+                        <div className='flex justify-end gap-2'>
+                          {isAttemptExportable(attempt.status) ? (
+                            <Button
+                              size='sm'
+                              variant='outline'
+                              className='gap-1'
+                              disabled={exportingId === attempt.id}
+                              onClick={() => void handleExportPdf(attempt.id)}
+                            >
+                              <Download className='size-3.5' />
+                              {exportingId === attempt.id ? copy.exportingPdf : copy.exportPdf}
+                            </Button>
+                          ) : null}
+                          <Button asChild size='sm'>
+                            <Link href={`/admin/exam-attempts/${attempt.id}`}>{copy.review}</Link>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
           <PaginationControls
             currentPage={page}

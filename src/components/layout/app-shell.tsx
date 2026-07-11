@@ -5,13 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   BookOpen,
+  CalendarRange,
   ChevronDown,
   ClipboardCheck,
   ClipboardList,
   LayoutDashboard,
   LogOut,
   Menu,
-  Settings,
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,15 +37,12 @@ function getNavItems(
       { href: '/admin/users', label: dictionary.shell.navUsers, icon: Users },
       { href: '/admin/questions', label: dictionary.shell.navQuestions, icon: BookOpen },
       { href: '/admin/exams', label: dictionary.shell.navExams, icon: ClipboardList },
+      { href: '/admin/exam-periods', label: dictionary.shell.navExamPeriods, icon: CalendarRange },
       { href: '/admin/exam-attempts', label: dictionary.shell.navExamAttempts, icon: ClipboardCheck },
     ];
   }
 
-  return [
-    { href: '/dashboard', label: dictionary.shell.navDashboard, icon: LayoutDashboard },
-    { href: '/exams', label: dictionary.shell.navExamsUser, icon: ClipboardList },
-    { href: '/profile', label: dictionary.shell.navProfile, icon: Settings },
-  ];
+  return [];
 }
 
 function getShellCopy(
@@ -179,25 +176,32 @@ export function AppShellInner({ children }: { children: React.ReactNode }) {
   const shellCopy = getShellCopy(user?.role, dictionary);
   const isAdmin = isAdminRole(user?.role);
 
-  const isPublicRoute = pathname === '/' || Boolean(pathname?.startsWith('/login'));
+  const isPublicRoute =
+    pathname === '/' ||
+    Boolean(pathname?.startsWith('/login')) ||
+    Boolean(pathname?.startsWith('/exams')) ||
+    Boolean(pathname?.startsWith('/attempts'));
   // /attempts/:id only — hide chrome while taking an exam (not list or result).
   const isExamTakingRoute = Boolean(pathname && /^\/attempts\/[^/]+$/.test(pathname));
 
   React.useEffect(() => {
     if (ready && !user && !clientHasStoredAuth && pathname && !isPublicRoute) {
-      router.push('/login');
+      router.push('/login/admin');
       return;
     }
 
     if (!ready || !user || !pathname) return;
 
-    if (isAdmin && (pathname === '/dashboard' || pathname.startsWith('/profile'))) {
-      router.replace('/admin/dashboard');
+    // JWT login is admin-only; keep public exam routes open for candidates.
+    if (!isAdmin) {
+      if (!isPublicRoute) {
+        router.replace('/exams');
+      }
       return;
     }
 
-    if (!isAdmin && pathname.startsWith('/admin')) {
-      router.replace('/dashboard');
+    if (pathname === '/dashboard' || pathname.startsWith('/profile')) {
+      router.replace('/admin/dashboard');
     }
   }, [clientHasStoredAuth, isAdmin, isPublicRoute, ready, user, pathname, router]);
 
@@ -239,7 +243,7 @@ export function AppShellInner({ children }: { children: React.ReactNode }) {
     return <div className='min-h-screen bg-background' />;
   }
 
-  if (user && !isAdmin && pathname?.startsWith('/admin')) {
+  if (user && !isAdmin && !isPublicRoute) {
     return <div className='min-h-screen bg-background' />;
   }
 
@@ -320,15 +324,6 @@ export function AppShellInner({ children }: { children: React.ReactNode }) {
                     </p>
                   </div>
                   <div className='mt-1 border-t border-border/70 pt-2'>
-                    {!isAdmin ? (
-                      <Link
-                        href='/profile'
-                        className='flex items-center rounded-xl px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted/70'
-                        onClick={() => setAccountMenuOpen(false)}
-                      >
-                        {dictionary.common.profile}
-                      </Link>
-                    ) : null}
                     <button
                       type='button'
                       className='flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-destructive transition hover:bg-destructive/10'

@@ -1,5 +1,5 @@
 import { apiRequest } from '@/lib/api/client';
-import { readAccessToken } from '@/features/auth/storage';
+import { requireExamSessionToken } from '@/features/exam-session/storage';
 import type {
   ExamAttemptInProgress,
   ExamAttemptListResult,
@@ -8,54 +8,48 @@ import type {
   SaveAttemptAnswersPayload,
 } from './types';
 
-function requireToken() {
-  const token = readAccessToken();
-  if (!token) throw new Error('Session expired');
-  return token;
-}
-
 export const userExamAttemptsApi = {
   start(examId: string) {
-    return apiRequest<ExamAttemptInProgress>(`/user/exams/${examId}/attempts`, {
+    return apiRequest<ExamAttemptInProgress>(`/public/exams/${examId}/attempts`, {
       method: 'POST',
-      token: requireToken(),
+      examSession: requireExamSessionToken(),
     });
   },
 
   list(query: ListAttemptsQuery = {}) {
-    return apiRequest<ExamAttemptListResult>('/user/exam-attempts', {
+    return apiRequest<ExamAttemptListResult>('/public/exam-attempts', {
       method: 'GET',
-      token: requireToken(),
+      examSession: requireExamSessionToken(),
       query,
     });
   },
 
   getById(attemptId: string) {
-    return apiRequest<ExamAttemptInProgress>(`/user/exam-attempts/${attemptId}`, {
+    return apiRequest<ExamAttemptInProgress>(`/public/exam-attempts/${attemptId}`, {
       method: 'GET',
-      token: requireToken(),
+      examSession: requireExamSessionToken(),
     });
   },
 
   saveAnswers(attemptId: string, payload: SaveAttemptAnswersPayload) {
-    return apiRequest<ExamAttemptInProgress>(`/user/exam-attempts/${attemptId}/answers`, {
+    return apiRequest<ExamAttemptInProgress>(`/public/exam-attempts/${attemptId}/answers`, {
       method: 'PATCH',
-      token: requireToken(),
+      examSession: requireExamSessionToken(),
       body: payload,
     });
   },
 
   submit(attemptId: string) {
-    return apiRequest<ExamAttemptResult>(`/user/exam-attempts/${attemptId}/submit`, {
+    return apiRequest<ExamAttemptResult>(`/public/exam-attempts/${attemptId}/submit`, {
       method: 'POST',
-      token: requireToken(),
+      examSession: requireExamSessionToken(),
     });
   },
 
   getResult(attemptId: string) {
-    return apiRequest<ExamAttemptResult>(`/user/exam-attempts/${attemptId}/result`, {
+    return apiRequest<ExamAttemptResult>(`/public/exam-attempts/${attemptId}/result`, {
       method: 'GET',
-      token: requireToken(),
+      examSession: requireExamSessionToken(),
     });
   },
 };

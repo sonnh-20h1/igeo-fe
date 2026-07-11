@@ -1,8 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { authRepository } from '@/features/auth/repository';
+import { readStoredSession } from '@/features/auth/storage';
 import type {
   AuthSession,
   ChangePasswordPayload,
@@ -33,6 +34,12 @@ function resolveInitialUser(
   return null;
 }
 
+/** Public exam flow uses x-exam-session — no JWT /me or refresh. */
+function isPublicExamAuthPath(pathname: string | null) {
+  if (!pathname) return false;
+  return pathname.startsWith('/exams') || pathname.startsWith('/attempts');
+}
+
 export function AuthProvider({
   children,
   initialSession = null,
@@ -50,12 +57,23 @@ export function AuthProvider({
   const [ready, setReady] = useState(() => Boolean(resolveInitialUser(initialSession, initialUser)));
   const [signing, setSigning] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     let mounted = true;
 
     async function restore() {
       try {
+        if (isPublicExamAuthPath(pathname)) {
+          // Candidate entry / taking exam: hydrate JWT from storage only (no /me, no refresh).
+          const stored = readStoredSession();
+          if (mounted) {
+            setUser(stored?.user ?? null);
+            setReady(true);
+          }
+          return;
+        }
+
         const session = await authRepository.restoreSession();
         if (mounted) {
           setUser(session?.user ?? null);
@@ -74,7 +92,7 @@ export function AuthProvider({
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [pathname]);
 
   async function signIn(creds: Credentials, role: Role = 'USER') {
     setSigning(true);
@@ -108,10 +126,9 @@ export function AuthProvider({
   }
 
   function signOut() {
-    const wasAdmin = user?.role === 'ADMIN';
     authRepository.signOut();
     setUser(null);
-    router.push(wasAdmin ? '/login/admin' : '/login');
+    router.push('/login/admin');
   }
 
   return (

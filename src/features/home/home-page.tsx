@@ -36,7 +36,7 @@ export function HomePage() {
             {home.hero.description}
           </p>
           <div className='home-reveal home-reveal-delay-3 mt-8 flex flex-wrap gap-3'>
-            <a href='#contact' className='home-cta-primary'>
+            <a href='/exams' className='home-cta-primary'>
               {home.hero.ctaRegister}
             </a>
             <a href='#about' className='home-cta-secondary'>

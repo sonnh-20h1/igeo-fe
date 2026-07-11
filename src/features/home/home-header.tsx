@@ -20,40 +20,64 @@ const NAV_LINKS = [
   { href: '#contact', key: 'contact' as const },
 ];
 
-export function HomeHeader() {
+type HomeHeaderProps = {
+  /** Hide login / dashboard button */
+  hideAuth?: boolean;
+  /** Always use solid navy bar (for non-hero pages) */
+  solid?: boolean;
+  /** Logo / brand link target */
+  brandHref?: string;
+  /** Prefix for section anchors, e.g. "/" → "/#about" */
+  sectionBase?: string;
+};
+
+export function HomeHeader({
+  hideAuth = false,
+  solid = false,
+  brandHref = '#top',
+  sectionBase = '',
+}: HomeHeaderProps) {
   const { dictionary } = useI18n();
   const { user, ready } = useAuth();
   const [open, setOpen] = React.useState(false);
-  const [scrolled, setScrolled] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(solid);
   const home = dictionary.home;
 
   React.useEffect(() => {
+    if (solid) {
+      setScrolled(true);
+      return;
+    }
     function onScroll() {
       setScrolled(window.scrollY > 12);
     }
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [solid]);
 
-  const authHref = user
-    ? isAdminRole(user.role)
-      ? '/admin/dashboard'
-      : '/dashboard'
-    : '/login';
-  const authLabel = user ? home.nav.dashboard : home.nav.login;
+  const authHref = user && isAdminRole(user.role) ? '/admin/dashboard' : '/exams';
+  const authLabel =
+    user && isAdminRole(user.role) ? home.nav.dashboard : home.nav.takeExam;
+
+  function sectionHref(hash: string) {
+    if (!sectionBase) return hash;
+    return `${sectionBase}${hash}`;
+  }
+
+  const BrandTag = brandHref.startsWith('#') ? 'a' : Link;
 
   return (
     <header
       className={cn(
         'home-header fixed inset-x-0 top-0 z-50 transition-[background,box-shadow,border-color] duration-300',
-        scrolled
+        scrolled || solid
           ? 'border-b border-white/20 bg-[#022648]/92 shadow-lg shadow-[#022648]/20 backdrop-blur-md'
           : 'border-b border-transparent bg-transparent',
       )}
     >
       <div className='mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
-        <a href='#top' className='flex min-w-0 items-center gap-3 text-white'>
+        <BrandTag href={brandHref} className='flex min-w-0 items-center gap-3 text-white'>
           <Image
             src='/images/logo-light.png'
             alt={home.brandShort}
@@ -66,13 +90,13 @@ export function HomeHeader() {
           <span className='truncate font-[family-name:var(--font-home-display)] text-lg tracking-tight sm:text-xl'>
             {home.brandShort}
           </span>
-        </a>
+        </BrandTag>
 
         <nav className='hidden items-center gap-1 lg:flex'>
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
-              href={link.href}
+              href={sectionHref(link.href)}
               className='rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white'
             >
               {home.nav[link.key]}
@@ -84,7 +108,7 @@ export function HomeHeader() {
           <div className='home-lang-switcher'>
             <LanguageSwitcher compact />
           </div>
-          {ready ? (
+          {!hideAuth && ready ? (
             <Button asChild size='sm' variant='secondary' className='hidden sm:inline-flex'>
               <Link href={authHref}>{authLabel}</Link>
             </Button>
@@ -109,14 +133,14 @@ export function HomeHeader() {
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
+                href={sectionHref(link.href)}
                 className='rounded-lg px-3 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10'
                 onClick={() => setOpen(false)}
               >
                 {home.nav[link.key]}
               </a>
             ))}
-            {ready ? (
+            {!hideAuth && ready ? (
               <Link
                 href={authHref}
                 className='mt-2 rounded-lg bg-[#E0C389] px-3 py-3 text-center text-sm font-semibold text-[#022648]'

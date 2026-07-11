@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { userExamAttemptsApi } from '@/features/user-exam-attempts/api';
 import type { AttemptAnswer, ExamAttemptInProgress } from '@/features/user-exam-attempts/types';
+import { hasExamSession } from '@/features/exam-session/storage';
 import { userExamsApi } from '@/features/user-exams/api';
 import type { ExamUserDetail } from '@/features/user-exams/types';
 import { useI18n } from '@/features/i18n/provider';
@@ -98,6 +99,14 @@ export default function TakeAttemptPage() {
   }, [attemptId, router]);
 
   useEffect(() => {
+    if (!hasExamSession()) {
+      router.replace('/exams');
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!hasExamSession()) return;
+
     let cancelled = false;
     async function init() {
       try {

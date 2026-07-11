@@ -12,7 +12,7 @@ export default function AuthHeader() {
   return (
     <header className='fixed left-0 top-0 z-40 w-full border-b border-white/40 bg-white/82 backdrop-blur-sm'>
       <div className='mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
-        <Link href='/login' className='flex min-w-0 items-center gap-3'>
+        <Link href='/login/admin' className='flex min-w-0 items-center gap-3'>
           <Image
             src='/images/logo.png'
             alt={APP_NAME}
@@ -30,7 +30,7 @@ export default function AuthHeader() {
         <div className='flex items-center gap-2'>
           <LanguageSwitcher compact />
           <Link
-            href='/login'
+            href='/login/admin'
             className='text-sm font-medium text-primary transition hover:text-primary/80 hover:underline'
           >
             {dictionary.authHeader.backToLogin}

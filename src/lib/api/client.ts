@@ -16,6 +16,8 @@ type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   token?: string | null;
+  /** Opaque public exam session — sent as x-exam-session (not JWT) */
+  examSession?: string | null;
   query?: Record<string, string | number | boolean | null | undefined>;
 };
 
@@ -40,7 +42,7 @@ function unwrapPayload<T>(payload: unknown): T {
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token, query } = options;
+  const { method = 'GET', body, token, examSession, query } = options;
   const searchParams = new URLSearchParams();
 
   if (query) {
@@ -61,6 +63,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(examSession ? { 'x-exam-session': examSession } : {}),
     },
     body:
       body === undefined ? undefined : isFormData ? (body as FormData) : JSON.stringify(body),

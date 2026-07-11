@@ -9,7 +9,7 @@ export default function UserAttemptsRedirectPage() {
   const { dictionary } = useI18n();
 
   useEffect(() => {
-    router.replace('/exams?tab=history');
+    router.replace('/exams');
   }, [router]);
 
   return <p className='py-16 text-center text-muted-foreground'>{dictionary.common.loading}</p>;

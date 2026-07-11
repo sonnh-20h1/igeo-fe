@@ -4,6 +4,7 @@ import { useEffect, useState, startTransition } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, History, Play } from 'lucide-react';
+import { hasExamSession } from '@/features/exam-session/storage';
 import { userExamsApi } from '@/features/user-exams/api';
 import type { ExamUserDetail } from '@/features/user-exams/types';
 import { userExamAttemptsApi } from '@/features/user-exam-attempts/api';
@@ -37,6 +38,14 @@ export default function UserExamDetailPage() {
   const [starting, setStarting] = useState(false);
 
   useEffect(() => {
+    if (!hasExamSession()) {
+      router.replace('/exams');
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!hasExamSession()) return;
+
     let cancelled = false;
     async function load() {
       try {
@@ -113,7 +122,7 @@ export default function UserExamDetailPage() {
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6'>
       <Button asChild variant='outline' className='gap-2'>
         <Link href='/exams'>
           <ArrowLeft className='size-4' />
@@ -143,9 +152,6 @@ export default function UserExamDetailPage() {
             <span>{copy.questions.replace('{n}', String(exam.questionCount))}</span>
             <span>{copy.totalScore.replace('{n}', String(exam.totalScore))}</span>
           </div>
-          {exam.hasDynamicQuestions ? (
-            <p className='text-sm text-muted-foreground'>{copy.dynamicHint}</p>
-          ) : null}
           {(exam.tags ?? []).length ? (
             <div className='flex flex-wrap gap-2'>
               {exam.tags.map((tag) => (
@@ -154,6 +160,9 @@ export default function UserExamDetailPage() {
                 </Badge>
               ))}
             </div>
+          ) : null}
+          {exam.hasDynamicQuestions ? (
+            <p className='text-sm text-muted-foreground'>{copy.dynamicHint}</p>
           ) : null}
           <Button className='gap-2' disabled={starting} onClick={() => void startExam()}>
             <Play className='size-4' />

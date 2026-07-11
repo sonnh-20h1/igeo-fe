@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
-export default function SignUpPage() {
-  redirect('/login');
+export default function SignupPage() {
+  redirect('/login/admin');
 }

@@ -3,8 +3,13 @@
 import { startTransition, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import { adminExamAttemptsApi } from '@/features/admin-exam-attempts/api';
+import {
+  buildAttemptPdfLabelsFromCopy,
+  exportAttemptPdf,
+  isAttemptExportable,
+} from '@/features/admin-exam-attempts/export-attempt-pdf';
 import type { ExamAttemptAdminDetail } from '@/features/user-exam-attempts/types';
 import { useI18n } from '@/features/i18n/provider';
 import { Button } from '@/components/ui/button';
@@ -20,7 +25,7 @@ type GradeDraft = Record<string, { earnedScore: string; feedback: string }>;
 export default function AdminExamAttemptDetailPage() {
   const params = useParams<{ attemptId: string }>();
   const attemptId = params.attemptId;
-  const { dictionary } = useI18n();
+  const { dictionary, locale } = useI18n();
   const copy = dictionary.adminExamAttempts;
   const { error: notifyError, success } = useNotification();
 
@@ -28,6 +33,15 @@ export default function AdminExamAttemptDetailPage() {
   const [grades, setGrades] = useState<GradeDraft>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  function formatDateTime(value: string | Date | null | undefined) {
+    if (!value) return '—';
+    return new Date(value).toLocaleString(locale === 'en' ? 'en-US' : 'vi-VN', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -108,6 +122,19 @@ export default function AdminExamAttemptDetailPage() {
     }
   }
 
+  async function handleExportPdf() {
+    if (!attempt) return;
+    setExporting(true);
+    try {
+      await exportAttemptPdf(attempt, buildAttemptPdfLabelsFromCopy(copy), locale);
+      success(copy.exportPdfDone);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : copy.exportPdfFailed, copy.exportPdfFailed);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   if (loading) {
     return <p className='py-16 text-center text-muted-foreground'>{dictionary.common.loading}</p>;
   }
@@ -122,15 +149,29 @@ export default function AdminExamAttemptDetailPage() {
     attempt.status === 'SUBMITTED' ||
     attempt.status === 'GRADED' ||
     attempt.status === 'EXPIRED';
+  const canExport = isAttemptExportable(attempt.status);
 
   return (
     <div className='space-y-6'>
-      <Button asChild variant='outline' className='gap-2'>
-        <Link href='/admin/exam-attempts'>
-          <ArrowLeft className='size-4' />
-          {copy.backToList}
-        </Link>
-      </Button>
+      <div className='flex flex-wrap items-center gap-2'>
+        <Button asChild variant='outline' className='gap-2'>
+          <Link href='/admin/exam-attempts'>
+            <ArrowLeft className='size-4' />
+            {copy.backToList}
+          </Link>
+        </Button>
+        {canExport ? (
+          <Button
+            variant='outline'
+            className='gap-2'
+            disabled={exporting}
+            onClick={() => void handleExportPdf()}
+          >
+            <Download className='size-4' />
+            {exporting ? copy.exportingPdf : copy.exportPdf}
+          </Button>
+        ) : null}
+      </div>
 
       <Card>
         <CardHeader>
@@ -138,11 +179,23 @@ export default function AdminExamAttemptDetailPage() {
             {copy.detailTitle} · {attempt.shortId}
           </CardTitle>
           <CardDescription>
+            {attempt.userFullName || copy.unknownUser}
+            {attempt.userEmail ? ` · ${attempt.userEmail}` : ''}
+            <br />
             {attempt.examTitle ? `${attempt.examTitle} · ` : null}
-            {copy.examCode}: {attempt.examId} · {copy.userId}: {attempt.userId}
+            {copy.examCode}: {attempt.examId}
           </CardDescription>
         </CardHeader>
         <CardContent className='flex flex-wrap gap-4 text-sm'>
+          <span>
+            {copy.colStartedAt}: {formatDateTime(attempt.startedAt)}
+          </span>
+          <span>
+            {copy.colEndedAt}:{' '}
+            {formatDateTime(
+              attempt.submittedAt || (attempt.status === 'EXPIRED' ? attempt.expiresAt : null),
+            )}
+          </span>
           <span>
             {copy.scoreLabel
               .replace('{total}', String(attempt.totalScore))

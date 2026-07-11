@@ -39,11 +39,10 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className='relative min-h-screen w-full bg-gradient-to-br from-[#f2e5d2] via-[#f8f1e6] to-white text-foreground flex flex-col justify-between overflow-hidden pt-24 px-4'>
-      {/* Light Header matching AuthHeader */}
+    <div className='relative flex min-h-screen w-full flex-col justify-between overflow-hidden bg-gradient-to-br from-[#f2e5d2] via-[#f8f1e6] to-white px-4 pt-24 text-foreground'>
       <header className='absolute left-0 top-0 z-40 w-full border-b border-white/40 bg-white/82 backdrop-blur-sm'>
         <div className='mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
-          <div className='flex min-w-0 items-center gap-3'>
+          <Link href='/' className='flex min-w-0 items-center gap-3'>
             <Image
               src='/images/logo.png'
               alt={APP_NAME}
@@ -56,33 +55,24 @@ export default function AdminLoginPage() {
               <p className='text-sm font-semibold text-foreground'>{APP_NAME}</p>
               <p className='text-xs text-muted-foreground'>{dictionary.authHeader.subtitle}</p>
             </div>
-          </div>
+          </Link>
 
           <div className='flex items-center gap-2'>
             <LanguageSwitcher compact />
-            <Link
-              href='/login'
-              className='text-sm font-medium text-primary transition hover:text-primary/80 hover:underline'
-            >
-              {dictionary.login.switchToUser}
-            </Link>
           </div>
         </div>
       </header>
 
-      {/* Main Login Card Area */}
       <div className='relative z-10 flex flex-1 items-center justify-center py-8'>
         <div className='w-full max-w-md rounded-3xl border border-border/60 bg-white p-8 shadow-2xl'>
           <div className='mb-8 text-center'>
-            <div className='mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary'>
+            <div className='mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary'>
               <Shield className='size-6' />
             </div>
             <h1 className='text-2xl font-bold tracking-tight text-foreground'>
               {dictionary.login.welcomeBackAdmin}
             </h1>
-            <p className='mt-2 text-sm text-muted-foreground'>
-              {dictionary.login.adminPortal}
-            </p>
+            <p className='mt-2 text-sm text-muted-foreground'>{dictionary.login.adminPortal}</p>
           </div>
 
           <form onSubmit={submit} className='space-y-4'>
@@ -114,7 +104,7 @@ export default function AdminLoginPage() {
             </div>
 
             {error ? (
-              <div className='rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600 flex items-center gap-2'>
+              <div className='flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600'>
                 <span className='size-1.5 shrink-0 rounded-full bg-red-500' />
                 <span>{error}</span>
               </div>
@@ -123,27 +113,28 @@ export default function AdminLoginPage() {
             <Button
               type='submit'
               disabled={signing}
-              className='w-full bg-primary hover:bg-primary/95 text-white font-semibold shadow-lg shadow-primary/25 transition-all duration-200 h-10 rounded-xl'
+              className='h-10 w-full rounded-xl bg-primary font-semibold text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:bg-primary/95'
             >
               {signing ? dictionary.common.loading : dictionary.common.login}
             </Button>
           </form>
 
-          <div className='mt-8 pt-6 border-t border-slate-100 text-center'>
+          <div className='mt-8 border-t border-slate-100 pt-6 text-center'>
             <Link
-              href='/login'
-              className='inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors duration-200 group'
+              href='/'
+              className='group inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors duration-200 hover:text-primary'
             >
               <ArrowLeft className='size-4 transition-transform duration-200 group-hover:-translate-x-1' />
-              {dictionary.login.switchToUser}
+              {dictionary.login.backToHome}
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className='relative z-10 py-6 text-center text-xs text-muted-foreground border-t border-slate-100'>
-        <p>© {new Date().getFullYear()} {APP_NAME}. All rights reserved.</p>
+      <footer className='relative z-10 border-t border-slate-100 py-6 text-center text-xs text-muted-foreground'>
+        <p>
+          © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
+        </p>
       </footer>
     </div>
   );

@@ -2,8 +2,9 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
+import { hasExamSession } from '@/features/exam-session/storage';
 import { userExamAttemptsApi } from '@/features/user-exam-attempts/api';
 import type { ExamAttemptResult } from '@/features/user-exam-attempts/types';
 import { useI18n } from '@/features/i18n/provider';
@@ -15,6 +16,7 @@ import { useNotification } from '@/components/ui/notification';
 export default function AttemptResultPage() {
   const params = useParams<{ attemptId: string }>();
   const attemptId = params.attemptId;
+  const router = useRouter();
   const { dictionary } = useI18n();
   const copy = dictionary.examResult;
   const { error: notifyError } = useNotification();
@@ -22,6 +24,14 @@ export default function AttemptResultPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!hasExamSession()) {
+      router.replace('/exams');
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!hasExamSession()) return;
+
     let cancelled = false;
     async function load() {
       try {

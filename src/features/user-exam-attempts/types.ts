@@ -44,6 +44,8 @@ export type ExamAttemptSummary = {
   maxScore: number;
   createdDate?: string | Date;
   userId?: string;
+  userFullName?: string | null;
+  userEmail?: string | null;
 };
 
 export type ExamAttemptInProgress = ExamAttemptSummary & {
