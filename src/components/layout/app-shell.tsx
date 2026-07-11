@@ -180,6 +180,8 @@ export function AppShellInner({ children }: { children: React.ReactNode }) {
   const isAdmin = isAdminRole(user?.role);
 
   const isPublicRoute = pathname === '/' || Boolean(pathname?.startsWith('/login'));
+  // /attempts/:id only — hide chrome while taking an exam (not list or result).
+  const isExamTakingRoute = Boolean(pathname && /^\/attempts\/[^/]+$/.test(pathname));
 
   React.useEffect(() => {
     if (ready && !user && !clientHasStoredAuth && pathname && !isPublicRoute) {
@@ -239,6 +241,10 @@ export function AppShellInner({ children }: { children: React.ReactNode }) {
 
   if (user && !isAdmin && pathname?.startsWith('/admin')) {
     return <div className='min-h-screen bg-background' />;
+  }
+
+  if (isExamTakingRoute) {
+    return <div className='min-h-screen bg-background'>{children}</div>;
   }
 
   return (

@@ -33,6 +33,7 @@ export type ExamAttemptSummary = {
   id: string;
   shortId: string;
   examId: string;
+  examTitle?: string | null;
   status: ExamAttemptStatus;
   startedAt: string | Date;
   expiresAt: string | Date;
