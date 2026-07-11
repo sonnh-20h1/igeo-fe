@@ -48,9 +48,9 @@ export default function AdminLoginPage() {
               src='/images/logo.png'
               alt={APP_NAME}
               className='shrink-0 object-contain'
-              style={{ width: 'auto', height: '36px' }}
-              width={256}
-              height={257}
+              style={{ width: 'auto', height: '40px' }}
+              width={1023}
+              height={1024}
             />
             <div className='min-w-0'>
               <p className='text-sm font-semibold text-foreground'>{APP_NAME}</p>

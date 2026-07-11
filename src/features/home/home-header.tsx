@@ -55,12 +55,12 @@ export function HomeHeader() {
       <div className='mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
         <a href='#top' className='flex min-w-0 items-center gap-3 text-white'>
           <Image
-            src='/images/logo.png'
+            src='/images/logo-light.png'
             alt={home.brandShort}
             className='shrink-0 object-contain'
-            style={{ width: 'auto', height: '36px' }}
-            width={256}
-            height={257}
+            style={{ width: 'auto', height: '40px' }}
+            width={1023}
+            height={1024}
             priority
           />
           <span className='truncate font-[family-name:var(--font-home-display)] text-lg tracking-tight sm:text-xl'>
