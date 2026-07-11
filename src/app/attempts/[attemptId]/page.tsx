@@ -377,7 +377,7 @@ export default function TakeAttemptPage() {
           </div>
           <div
             className={cn(
-              'flex shrink-0 flex-col items-end rounded-xl px-3 py-2 font-mono',
+              'flex shrink-0 flex-col items-end rounded-sm px-3 py-2 font-mono',
               remainingMs < 5 * 60 * 1000
                 ? 'bg-destructive/20 text-[#ffb4a8] ring-1 ring-destructive/40'
                 : 'bg-white/10 text-[#E0C389] ring-1 ring-white/15',

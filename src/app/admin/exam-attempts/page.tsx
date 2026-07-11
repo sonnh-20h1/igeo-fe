@@ -8,6 +8,7 @@ import type { ExamAttemptStatus, ExamAttemptSummary } from '@/features/user-exam
 import { useI18n } from '@/features/i18n/provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import {
   Select,
@@ -28,7 +29,9 @@ export default function AdminExamAttemptsPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [statusFilter, setStatusFilter] = useState<ExamAttemptStatus | 'ALL'>('PENDING_REVIEW');
+  const [statusFilter, setStatusFilter] = useState<ExamAttemptStatus | 'ALL'>('ALL');
+  const [emailInput, setEmailInput] = useState('');
+  const [emailFilter, setEmailFilter] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +45,7 @@ export default function AdminExamAttemptsPage() {
           page,
           size: pageSize,
           status: statusFilter === 'ALL' ? undefined : statusFilter,
+          email: emailFilter || undefined,
         });
         if (cancelled) return;
         startTransition(() => {
@@ -59,7 +63,12 @@ export default function AdminExamAttemptsPage() {
     return () => {
       cancelled = true;
     };
-  }, [copy.loadFailed, notifyError, page, pageSize, statusFilter]);
+  }, [copy.loadFailed, emailFilter, notifyError, page, pageSize, statusFilter]);
+
+  function applyEmailFilter() {
+    setPage(1);
+    setEmailFilter(emailInput.trim());
+  }
 
   function statusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return copy.statusInProgress;
@@ -86,25 +95,45 @@ export default function AdminExamAttemptsPage() {
             </CardTitle>
             <CardDescription>{copy.listDescription}</CardDescription>
           </div>
-          <Select
-            value={statusFilter}
-            onValueChange={(value) => {
-              setPage(1);
-              setStatusFilter(value as ExamAttemptStatus | 'ALL');
-            }}
-          >
-            <SelectTrigger className='w-[220px]'>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='ALL'>{copy.filterAllStatuses}</SelectItem>
-              <SelectItem value='PENDING_REVIEW'>{copy.statusPendingReview}</SelectItem>
-              <SelectItem value='GRADED'>{copy.statusGraded}</SelectItem>
-              <SelectItem value='SUBMITTED'>{copy.statusSubmitted}</SelectItem>
-              <SelectItem value='IN_PROGRESS'>{copy.statusInProgress}</SelectItem>
-              <SelectItem value='EXPIRED'>{copy.statusExpired}</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center'>
+            <form
+              className='flex flex-1 gap-2 sm:max-w-sm'
+              onSubmit={(event) => {
+                event.preventDefault();
+                applyEmailFilter();
+              }}
+            >
+              <Input
+                type='email'
+                value={emailInput}
+                onChange={(event) => setEmailInput(event.target.value)}
+                placeholder={copy.emailPlaceholder}
+                className='flex-1'
+              />
+              <Button type='submit' variant='outline'>
+                {copy.filterEmail}
+              </Button>
+            </form>
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => {
+                setPage(1);
+                setStatusFilter(value as ExamAttemptStatus | 'ALL');
+              }}
+            >
+              <SelectTrigger className='w-[220px]'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='ALL'>{copy.filterAllStatuses}</SelectItem>
+                <SelectItem value='PENDING_REVIEW'>{copy.statusPendingReview}</SelectItem>
+                <SelectItem value='GRADED'>{copy.statusGraded}</SelectItem>
+                <SelectItem value='SUBMITTED'>{copy.statusSubmitted}</SelectItem>
+                <SelectItem value='IN_PROGRESS'>{copy.statusInProgress}</SelectItem>
+                <SelectItem value='EXPIRED'>{copy.statusExpired}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent className='space-y-4'>
           {loading ? (
@@ -123,9 +152,14 @@ export default function AdminExamAttemptsPage() {
                       <p className='font-mono text-sm font-semibold text-primary'>{attempt.shortId}</p>
                       <Badge variant='outline'>{statusLabel(attempt.status)}</Badge>
                     </div>
-                    <p className='mt-1 text-sm text-muted-foreground'>
-                      {copy.examCode}: {attempt.examId}
+                    <p className='mt-1 text-sm font-medium'>
+                      {attempt.examTitle || `${copy.examCode}: ${attempt.examId}`}
                     </p>
+                    {attempt.examTitle ? (
+                      <p className='mt-0.5 text-xs text-muted-foreground'>
+                        {copy.examCode}: {attempt.examId}
+                      </p>
+                    ) : null}
                     <p className='mt-1 text-sm'>
                       {copy.scoreLabel
                         .replace('{total}', String(attempt.totalScore))

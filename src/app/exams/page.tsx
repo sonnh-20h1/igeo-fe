@@ -229,6 +229,9 @@ function ExamsListTab({
                     {exam.hasAttempted ? (
                       <Badge className='bg-secondary text-foreground'>{copy.attempted}</Badge>
                     ) : null}
+                    {exam.hasDynamicQuestions ? (
+                      <Badge variant='outline'>{copy.dynamicBadge}</Badge>
+                    ) : null}
                   </div>
                   {exam.description ? (
                     <p className='mt-1 line-clamp-2 text-sm text-muted-foreground'>{exam.description}</p>

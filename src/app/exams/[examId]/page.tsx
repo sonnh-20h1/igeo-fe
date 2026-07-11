@@ -131,6 +131,9 @@ export default function UserExamDetailPage() {
             {exam.hasAttempted ? (
               <Badge className='bg-secondary text-foreground'>{copy.attempted}</Badge>
             ) : null}
+            {exam.hasDynamicQuestions ? (
+              <Badge variant='outline'>{copy.dynamicBadge}</Badge>
+            ) : null}
           </div>
           <CardDescription>{exam.description || copy.noDescription}</CardDescription>
         </CardHeader>
@@ -140,6 +143,9 @@ export default function UserExamDetailPage() {
             <span>{copy.questions.replace('{n}', String(exam.questionCount))}</span>
             <span>{copy.totalScore.replace('{n}', String(exam.totalScore))}</span>
           </div>
+          {exam.hasDynamicQuestions ? (
+            <p className='text-sm text-muted-foreground'>{copy.dynamicHint}</p>
+          ) : null}
           {(exam.tags ?? []).length ? (
             <div className='flex flex-wrap gap-2'>
               {exam.tags.map((tag) => (

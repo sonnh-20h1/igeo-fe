@@ -7,8 +7,18 @@ export type ExamUserSummary = {
   tags: string[];
   questionCount: number;
   totalScore: number;
+  hasDynamicQuestions?: boolean;
   hasAttempted: boolean;
   createdDate?: string | Date;
+};
+
+export type ExamUserTypeConfig = {
+  type: 'MULTIPLE_CHOICE' | 'ESSAY';
+  selectionMode: 'MANUAL' | 'RANDOM' | 'DYNAMIC';
+  score: number;
+  count: number;
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
+  tags: string[];
 };
 
 export type ExamUserQuestionContent = {
@@ -31,6 +41,7 @@ export type ExamUserQuestionItem = {
 
 export type ExamUserDetail = ExamUserSummary & {
   questions: ExamUserQuestionItem[];
+  typeConfigs?: ExamUserTypeConfig[];
 };
 
 export type ExamUserListResult = {

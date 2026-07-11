@@ -37,13 +37,10 @@ export default function AdminExamAttemptDetailPage() {
         if (cancelled) return;
         const draft: GradeDraft = {};
         for (const answer of detail.answers ?? []) {
-          if (answer.type === 'ESSAY') {
-            draft[answer.questionShortId] = {
-              earnedScore:
-                answer.earnedScore != null ? String(answer.earnedScore) : '',
-              feedback: answer.feedback ?? '',
-            };
-          }
+          draft[answer.questionShortId] = {
+            earnedScore: answer.earnedScore != null ? String(answer.earnedScore) : '',
+            feedback: answer.feedback ?? '',
+          };
         }
         startTransition(() => {
           setAttempt(detail);
@@ -65,9 +62,9 @@ export default function AdminExamAttemptDetailPage() {
 
   async function submitGrades() {
     if (!attempt) return;
-    const essayAnswers = (attempt.answers ?? []).filter((item) => item.type === 'ESSAY');
+    const answers = attempt.answers ?? [];
     const payload = {
-      grades: essayAnswers.map((item) => {
+      grades: answers.map((item) => {
         const draft = grades[item.questionShortId] || { earnedScore: '0', feedback: '' };
         return {
           questionShortId: item.questionShortId,
@@ -77,15 +74,32 @@ export default function AdminExamAttemptDetailPage() {
       }),
     };
 
-    if (payload.grades.some((item) => !Number.isFinite(item.earnedScore) || item.earnedScore < 0)) {
+    if (
+      payload.grades.some((item) => {
+        const answer = answers.find((a) => a.questionShortId === item.questionShortId);
+        return (
+          !Number.isFinite(item.earnedScore) ||
+          item.earnedScore < 0 ||
+          (answer != null && item.earnedScore > answer.score)
+        );
+      })
+    ) {
       notifyError(copy.invalidScore, copy.gradeFailed);
       return;
     }
 
     setSaving(true);
     try {
-      const updated = await adminExamAttemptsApi.gradeEssay(attemptId, payload);
+      const updated = await adminExamAttemptsApi.gradeAttempt(attemptId, payload);
+      const draft: GradeDraft = {};
+      for (const answer of updated.answers ?? []) {
+        draft[answer.questionShortId] = {
+          earnedScore: answer.earnedScore != null ? String(answer.earnedScore) : '',
+          feedback: answer.feedback ?? '',
+        };
+      }
       setAttempt(updated);
+      setGrades(draft);
       success(copy.graded);
     } catch (error) {
       notifyError(error instanceof Error ? error.message : copy.gradeFailed, copy.gradeFailed);
@@ -106,7 +120,8 @@ export default function AdminExamAttemptDetailPage() {
   const canGrade =
     attempt.status === 'PENDING_REVIEW' ||
     attempt.status === 'SUBMITTED' ||
-    attempt.status === 'GRADED';
+    attempt.status === 'GRADED' ||
+    attempt.status === 'EXPIRED';
 
   return (
     <div className='space-y-6'>
@@ -123,6 +138,7 @@ export default function AdminExamAttemptDetailPage() {
             {copy.detailTitle} · {attempt.shortId}
           </CardTitle>
           <CardDescription>
+            {attempt.examTitle ? `${attempt.examTitle} · ` : null}
             {copy.examCode}: {attempt.examId} · {copy.userId}: {attempt.userId}
           </CardDescription>
         </CardHeader>
@@ -160,65 +176,58 @@ export default function AdminExamAttemptDetailPage() {
                 {item.userAnswer || '—'}
               </p>
               {item.type === 'MULTIPLE_CHOICE' ? (
-                <>
-                  <p>
-                    <span className='text-muted-foreground'>{copy.correctAnswer}: </span>
-                    {item.question?.correctAnswer || '—'}
-                  </p>
-                  <p>
-                    <span className='text-muted-foreground'>{copy.earnedScore}: </span>
-                    {item.earnedScore ?? 0}/{item.score}
-                  </p>
-                </>
-              ) : (
-                <div className='grid gap-3 sm:grid-cols-2'>
-                  <div className='space-y-1'>
-                    <Label>
-                      {copy.earnedScore} (max {item.score})
-                    </Label>
-                    <Input
-                      type='number'
-                      min={0}
-                      max={item.score}
-                      step={0.1}
-                      disabled={!canGrade}
-                      value={grades[item.questionShortId]?.earnedScore ?? ''}
-                      onChange={(event) =>
-                        setGrades((current) => ({
-                          ...current,
-                          [item.questionShortId]: {
-                            earnedScore: event.target.value,
-                            feedback: current[item.questionShortId]?.feedback ?? '',
-                          },
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className='space-y-1 sm:col-span-2'>
-                    <Label>{copy.feedback}</Label>
-                    <Textarea
-                      rows={3}
-                      disabled={!canGrade}
-                      value={grades[item.questionShortId]?.feedback ?? ''}
-                      onChange={(event) =>
-                        setGrades((current) => ({
-                          ...current,
-                          [item.questionShortId]: {
-                            earnedScore: current[item.questionShortId]?.earnedScore ?? '',
-                            feedback: event.target.value,
-                          },
-                        }))
-                      }
-                    />
-                  </div>
+                <p>
+                  <span className='text-muted-foreground'>{copy.correctAnswer}: </span>
+                  {item.question?.correctAnswer || '—'}
+                </p>
+              ) : null}
+              <div className='grid gap-3 sm:grid-cols-2'>
+                <div className='space-y-1'>
+                  <Label>
+                    {copy.earnedScore} (max {item.score})
+                  </Label>
+                  <Input
+                    type='number'
+                    min={0}
+                    max={item.score}
+                    step={0.1}
+                    disabled={!canGrade}
+                    value={grades[item.questionShortId]?.earnedScore ?? ''}
+                    onChange={(event) =>
+                      setGrades((current) => ({
+                        ...current,
+                        [item.questionShortId]: {
+                          earnedScore: event.target.value,
+                          feedback: current[item.questionShortId]?.feedback ?? '',
+                        },
+                      }))
+                    }
+                  />
                 </div>
-              )}
+                <div className='space-y-1 sm:col-span-2'>
+                  <Label>{copy.feedback}</Label>
+                  <Textarea
+                    rows={3}
+                    disabled={!canGrade}
+                    value={grades[item.questionShortId]?.feedback ?? ''}
+                    onChange={(event) =>
+                      setGrades((current) => ({
+                        ...current,
+                        [item.questionShortId]: {
+                          earnedScore: current[item.questionShortId]?.earnedScore ?? '',
+                          feedback: event.target.value,
+                        },
+                      }))
+                    }
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {canGrade && answers.some((item) => item.type === 'ESSAY') ? (
+      {canGrade && answers.length > 0 ? (
         <div className='flex justify-end'>
           <Button disabled={saving} onClick={() => void submitGrades()}>
             {saving ? dictionary.common.loading : copy.saveGrades}

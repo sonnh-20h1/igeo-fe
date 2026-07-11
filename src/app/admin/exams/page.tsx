@@ -131,6 +131,29 @@ function toForm(exam: Exam): ExamFormState {
   return next;
 }
 
+function getConfigQuestionCount(config: { selectionMode: ExamQuestionSelectionMode; count?: number | null; shortIds?: string[] }) {
+  if (config.selectionMode === 'MANUAL') {
+    return config.shortIds?.length || config.count || 0;
+  }
+  return config.count || 0;
+}
+
+function getExamDisplayStats(exam: Exam) {
+  const configs = exam.typeConfigs ?? [];
+  if (!configs.length) {
+    return { questionCount: exam.questionCount, totalScore: exam.totalScore };
+  }
+  return configs.reduce(
+    (acc, config) => {
+      const count = getConfigQuestionCount(config);
+      acc.questionCount += count;
+      acc.totalScore += count * (Number(config.score) || 0);
+      return acc;
+    },
+    { questionCount: 0, totalScore: 0 },
+  );
+}
+
 function expectedPrefix(type: QuestionType) {
   return type === 'MULTIPLE_CHOICE' ? 'MC' : 'WE';
 }
@@ -302,7 +325,7 @@ export default function AdminExamsPage() {
         return null;
       }
 
-      if (config.selectionMode === 'RANDOM') {
+      if (config.selectionMode === 'RANDOM' || config.selectionMode === 'DYNAMIC') {
         const count = Number(config.count);
         if (!Number.isFinite(count) || count < 1) {
           setFormError(copy.invalidCount);
@@ -310,7 +333,7 @@ export default function AdminExamsPage() {
         }
         configs.push({
           type,
-          selectionMode: 'RANDOM',
+          selectionMode: config.selectionMode,
           score,
           count,
           difficulty: config.difficulty === 'ALL' ? undefined : config.difficulty,
@@ -519,7 +542,12 @@ export default function AdminExamsPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  items.map((exam) => (
+                  items.map((exam) => {
+                    const stats = getExamDisplayStats(exam);
+                    const hasDynamic = (exam.typeConfigs ?? []).some(
+                      (config) => config.selectionMode === 'DYNAMIC',
+                    );
+                    return (
                     <TableRow key={exam.id}>
                       <TableCell>
                         <span className='font-mono text-sm font-semibold text-primary'>{exam.shortId}</span>
@@ -529,13 +557,18 @@ export default function AdminExamsPage() {
                         {exam.description ? (
                           <p className='mt-1 line-clamp-1 text-sm text-muted-foreground'>{exam.description}</p>
                         ) : null}
+                        {hasDynamic ? (
+                          <Badge variant='outline' className='mt-1'>
+                            DYNAMIC
+                          </Badge>
+                        ) : null}
                       </TableCell>
                       <TableCell>
                         <Badge variant='outline'>{statusLabel(exam.status)}</Badge>
                       </TableCell>
                       <TableCell>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</TableCell>
-                      <TableCell>{exam.questionCount}</TableCell>
-                      <TableCell>{exam.totalScore}</TableCell>
+                      <TableCell>{stats.questionCount}</TableCell>
+                      <TableCell>{stats.totalScore}</TableCell>
                       <TableCell>
                         <div className='flex flex-wrap gap-1'>
                           {(exam.tags ?? []).slice(0, 3).map((tag) => (
@@ -566,7 +599,8 @@ export default function AdminExamsPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
@@ -682,7 +716,7 @@ export default function AdminExamsPage() {
 
                     {config.enabled ? (
                       <>
-                        <div className='grid gap-2 sm:grid-cols-2'>
+                        <div className='grid gap-2 sm:grid-cols-3'>
                           <button
                             type='button'
                             className={cn(
@@ -713,6 +747,21 @@ export default function AdminExamsPage() {
                             <p className='font-semibold'>{copy.modeRandom}</p>
                             <p className='mt-1 text-xs text-muted-foreground'>{copy.modeRandomHint}</p>
                           </button>
+                          <button
+                            type='button'
+                            className={cn(
+                              'rounded-xl border px-3 py-2 text-left text-sm transition',
+                              config.selectionMode === 'DYNAMIC'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border/70 hover:bg-muted/40',
+                            )}
+                            onClick={() =>
+                              setForm((current) => setConfig(current, type, { selectionMode: 'DYNAMIC' }))
+                            }
+                          >
+                            <p className='font-semibold'>{copy.modeDynamic}</p>
+                            <p className='mt-1 text-xs text-muted-foreground'>{copy.modeDynamicHint}</p>
+                          </button>
                         </div>
 
                         <div className='grid gap-3 sm:grid-cols-2'>
@@ -730,7 +779,7 @@ export default function AdminExamsPage() {
                               }
                             />
                           </div>
-                          {config.selectionMode === 'RANDOM' ? (
+                          {config.selectionMode === 'RANDOM' || config.selectionMode === 'DYNAMIC' ? (
                             <div className='space-y-1'>
                               <Label>{copy.fieldCount}</Label>
                               <Input
@@ -747,7 +796,7 @@ export default function AdminExamsPage() {
                           ) : null}
                         </div>
 
-                        {config.selectionMode === 'RANDOM' ? (
+                        {config.selectionMode === 'RANDOM' || config.selectionMode === 'DYNAMIC' ? (
                           <div className='grid gap-3 sm:grid-cols-2'>
                             <div className='space-y-1'>
                               <Label>{copy.fieldDifficulty}</Label>
@@ -855,6 +904,10 @@ export default function AdminExamsPage() {
               <Label>
                 {copy.resolvedPreview.replace('{count}', String(resolvedQuestions.length))}
               </Label>
+              {(form.mc.enabled && form.mc.selectionMode === 'DYNAMIC') ||
+              (form.essay.enabled && form.essay.selectionMode === 'DYNAMIC') ? (
+                <p className='text-sm text-muted-foreground'>{copy.resolvedDynamicNote}</p>
+              ) : null}
               {resolvedQuestions.length === 0 ? (
                 <p className='text-sm text-muted-foreground'>{copy.resolvedEmpty}</p>
               ) : (

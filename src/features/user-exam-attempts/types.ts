@@ -69,12 +69,16 @@ export type ListAttemptsQuery = {
   size?: number;
   status?: ExamAttemptStatus;
   examId?: string;
+  email?: string;
 };
 
 export type SaveAttemptAnswersPayload = {
   answers: Array<{ questionShortId: string; userAnswer: string }>;
 };
 
-export type GradeEssayPayload = {
+export type GradeAttemptPayload = {
   grades: Array<{ questionShortId: string; earnedScore: number; feedback?: string }>;
 };
+
+/** @deprecated Use GradeAttemptPayload */
+export type GradeEssayPayload = GradeAttemptPayload;

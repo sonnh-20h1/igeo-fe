@@ -1,7 +1,7 @@
 import type { Question, QuestionDifficulty, QuestionType } from '@/features/admin-questions/types';
 
 export type ExamStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-export type ExamQuestionSelectionMode = 'MANUAL' | 'RANDOM';
+export type ExamQuestionSelectionMode = 'MANUAL' | 'RANDOM' | 'DYNAMIC';
 
 export type ExamTypeConfig = {
   type: QuestionType;
