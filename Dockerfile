@@ -19,9 +19,9 @@ RUN if [ -f yarn.lock ]; then yarn install --frozen-lockfile; else yarn install;
 COPY . .
 RUN if [ -z "$NEXT_PUBLIC_API_BASE_URL" ]; then \
       if [ "$MODE" = "prod" ]; then \
-        NEXT_PUBLIC_API_BASE_URL="https://api.lumio.edu.vn"; \
+        NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL"; \
       else \
-        NEXT_PUBLIC_API_BASE_URL="http://localhost:9000"; \
+        NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL"; \
       fi; \
     fi && \
     PACKAGE_VERSION="$(node -p "require('./package.json').version")" && \
