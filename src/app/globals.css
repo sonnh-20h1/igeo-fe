@@ -314,14 +314,35 @@ textarea {
 }
 
 .home-lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  height: 2rem; /* match Button size=sm → h-8 */
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.1);
   padding: 2px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .home-lang-switcher {
+    height: 2.25rem; /* match Button size=sm → sm:h-9 */
+  }
+}
+
+.home-lang-switcher > div {
+  height: 100% !important;
+  min-height: 0;
 }
 
 .home-lang-switcher button[data-variant],
 .home-lang-switcher button {
+  height: calc(100% - 0px) !important;
+  min-height: 0 !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
   color: rgba(255, 255, 255, 0.75);
 }
 

@@ -106,7 +106,7 @@ export function HomeHeader({
 
         <div className='flex items-center gap-2'>
           <div className='home-lang-switcher'>
-            <LanguageSwitcher compact />
+            <LanguageSwitcher compact className='!h-full' />
           </div>
           {!hideAuth && ready ? (
             <Button asChild size='sm' variant='secondary' className='hidden sm:inline-flex'>

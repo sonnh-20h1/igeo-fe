@@ -203,11 +203,6 @@ export default function UserExamDetailPage() {
                     {formatDate(attempt.startedAt)}
                     {attempt.submittedAt ? ` → ${formatDate(attempt.submittedAt)}` : ''}
                   </p>
-                  <p className='mt-1 text-sm'>
-                    {attemptsCopy.scoreLabel
-                      .replace('{total}', String(attempt.totalScore))
-                      .replace('{max}', String(attempt.maxScore))}
-                  </p>
                 </div>
                 <div>
                   {attempt.status === 'IN_PROGRESS' ? (
@@ -215,9 +210,7 @@ export default function UserExamDetailPage() {
                       <Link href={`/attempts/${attempt.id}`}>{attemptsCopy.resume}</Link>
                     </Button>
                   ) : (
-                    <Button asChild variant='outline'>
-                      <Link href={`/attempts/${attempt.id}/result`}>{attemptsCopy.viewResult}</Link>
-                    </Button>
+                    <Badge variant='secondary'>{attemptsCopy.submittedDone}</Badge>
                   )}
                 </div>
               </div>

@@ -17,6 +17,7 @@ import { userExamAttemptsApi } from '@/features/user-exam-attempts/api';
 import type { ExamAttemptStatus, ExamAttemptSummary } from '@/features/user-exam-attempts/types';
 import { HomeHeader } from '@/features/home/home-header';
 import { useI18n } from '@/features/i18n/provider';
+import { formatMessage } from '@/features/i18n/format';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -35,22 +36,74 @@ import { useNotification } from '@/components/ui/notification';
 type EntryForm = {
   fullName: string;
   email: string;
-  phone: string;
+  phoneCountryCode: string;
+  phoneLocal: string;
   cccd: string;
   dob: string;
   className: string;
   school: string;
 };
 
+const PHONE_COUNTRY_OPTIONS = [
+  { code: '+84', nameVi: 'Việt Nam', nameEn: 'Vietnam' },
+  { code: '+66', nameVi: 'Thái Lan', nameEn: 'Thailand' },
+  { code: '+855', nameVi: 'Campuchia', nameEn: 'Cambodia' },
+  { code: '+856', nameVi: 'Lào', nameEn: 'Laos' },
+  { code: '+62', nameVi: 'Indonesia', nameEn: 'Indonesia' },
+  { code: '+60', nameVi: 'Malaysia', nameEn: 'Malaysia' },
+  { code: '+65', nameVi: 'Singapore', nameEn: 'Singapore' },
+  { code: '+63', nameVi: 'Philippines', nameEn: 'Philippines' },
+  { code: '+81', nameVi: 'Nhật Bản', nameEn: 'Japan' },
+  { code: '+82', nameVi: 'Hàn Quốc', nameEn: 'South Korea' },
+  { code: '+86', nameVi: 'Trung Quốc', nameEn: 'China' },
+  { code: '+91', nameVi: 'Ấn Độ', nameEn: 'India' },
+  { code: '+1', nameVi: 'Hoa Kỳ / Canada', nameEn: 'USA / Canada' },
+  { code: '+44', nameVi: 'Anh', nameEn: 'United Kingdom' },
+  { code: '+61', nameVi: 'Úc', nameEn: 'Australia' },
+] as const;
+
 const emptyEntryForm = (): EntryForm => ({
   fullName: '',
   email: '',
-  phone: '',
+  phoneCountryCode: '+84',
+  phoneLocal: '',
   cccd: '',
   dob: '',
   className: '',
   school: '',
 });
+
+function normalizePhoneLocal(value: string) {
+  return value.replace(/\D/g, '').replace(/^0+/, '');
+}
+
+function buildInternationalPhone(countryCode: string, local: string) {
+  const digits = normalizePhoneLocal(local);
+  if (!digits) return '';
+  return `${countryCode}${digits}`;
+}
+
+/** Age 16–19 as of Aug 1 of the current year; range shifts +1 year each calendar year. */
+function getEligibleDobRange(reference = new Date()) {
+  const year = reference.getFullYear();
+  const min = `${year - 19}-08-01`;
+  const max = `${year - 16}-08-01`;
+  return { min, max, year };
+}
+
+function formatDobDisplay(ymd: string, locale: string) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  if (!y || !m || !d) return ymd;
+  return new Date(y, m - 1, d).toLocaleDateString(locale === 'en' ? 'en-GB' : 'vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function isDobInEligibleRange(dobYmd: string, range = getEligibleDobRange()) {
+  return Boolean(dobYmd) && dobYmd >= range.min && dobYmd <= range.max;
+}
 
 function formatDateTime(value: string | Date, locale: string) {
   return new Date(value).toLocaleString(locale === 'en' ? 'en-US' : 'vi-VN', {
@@ -78,6 +131,17 @@ function UserExamsPageContent() {
   const attemptsCopy = dictionary.userAttempts;
   const { error: notifyError, success } = useNotification();
   const router = useRouter();
+  const dobRange = getEligibleDobRange();
+  const dobHint = formatMessage(examsCopy.fieldDobHint, {
+    year: dobRange.year,
+    min: formatDobDisplay(dobRange.min, locale),
+    max: formatDobDisplay(dobRange.max, locale),
+  });
+  const dobInvalid = formatMessage(examsCopy.fieldDobInvalid, {
+    year: dobRange.year,
+    min: formatDobDisplay(dobRange.min, locale),
+    max: formatDobDisplay(dobRange.max, locale),
+  });
 
   const [ready, setReady] = useState(false);
   const [candidate, setCandidate] = useState<ExamCandidateProfile | null>(null);
@@ -131,10 +195,12 @@ function UserExamsPageContent() {
     event.preventDefault();
     setEntryError(null);
 
+    const phone = buildInternationalPhone(entryForm.phoneCountryCode, entryForm.phoneLocal);
+
     if (
       !entryForm.fullName.trim() ||
       !entryForm.email.trim() ||
-      !entryForm.phone.trim() ||
+      !phone ||
       !entryForm.cccd.trim() ||
       !entryForm.dob ||
       !entryForm.className.trim() ||
@@ -144,12 +210,17 @@ function UserExamsPageContent() {
       return;
     }
 
+    if (!isDobInEligibleRange(entryForm.dob, dobRange)) {
+      setEntryError(dobInvalid);
+      return;
+    }
+
     setSubmitting(true);
     try {
       const result = await userExamPeriodsApi.submitEntry({
         fullName: entryForm.fullName.trim(),
         email: entryForm.email.trim().toLowerCase(),
-        phone: entryForm.phone.trim(),
+        phone,
         cccd: entryForm.cccd.trim(),
         dob: new Date(entryForm.dob).toISOString(),
         className: entryForm.className.trim(),
@@ -248,39 +319,75 @@ function UserExamsPageContent() {
                     autoComplete='email'
                   />
                 </div>
-                <div className='grid gap-4 sm:grid-cols-2'>
                   <div className='space-y-1'>
-                    <Label htmlFor='phone'>{examsCopy.fieldPhone}</Label>
-                    <Input
-                      id='phone'
-                      value={entryForm.phone}
-                      onChange={(event) =>
-                        setEntryForm((current) => ({ ...current, phone: event.target.value }))
+                  <Label htmlFor='phoneLocal'>{examsCopy.fieldPhone}</Label>
+                  <div className='flex gap-2'>
+                    <Select
+                      value={entryForm.phoneCountryCode}
+                      onValueChange={(value) =>
+                        setEntryForm((current) => ({ ...current, phoneCountryCode: value }))
                       }
-                      autoComplete='tel'
+                    >
+                      <SelectTrigger
+                        className='w-[7rem] shrink-0 font-medium'
+                        aria-label={examsCopy.fieldPhoneCountry}
+                      >
+                        <span>{entryForm.phoneCountryCode}</span>
+                      </SelectTrigger>
+                      <SelectContent className='min-w-[14rem]'>
+                        {PHONE_COUNTRY_OPTIONS.map((item) => (
+                          <SelectItem key={item.code} value={item.code}>
+                            {locale === 'en' ? item.nameEn : item.nameVi} ({item.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id='phoneLocal'
+                      inputMode='numeric'
+                      autoComplete='tel-national'
+                      placeholder={examsCopy.fieldPhonePlaceholder}
+                      value={entryForm.phoneLocal}
+                      onChange={(event) =>
+                        setEntryForm((current) => ({
+                          ...current,
+                          phoneLocal: event.target.value.replace(/[^\d]/g, ''),
+                        }))
+                      }
+                      onBlur={() =>
+                        setEntryForm((current) => ({
+                          ...current,
+                          phoneLocal: normalizePhoneLocal(current.phoneLocal),
+                        }))
+                      }
+                      className='flex-1'
                     />
                   </div>
-                  <div className='space-y-1'>
-                    <Label htmlFor='cccd'>{examsCopy.fieldCccd}</Label>
-                    <Input
-                      id='cccd'
-                      value={entryForm.cccd}
-                      onChange={(event) =>
-                        setEntryForm((current) => ({ ...current, cccd: event.target.value }))
-                      }
-                    />
-                  </div>
+                  <p className='text-xs text-muted-foreground'>{examsCopy.fieldPhoneHint}</p>
+                </div>
+                <div className='space-y-1'>
+                  <Label htmlFor='cccd'>{examsCopy.fieldCccd}</Label>
+                  <Input
+                    id='cccd'
+                    value={entryForm.cccd}
+                    onChange={(event) =>
+                      setEntryForm((current) => ({ ...current, cccd: event.target.value }))
+                    }
+                  />
                 </div>
                 <div className='space-y-1'>
                   <Label htmlFor='dob'>{examsCopy.fieldDob}</Label>
                   <Input
                     id='dob'
                     type='date'
+                    min={dobRange.min}
+                    max={dobRange.max}
                     value={entryForm.dob}
                     onChange={(event) =>
                       setEntryForm((current) => ({ ...current, dob: event.target.value }))
                     }
                   />
+                  <p className='text-xs text-muted-foreground'>{dobHint}</p>
                 </div>
                 <div className='grid gap-4 sm:grid-cols-2'>
                   <div className='space-y-1'>
@@ -570,11 +677,6 @@ function AttemptsHistoryTab({
                     <Badge variant='outline'>{statusLabel(attempt.status)}</Badge>
                   </div>
                   <p className='mt-1 font-mono text-xs text-muted-foreground'>{attempt.shortId}</p>
-                  <p className='mt-1 text-sm'>
-                    {copy.scoreLabel
-                      .replace('{total}', String(attempt.totalScore))
-                      .replace('{max}', String(attempt.maxScore))}
-                  </p>
                 </div>
                 <div>
                   {attempt.status === 'IN_PROGRESS' ? (
@@ -582,9 +684,7 @@ function AttemptsHistoryTab({
                       <Link href={`/attempts/${attempt.id}`}>{copy.resume}</Link>
                     </Button>
                   ) : (
-                    <Button asChild variant='outline'>
-                      <Link href={`/attempts/${attempt.id}/result`}>{copy.viewResult}</Link>
-                    </Button>
+                    <Badge variant='secondary'>{copy.submittedDone}</Badge>
                   )}
                 </div>
               </div>
