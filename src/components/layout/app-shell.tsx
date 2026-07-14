@@ -11,6 +11,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   LogOut,
+  Mail,
   Menu,
   Users,
 } from 'lucide-react';
@@ -39,6 +40,7 @@ function getNavItems(
       { href: '/admin/exams', label: dictionary.shell.navExams, icon: ClipboardList },
       { href: '/admin/exam-periods', label: dictionary.shell.navExamPeriods, icon: CalendarRange },
       { href: '/admin/exam-attempts', label: dictionary.shell.navExamAttempts, icon: ClipboardCheck },
+      { href: '/admin/contacts', label: dictionary.shell.navContacts, icon: Mail },
     ];
   }
 

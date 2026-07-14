@@ -5,7 +5,6 @@ import { HomeContactForm } from '@/features/home/home-contact-form';
 import { HomeFaq } from '@/features/home/home-faq';
 import { HomeHeader } from '@/features/home/home-header';
 import { useI18n } from '@/features/i18n/provider';
-import { SITE_URL, SUPPORT_EMAIL } from '@/lib/app-config';
 
 function SectionHeading({ children }: { children: ReactNode }) {
   return (
@@ -202,34 +201,6 @@ export function HomePage() {
             <p className='mt-6 max-w-xl text-base leading-relaxed text-[#022648]/82 sm:text-lg'>
               {home.contact.intro}
             </p>
-            <dl className='mt-8 space-y-4 text-base'>
-              <div>
-                <dt className='text-sm font-semibold uppercase tracking-[0.16em] text-[#022648]/5'>
-                  {home.contact.emailLabel}
-                </dt>
-                <dd className='mt-1'>
-                  <a
-                    href={`mailto:${SUPPORT_EMAIL}`}
-                    className='font-medium text-[#022648] underline decoration-[#E0C389] underline-offset-4 transition hover:decoration-[#022648]'
-                  >
-                    {SUPPORT_EMAIL}
-                  </a>
-                </dd>
-              </div>
-              <div>
-                <dt className='text-sm font-semibold uppercase tracking-[0.16em] text-[#022648]/5'>
-                  {home.contact.websiteLabel}
-                </dt>
-                <dd className='mt-1'>
-                  <a
-                    href={SITE_URL}
-                    className='font-medium text-[#022648] underline decoration-[#E0C389] underline-offset-4 transition hover:decoration-[#022648]'
-                  >
-                    {SITE_URL.replace(/^https?:\/\//, '')}
-                  </a>
-                </dd>
-              </div>
-            </dl>
           </div>
           <HomeContactForm copy={home.contact} />
         </div>
