@@ -88,8 +88,6 @@ export default function AdminExamAttemptsPage() {
   function statusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return copy.statusInProgress;
     if (status === 'SUBMITTED') return copy.statusSubmitted;
-    if (status === 'PENDING_REVIEW') return copy.statusPendingReview;
-    if (status === 'GRADED') return copy.statusGraded;
     return copy.statusExpired;
   }
 
@@ -160,10 +158,8 @@ export default function AdminExamAttemptsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='ALL'>{copy.filterAllStatuses}</SelectItem>
-                <SelectItem value='PENDING_REVIEW'>{copy.statusPendingReview}</SelectItem>
-                <SelectItem value='GRADED'>{copy.statusGraded}</SelectItem>
-                <SelectItem value='SUBMITTED'>{copy.statusSubmitted}</SelectItem>
                 <SelectItem value='IN_PROGRESS'>{copy.statusInProgress}</SelectItem>
+                <SelectItem value='SUBMITTED'>{copy.statusSubmitted}</SelectItem>
                 <SelectItem value='EXPIRED'>{copy.statusExpired}</SelectItem>
               </SelectContent>
             </Select>
@@ -180,20 +176,19 @@ export default function AdminExamAttemptsPage() {
                   <TableHead>{copy.colStatus}</TableHead>
                   <TableHead>{copy.colStartedAt}</TableHead>
                   <TableHead>{copy.colEndedAt}</TableHead>
-                  <TableHead>{copy.colScore}</TableHead>
                   <TableHead className='text-right'>{copy.colActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
                       {copy.empty}
                     </TableCell>
                   </TableRow>
@@ -225,11 +220,6 @@ export default function AdminExamAttemptsPage() {
                       </TableCell>
                       <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
                         {formatDateTime(endedAt(attempt), locale)}
-                      </TableCell>
-                      <TableCell className='whitespace-nowrap text-sm'>
-                        {copy.scoreLabel
-                          .replace('{total}', String(attempt.totalScore))
-                          .replace('{max}', String(attempt.maxScore))}
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='flex justify-end gap-2'>

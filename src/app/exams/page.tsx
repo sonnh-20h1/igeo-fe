@@ -796,8 +796,6 @@ function AttemptsHistoryTab({
   function statusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return copy.statusInProgress;
     if (status === 'SUBMITTED') return copy.statusSubmitted;
-    if (status === 'PENDING_REVIEW') return copy.statusPendingReview;
-    if (status === 'GRADED') return copy.statusGraded;
     return copy.statusExpired;
   }
 
@@ -825,8 +823,6 @@ function AttemptsHistoryTab({
             <SelectItem value='ALL'>{copy.filterAllStatuses}</SelectItem>
             <SelectItem value='IN_PROGRESS'>{copy.statusInProgress}</SelectItem>
             <SelectItem value='SUBMITTED'>{copy.statusSubmitted}</SelectItem>
-            <SelectItem value='PENDING_REVIEW'>{copy.statusPendingReview}</SelectItem>
-            <SelectItem value='GRADED'>{copy.statusGraded}</SelectItem>
             <SelectItem value='EXPIRED'>{copy.statusExpired}</SelectItem>
           </SelectContent>
         </Select>
@@ -856,7 +852,9 @@ function AttemptsHistoryTab({
                       <Link href={`/attempts/${attempt.id}`}>{copy.resume}</Link>
                     </Button>
                   ) : (
-                    <Badge variant='outline'>{copy.submittedDone}</Badge>
+                    <Badge variant='outline'>
+                      {attempt.status === 'SUBMITTED' ? copy.submittedDone : statusLabel(attempt.status)}
+                    </Badge>
                   )}
                 </div>
               </div>

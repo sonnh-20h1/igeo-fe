@@ -1,9 +1,4 @@
-export type ExamAttemptStatus =
-  | 'IN_PROGRESS'
-  | 'SUBMITTED'
-  | 'PENDING_REVIEW'
-  | 'GRADED'
-  | 'EXPIRED';
+export type ExamAttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'EXPIRED';
 
 export type AttemptQuestionSnapshot = {
   shortId: string;
@@ -77,10 +72,3 @@ export type ListAttemptsQuery = {
 export type SaveAttemptAnswersPayload = {
   answers: Array<{ questionShortId: string; userAnswer: string }>;
 };
-
-export type GradeAttemptPayload = {
-  grades: Array<{ questionShortId: string; earnedScore: number; feedback?: string }>;
-};
-
-/** @deprecated Use GradeAttemptPayload */
-export type GradeEssayPayload = GradeAttemptPayload;

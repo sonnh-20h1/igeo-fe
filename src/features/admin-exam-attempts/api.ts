@@ -3,7 +3,6 @@ import { readAccessToken } from '@/features/auth/storage';
 import type {
   ExamAttemptAdminDetail,
   ExamAttemptListResult,
-  GradeAttemptPayload,
   ListAttemptsQuery,
 } from '@/features/user-exam-attempts/types';
 
@@ -27,18 +26,5 @@ export const adminExamAttemptsApi = {
       method: 'GET',
       token: requireToken(),
     });
-  },
-
-  gradeAttempt(attemptId: string, payload: GradeAttemptPayload) {
-    return apiRequest<ExamAttemptAdminDetail>(`/admin/exam-attempts/${attemptId}/grade`, {
-      method: 'PATCH',
-      token: requireToken(),
-      body: payload,
-    });
-  },
-
-  /** @deprecated Use gradeAttempt */
-  gradeEssay(attemptId: string, payload: GradeAttemptPayload) {
-    return this.gradeAttempt(attemptId, payload);
   },
 };

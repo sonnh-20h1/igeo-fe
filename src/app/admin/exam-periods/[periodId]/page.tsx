@@ -188,8 +188,6 @@ export default function AdminExamPeriodDetailPage() {
   function attemptStatusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return attemptsCopy.statusInProgress;
     if (status === 'SUBMITTED') return attemptsCopy.statusSubmitted;
-    if (status === 'PENDING_REVIEW') return attemptsCopy.statusPendingReview;
-    if (status === 'GRADED') return attemptsCopy.statusGraded;
     return attemptsCopy.statusExpired;
   }
 
@@ -376,10 +374,8 @@ export default function AdminExamPeriodDetailPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='ALL'>{attemptsCopy.filterAllStatuses}</SelectItem>
-                <SelectItem value='PENDING_REVIEW'>{attemptsCopy.statusPendingReview}</SelectItem>
-                <SelectItem value='GRADED'>{attemptsCopy.statusGraded}</SelectItem>
-                <SelectItem value='SUBMITTED'>{attemptsCopy.statusSubmitted}</SelectItem>
                 <SelectItem value='IN_PROGRESS'>{attemptsCopy.statusInProgress}</SelectItem>
+                <SelectItem value='SUBMITTED'>{attemptsCopy.statusSubmitted}</SelectItem>
                 <SelectItem value='EXPIRED'>{attemptsCopy.statusExpired}</SelectItem>
               </SelectContent>
             </Select>
@@ -396,20 +392,19 @@ export default function AdminExamPeriodDetailPage() {
                   <TableHead>{attemptsCopy.colStatus}</TableHead>
                   <TableHead>{attemptsCopy.colStartedAt}</TableHead>
                   <TableHead>{attemptsCopy.colEndedAt}</TableHead>
-                  <TableHead>{attemptsCopy.colScore}</TableHead>
                   <TableHead className='text-right'>{attemptsCopy.colActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {attemptsLoading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : attempts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
                       {copy.attemptsEmpty}
                     </TableCell>
                   </TableRow>
@@ -443,11 +438,6 @@ export default function AdminExamPeriodDetailPage() {
                       </TableCell>
                       <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
                         {formatDateTime(attemptEndedAt(attempt), locale)}
-                      </TableCell>
-                      <TableCell className='whitespace-nowrap text-sm'>
-                        {attemptsCopy.scoreLabel
-                          .replace('{total}', String(attempt.totalScore))
-                          .replace('{max}', String(attempt.maxScore))}
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='flex justify-end gap-2'>

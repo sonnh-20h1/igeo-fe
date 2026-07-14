@@ -11,22 +11,15 @@ export type AttemptPdfLabels = {
   status: string;
   startedAt: string;
   endedAt: string;
-  score: string;
-  mcScore: string;
-  essayScore: string;
   questionLabel: string;
   typeMcq: string;
   typeEssay: string;
   userAnswer: string;
   correctAnswer: string;
-  earnedScore: string;
-  feedback: string;
   options: string;
   noAnswer: string;
   statusInProgress: string;
   statusSubmitted: string;
-  statusPendingReview: string;
-  statusGraded: string;
   statusExpired: string;
 };
 
@@ -45,8 +38,6 @@ function formatDateTime(value: string | Date | null | undefined, locale: string)
 function statusLabel(status: ExamAttemptStatus, labels: AttemptPdfLabels) {
   if (status === 'IN_PROGRESS') return labels.statusInProgress;
   if (status === 'SUBMITTED') return labels.statusSubmitted;
-  if (status === 'PENDING_REVIEW') return labels.statusPendingReview;
-  if (status === 'GRADED') return labels.statusGraded;
   return labels.statusExpired;
 }
 
@@ -216,7 +207,6 @@ export async function exportAttemptPdf(
   };
 
   const candidate = attempt.userFullName || labels.unknownUser;
-  const scoreText = `${attempt.totalScore}/${attempt.maxScore}`;
   const answers = [...(attempt.answers ?? [])].sort((a, b) => a.order - b.order);
 
   writeWrapped(cursor, labels.title, { bold: true, size: 16 });
@@ -228,13 +218,6 @@ export async function exportAttemptPdf(
   writeLabelValue(cursor, labels.status, statusLabel(attempt.status, labels));
   writeLabelValue(cursor, labels.startedAt, formatDateTime(attempt.startedAt, locale));
   writeLabelValue(cursor, labels.endedAt, formatDateTime(endedAt(attempt), locale));
-  writeLabelValue(
-    cursor,
-    labels.score,
-    `${scoreText} (${labels.mcScore}: ${attempt.mcScore} · ${labels.essayScore}: ${
-      attempt.essayScore != null ? attempt.essayScore : '—'
-    })`,
-  );
 
   writeSpacer(cursor, 8);
 
@@ -272,16 +255,6 @@ export async function exportAttemptPdf(
     if (item.type === 'MULTIPLE_CHOICE') {
       writeLabelValue(cursor, labels.correctAnswer, item.question?.correctAnswer || '—');
     }
-
-    writeLabelValue(
-      cursor,
-      labels.earnedScore,
-      `${item.earnedScore != null ? item.earnedScore : '—'} / ${item.score}`,
-    );
-
-    if (item.feedback) {
-      writeLabelValue(cursor, labels.feedback, item.feedback);
-    }
   });
 
   const candidatePart = sanitizeFilename(attempt.userFullName || attempt.shortId || 'candidate');
@@ -298,24 +271,16 @@ export function buildAttemptPdfLabelsFromCopy(copy: {
   colStatus: string;
   colStartedAt: string;
   colEndedAt: string;
-  colScore: string;
-  scoreLabel: string;
   questionLabel: string;
   userAnswer: string;
   correctAnswer: string;
-  earnedScore: string;
-  feedback: string;
   statusInProgress: string;
   statusSubmitted: string;
-  statusPendingReview: string;
-  statusGraded: string;
   statusExpired: string;
   pdfTypeMcq: string;
   pdfTypeEssay: string;
   pdfOptions: string;
   pdfNoAnswer: string;
-  pdfMcScore: string;
-  pdfEssayScore: string;
 }): AttemptPdfLabels {
   return {
     title: copy.detailTitle,
@@ -327,22 +292,15 @@ export function buildAttemptPdfLabelsFromCopy(copy: {
     status: copy.colStatus,
     startedAt: copy.colStartedAt,
     endedAt: copy.colEndedAt,
-    score: copy.colScore,
-    mcScore: copy.pdfMcScore,
-    essayScore: copy.pdfEssayScore,
     questionLabel: copy.questionLabel,
     typeMcq: copy.pdfTypeMcq,
     typeEssay: copy.pdfTypeEssay,
     userAnswer: copy.userAnswer,
     correctAnswer: copy.correctAnswer,
-    earnedScore: copy.earnedScore,
-    feedback: copy.feedback,
     options: copy.pdfOptions,
     noAnswer: copy.pdfNoAnswer,
     statusInProgress: copy.statusInProgress,
     statusSubmitted: copy.statusSubmitted,
-    statusPendingReview: copy.statusPendingReview,
-    statusGraded: copy.statusGraded,
     statusExpired: copy.statusExpired,
   };
 }

@@ -29,18 +29,18 @@ export default function AdminDashboardPage() {
 
     async function loadSummary() {
       try {
-        const [users, questions, exams, pending] = await Promise.all([
+        const [users, questions, exams, submitted] = await Promise.all([
           adminUsersApi.list({ page: 1, size: 1 }),
           adminQuestionsApi.list({ page: 1, size: 1 }),
           adminExamsApi.list({ page: 1, size: 1 }),
-          adminExamAttemptsApi.list({ page: 1, size: 1, status: 'PENDING_REVIEW' }),
+          adminExamAttemptsApi.list({ page: 1, size: 1, status: 'SUBMITTED' }),
         ]);
         if (cancelled) return;
         startTransition(() => {
           setUserTotal(users.pageInfo?.total ?? 0);
           setQuestionTotal(questions.pageInfo?.total ?? 0);
           setExamTotal(exams.pageInfo?.total ?? 0);
-          setPendingReviewTotal(pending.pageInfo?.total ?? 0);
+          setPendingReviewTotal(submitted.pageInfo?.total ?? 0);
           setLoading(false);
         });
       } catch {

@@ -108,8 +108,6 @@ export default function UserExamDetailPage() {
   function statusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return attemptsCopy.statusInProgress;
     if (status === 'SUBMITTED') return attemptsCopy.statusSubmitted;
-    if (status === 'PENDING_REVIEW') return attemptsCopy.statusPendingReview;
-    if (status === 'GRADED') return attemptsCopy.statusGraded;
     return attemptsCopy.statusExpired;
   }
 
