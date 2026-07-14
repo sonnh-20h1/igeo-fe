@@ -39,6 +39,11 @@ export function writeExamSession(sessionToken: string, candidate: ExamCandidateP
   localStorage.setItem(EXAM_CANDIDATE_KEY, JSON.stringify(candidate));
 }
 
+export function writeExamCandidate(candidate: ExamCandidateProfile) {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.setItem(EXAM_CANDIDATE_KEY, JSON.stringify(candidate));
+}
+
 export function clearExamSession() {
   if (typeof localStorage === 'undefined') return;
   localStorage.removeItem(EXAM_SESSION_KEY);

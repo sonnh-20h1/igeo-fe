@@ -3,16 +3,21 @@
 import { startTransition, useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, History, LogOut, Play } from 'lucide-react';
-import type { ExamPeriodCurrent } from '@/features/admin-exam-periods/types';
+import { ClipboardList, History, LogOut, Pencil, Play } from 'lucide-react';
+import type { ExamPeriodCurrent, ExamPeriodExamItem } from '@/features/admin-exam-periods/types';
 import {
   clearExamSession,
   hasExamSession,
   readExamCandidate,
+  writeExamCandidate,
   writeExamSession,
   type ExamCandidateProfile,
 } from '@/features/exam-session/storage';
 import { userExamPeriodsApi } from '@/features/user-exam-periods/api';
+import {
+  toExamCandidateProfile,
+  userExamCandidatesApi,
+} from '@/features/user-exam-candidates/api';
 import { userExamAttemptsApi } from '@/features/user-exam-attempts/api';
 import type { ExamAttemptStatus, ExamAttemptSummary } from '@/features/user-exam-attempts/types';
 import { HomeHeader } from '@/features/home/home-header';
@@ -23,6 +28,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PaginationControls } from '@/components/ui/pagination-controls';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -150,6 +162,9 @@ function UserExamsPageContent() {
   const [entryForm, setEntryForm] = useState<EntryForm>(emptyEntryForm);
   const [entryError, setEntryError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [schoolDialogOpen, setSchoolDialogOpen] = useState(false);
+  const [schoolForm, setSchoolForm] = useState({ className: '', school: '' });
+  const [savingSchool, setSavingSchool] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,8 +182,18 @@ function UserExamsPageContent() {
       setCandidate(stored);
       setLoadingCurrent(true);
       try {
-        const result = await userExamPeriodsApi.getCurrentForSession();
+        const [result, profile] = await Promise.all([
+          userExamPeriodsApi.getCurrentForSession(),
+          userExamCandidatesApi.getMe().catch(() => null),
+        ]);
         if (cancelled) return;
+
+        if (profile) {
+          const nextProfile = toExamCandidateProfile(profile);
+          writeExamCandidate(nextProfile);
+          setCandidate(nextProfile);
+        }
+
         startTransition(() => {
           setCurrent(result);
           setLoadingCurrent(false);
@@ -262,11 +287,49 @@ function UserExamsPageContent() {
     }
   }
 
-  function resetCandidate() {
+  function openSchoolDialog() {
+    if (!candidate) return;
+    setSchoolForm({
+      className: candidate.className || '',
+      school: candidate.school || '',
+    });
+    setSchoolDialogOpen(true);
+  }
+
+  function exitAccount() {
     clearExamSession();
+    setSchoolDialogOpen(false);
     setCandidate(null);
     setCurrent(null);
-    setEntryForm(emptyEntryForm);
+    setEntryForm(emptyEntryForm());
+    setEntryError(null);
+  }
+
+  async function saveSchoolAndClass(event: React.FormEvent) {
+    event.preventDefault();
+    if (!schoolForm.className.trim() || !schoolForm.school.trim()) {
+      notifyError(examsCopy.entryRequired, examsCopy.schoolClassUpdateFailed);
+      return;
+    }
+    setSavingSchool(true);
+    try {
+      const updated = await userExamCandidatesApi.updateSchoolAndClass({
+        className: schoolForm.className.trim(),
+        school: schoolForm.school.trim(),
+      });
+      const nextProfile = toExamCandidateProfile(updated);
+      writeExamCandidate(nextProfile);
+      setCandidate(nextProfile);
+      setSchoolDialogOpen(false);
+      success(examsCopy.schoolClassUpdated);
+    } catch (error) {
+      notifyError(
+        error instanceof Error ? error.message : examsCopy.schoolClassUpdateFailed,
+        examsCopy.schoolClassUpdateFailed,
+      );
+    } finally {
+      setSavingSchool(false);
+    }
   }
 
   if (!ready) {
@@ -434,12 +497,24 @@ function UserExamsPageContent() {
             <h1 className='mt-2 text-2xl font-semibold sm:text-3xl'>
               {examsCopy.greeting.replace('{name}', candidate.fullName)}
             </h1>
+            <p className='mt-2 text-sm text-muted-foreground'>
+              {formatMessage(examsCopy.candidateMeta, {
+                className: candidate.className || '—',
+                school: candidate.school || '—',
+              })}
+            </p>
             <p className='mt-2 max-w-2xl text-muted-foreground'>{examsCopy.description}</p>
           </div>
-          <Button variant='outline' className='gap-2' onClick={resetCandidate}>
-            <LogOut className='size-4' />
-            {examsCopy.changeCandidate}
-          </Button>
+          <div className='flex flex-wrap gap-2'>
+            <Button variant='outline' className='gap-2' onClick={openSchoolDialog}>
+              <Pencil className='size-4' />
+              {examsCopy.editSchoolClass}
+            </Button>
+            <Button variant='outline' className='gap-2' onClick={exitAccount}>
+              <LogOut className='size-4' />
+              {examsCopy.exitAccount}
+            </Button>
+          </div>
         </div>
 
         <CurrentPeriodPanel
@@ -459,6 +534,84 @@ function UserExamsPageContent() {
           notifyError={notifyError}
         />
       </div>
+
+      <Dialog open={schoolDialogOpen} onOpenChange={setSchoolDialogOpen}>
+        <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-lg'>
+          <DialogHeader>
+            <DialogTitle>{examsCopy.editSchoolClass}</DialogTitle>
+            <DialogDescription>{examsCopy.editProfileHint}</DialogDescription>
+          </DialogHeader>
+          <form className='space-y-4' onSubmit={(event) => void saveSchoolAndClass(event)}>
+            <div className='space-y-1'>
+              <Label htmlFor='viewFullName' className='text-foreground/55'>
+                {examsCopy.fieldFullName}
+              </Label>
+              <Input id='viewFullName' value={candidate.fullName} readOnly disabled />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='viewEmail' className='text-foreground/55'>
+                {examsCopy.fieldEmail}
+              </Label>
+              <Input id='viewEmail' value={candidate.email || '—'} readOnly disabled />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='viewPhone' className='text-foreground/55'>
+                {examsCopy.fieldPhone}
+              </Label>
+              <Input id='viewPhone' value={candidate.phone || '—'} readOnly disabled />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='viewCccd' className='text-foreground/55'>
+                {examsCopy.fieldCccd}
+              </Label>
+              <Input id='viewCccd' value={candidate.cccd || '—'} readOnly disabled />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='viewDob' className='text-foreground/55'>
+                {examsCopy.fieldDob}
+              </Label>
+              <Input
+                id='viewDob'
+                value={
+                  candidate.dob
+                    ? formatDobDisplay(
+                        typeof candidate.dob === 'string'
+                          ? candidate.dob.slice(0, 10)
+                          : new Date(candidate.dob).toISOString().slice(0, 10),
+                        locale,
+                      )
+                    : '—'
+                }
+                readOnly
+                disabled
+              />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='editClassName'>{examsCopy.fieldClassName}</Label>
+              <Input
+                id='editClassName'
+                value={schoolForm.className}
+                onChange={(event) =>
+                  setSchoolForm((current) => ({ ...current, className: event.target.value }))
+                }
+              />
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='editSchool'>{examsCopy.fieldSchool}</Label>
+              <Input
+                id='editSchool'
+                value={schoolForm.school}
+                onChange={(event) =>
+                  setSchoolForm((current) => ({ ...current, school: event.target.value }))
+                }
+              />
+            </div>
+            <Button type='submit' className='w-full' disabled={savingSchool}>
+              {savingSchool ? dictionary.common.loading : examsCopy.saveSchoolClass}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </ExamPublicChrome>
   );
 }
@@ -482,13 +635,17 @@ function CurrentPeriodPanel({
   success: (message: string, title?: string) => void;
   onStarted: (attemptId: string) => void;
 }) {
-  const [starting, setStarting] = useState(false);
-  const exam = current?.exam ?? current?.exams?.[0] ?? null;
-  const period = current?.period;
+  const [startingId, setStartingId] = useState<string | null>(null);
+  const period = current?.period ?? null;
+  const exams: ExamPeriodExamItem[] =
+    current?.exams?.length
+      ? current.exams
+      : current?.exam
+        ? [current.exam]
+        : [];
 
-  async function startExam() {
-    if (!exam) return;
-    setStarting(true);
+  async function startExam(exam: ExamPeriodExamItem) {
+    setStartingId(exam.id);
     try {
       const attempt = await userExamAttemptsApi.start(exam.id);
       success(copy.started);
@@ -496,7 +653,7 @@ function CurrentPeriodPanel({
     } catch (error) {
       notifyError(error instanceof Error ? error.message : copy.startFailed, copy.startFailed);
     } finally {
-      setStarting(false);
+      setStartingId(null);
     }
   }
 
@@ -512,7 +669,7 @@ function CurrentPeriodPanel({
       <CardContent className='space-y-4'>
         {loading ? (
           <p className='py-10 text-center text-muted-foreground'>{loadingLabel}</p>
-        ) : !exam || !period ? (
+        ) : !period || exams.length === 0 ? (
           <p className='py-10 text-center text-muted-foreground'>{copy.noOpenPeriod}</p>
         ) : (
           <div className='space-y-4 rounded-2xl border border-border/70 bg-card p-4'>
@@ -530,43 +687,58 @@ function CurrentPeriodPanel({
               </p>
             </div>
 
-            <div className='border-t border-border/60 pt-4'>
-              <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-                <div className='min-w-0'>
-                  <div className='flex flex-wrap items-center gap-2'>
-                    <h3 className='text-base font-semibold'>{exam.title}</h3>
-                    <Badge variant='outline' className='font-mono text-[11px]'>
-                      {exam.shortId}
-                    </Badge>
-                    {exam.hasAttempted ? (
-                      <Badge className='bg-secondary text-foreground'>{copy.attempted}</Badge>
+            <div className='space-y-3 border-t border-border/60 pt-4'>
+              {exams.map((exam) => (
+                <div
+                  key={exam.id || exam.shortId}
+                  className='flex flex-col gap-4 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between'
+                >
+                  <div className='min-w-0'>
+                    <div className='flex flex-wrap items-center gap-2'>
+                      <h3 className='text-base font-semibold'>{exam.title}</h3>
+                      <Badge variant='outline' className='font-mono text-[11px]'>
+                        {exam.shortId}
+                      </Badge>
+                      {exam.hasAttempted ? (
+                        <Badge className='bg-secondary text-foreground'>{copy.attempted}</Badge>
+                      ) : null}
+                      {exam.hasDynamicQuestions ? (
+                        <Badge variant='outline'>{copy.dynamicBadge}</Badge>
+                      ) : null}
+                    </div>
+                    {exam.description ? (
+                      <p className='mt-1 line-clamp-2 text-sm text-muted-foreground'>
+                        {exam.description}
+                      </p>
                     ) : null}
+                    <div className='mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground'>
+                      <span>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</span>
+                      <span>{copy.questions.replace('{n}', String(exam.questionCount))}</span>
+                      <span>{copy.totalScore.replace('{n}', String(exam.totalScore))}</span>
+                    </div>
                     {exam.hasDynamicQuestions ? (
-                      <Badge variant='outline'>{copy.dynamicBadge}</Badge>
+                      <p className='mt-2 text-xs text-muted-foreground'>{copy.dynamicHint}</p>
                     ) : null}
                   </div>
-                  {exam.description ? (
-                    <p className='mt-1 line-clamp-2 text-sm text-muted-foreground'>{exam.description}</p>
-                  ) : null}
-                  <div className='mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground'>
-                    <span>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</span>
-                    <span>{copy.questions.replace('{n}', String(exam.questionCount))}</span>
-                    <span>{copy.totalScore.replace('{n}', String(exam.totalScore))}</span>
+                  <div className='flex gap-2'>
+                    <Button asChild variant='outline'>
+                      <Link href={`/exams/${exam.id}`}>{copy.view}</Link>
+                    </Button>
+                    <Button
+                      className='gap-2'
+                      disabled={startingId === exam.id}
+                      onClick={() => void startExam(exam)}
+                    >
+                      <Play className='size-4' />
+                      {startingId === exam.id
+                        ? loadingLabel
+                        : exam.hasAttempted
+                          ? copy.retake
+                          : copy.start}
+                    </Button>
                   </div>
-                  {exam.hasDynamicQuestions ? (
-                    <p className='mt-2 text-xs text-muted-foreground'>{copy.dynamicHint}</p>
-                  ) : null}
                 </div>
-                <div className='flex gap-2'>
-                  <Button asChild variant='outline'>
-                    <Link href={`/exams/${exam.id}`}>{copy.view}</Link>
-                  </Button>
-                  <Button className='gap-2' disabled={starting} onClick={() => void startExam()}>
-                    <Play className='size-4' />
-                    {starting ? loadingLabel : exam.hasAttempted ? copy.retake : copy.start}
-                  </Button>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         )}
