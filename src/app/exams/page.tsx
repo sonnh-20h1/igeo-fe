@@ -684,7 +684,7 @@ function AttemptsHistoryTab({
                       <Link href={`/attempts/${attempt.id}`}>{copy.resume}</Link>
                     </Button>
                   ) : (
-                    <Badge variant='secondary'>{copy.submittedDone}</Badge>
+                    <Badge variant='outline'>{copy.submittedDone}</Badge>
                   )}
                 </div>
               </div>

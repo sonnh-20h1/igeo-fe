@@ -210,7 +210,7 @@ export default function UserExamDetailPage() {
                       <Link href={`/attempts/${attempt.id}`}>{attemptsCopy.resume}</Link>
                     </Button>
                   ) : (
-                    <Badge variant='secondary'>{attemptsCopy.submittedDone}</Badge>
+                    <Badge variant='outline'>{attemptsCopy.submittedDone}</Badge>
                   )}
                 </div>
               </div>
