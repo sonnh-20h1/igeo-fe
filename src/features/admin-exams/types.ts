@@ -7,6 +7,8 @@ export type ExamTypeConfig = {
   type: QuestionType;
   selectionMode: ExamQuestionSelectionMode;
   score: number;
+  /** Minutes per question for this type */
+  durationMinutes?: number | null;
   count?: number | null;
   difficulty?: QuestionDifficulty | null;
   tags?: string[];
@@ -17,6 +19,7 @@ export type ExamTypeConfigPayload = {
   type: QuestionType;
   selectionMode: ExamQuestionSelectionMode;
   score: number;
+  durationMinutes?: number;
   count?: number;
   difficulty?: QuestionDifficulty;
   tags?: string[];
@@ -28,6 +31,7 @@ export type ExamQuestionEntry = {
   type: QuestionType;
   score: number;
   order: number;
+  durationMinutes?: number | null;
   question?: Question | null;
 };
 
@@ -67,7 +71,8 @@ export type ListExamsQuery = {
 export type CreateExamPayload = {
   title: string;
   description?: string;
-  durationMinutes: number;
+  /** Omit to auto-sum from typeConfigs (count × durationMinutes) */
+  durationMinutes?: number;
   typeConfigs: ExamTypeConfigPayload[];
   status?: ExamStatus;
   tags?: string[];
@@ -76,6 +81,7 @@ export type CreateExamPayload = {
 export type UpdateExamPayload = {
   title?: string;
   description?: string | null;
+  /** Omit together with typeConfigs to let BE recompute total duration */
   durationMinutes?: number;
   typeConfigs?: ExamTypeConfigPayload[];
   status?: ExamStatus;

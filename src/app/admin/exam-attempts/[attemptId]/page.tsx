@@ -3,7 +3,7 @@
 import { startTransition, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft, Download, Unlock } from 'lucide-react';
 import { adminExamAttemptsApi } from '@/features/admin-exam-attempts/api';
 import {
   buildAttemptPdfLabelsFromCopy,
@@ -14,8 +14,40 @@ import type { ExamAttemptAdminDetail, ExamAttemptStatus } from '@/features/user-
 import { useI18n } from '@/features/i18n/provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useNotification } from '@/components/ui/notification';
+
+type GradeDraft = Record<string, { earnedScore: string; feedback: string }>;
+
+function buildGradeDraft(detail: ExamAttemptAdminDetail): GradeDraft {
+  const draft: GradeDraft = {};
+  for (const answer of detail.answers ?? []) {
+    draft[answer.questionShortId] = {
+      earnedScore: answer.earnedScore != null ? String(answer.earnedScore) : '',
+      feedback: answer.feedback ?? '',
+    };
+  }
+  return draft;
+}
+
+function getScoreFieldError(
+  raw: string,
+  maxScore: number,
+  messages: { invalidScore: string; scoreExceedsMax: string; scoreBelowZero: string },
+): string | null {
+  const value = raw.trim();
+  if (!value) return null;
+  const earnedScore = Number(value);
+  if (!Number.isFinite(earnedScore)) return messages.invalidScore;
+  if (earnedScore < 0) return messages.scoreBelowZero;
+  if (earnedScore > maxScore) {
+    return messages.scoreExceedsMax.replace('{max}', String(maxScore));
+  }
+  return null;
+}
 
 export default function AdminExamAttemptDetailPage() {
   const params = useParams<{ attemptId: string }>();
@@ -25,8 +57,12 @@ export default function AdminExamAttemptDetailPage() {
   const { error: notifyError, success } = useNotification();
 
   const [attempt, setAttempt] = useState<ExamAttemptAdminDetail | null>(null);
+  const [grades, setGrades] = useState<GradeDraft>({});
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [savingQuestionId, setSavingQuestionId] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   function formatDateTime(value: string | Date | null | undefined) {
     if (!value) return '—';
@@ -39,6 +75,8 @@ export default function AdminExamAttemptDetailPage() {
   function statusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return copy.statusInProgress;
     if (status === 'SUBMITTED') return copy.statusSubmitted;
+    if (status === 'GRADED') return copy.statusGraded;
+    if (status === 'LOCKED') return copy.statusLocked;
     return copy.statusExpired;
   }
 
@@ -50,6 +88,7 @@ export default function AdminExamAttemptDetailPage() {
         if (cancelled) return;
         startTransition(() => {
           setAttempt(detail);
+          setGrades(buildGradeDraft(detail));
           setLoading(false);
         });
       } catch (error) {
@@ -64,6 +103,110 @@ export default function AdminExamAttemptDetailPage() {
       cancelled = true;
     };
   }, [attemptId, copy.loadFailed, notifyError]);
+
+  function validateGrade(
+    questionShortId: string,
+    earnedScore: number,
+    maxScore: number,
+  ): string | null {
+    if (!Number.isFinite(earnedScore)) return copy.invalidScore;
+    if (earnedScore < 0) return copy.scoreBelowZero;
+    if (earnedScore > maxScore) {
+      return copy.scoreExceedsMax.replace('{max}', String(maxScore));
+    }
+    return null;
+  }
+
+  function scoreMessages() {
+    return {
+      invalidScore: copy.invalidScore,
+      scoreExceedsMax: copy.scoreExceedsMax,
+      scoreBelowZero: copy.scoreBelowZero,
+    };
+  }
+
+  async function saveOneQuestion(questionShortId: string) {
+    if (!attempt) return;
+    const answer = attempt.answers.find((item) => item.questionShortId === questionShortId);
+    if (!answer) return;
+    const draft = grades[questionShortId] || { earnedScore: '', feedback: '' };
+    const earnedScore = Number(draft.earnedScore);
+    const error = validateGrade(questionShortId, earnedScore, answer.score);
+    if (error) {
+      notifyError(error, copy.gradeFailed);
+      return;
+    }
+
+    setSavingQuestionId(questionShortId);
+    try {
+      const updated = await adminExamAttemptsApi.gradeQuestion(attemptId, questionShortId, {
+        earnedScore,
+        feedback: draft.feedback.trim() || undefined,
+      });
+      setAttempt(updated);
+      setGrades(buildGradeDraft(updated));
+      success(copy.graded);
+    } catch (err) {
+      notifyError(err instanceof Error ? err.message : copy.gradeFailed, copy.gradeFailed);
+    } finally {
+      setSavingQuestionId(null);
+    }
+  }
+
+  async function saveAllGrades() {
+    if (!attempt) return;
+    const answers = attempt.answers ?? [];
+    const payload = {
+      grades: answers.map((item) => {
+        const draft = grades[item.questionShortId] || { earnedScore: '0', feedback: '' };
+        return {
+          questionShortId: item.questionShortId,
+          earnedScore: Number(draft.earnedScore),
+          feedback: draft.feedback.trim() || undefined,
+        };
+      }),
+    };
+
+    for (const grade of payload.grades) {
+      const answer = answers.find((item) => item.questionShortId === grade.questionShortId);
+      const error = validateGrade(
+        grade.questionShortId,
+        grade.earnedScore,
+        answer?.score ?? 0,
+      );
+      if (error) {
+        notifyError(error, copy.gradeFailed);
+        return;
+      }
+    }
+
+    setSaving(true);
+    try {
+      const updated = await adminExamAttemptsApi.gradeAttempt(attemptId, payload);
+      setAttempt(updated);
+      setGrades(buildGradeDraft(updated));
+      success(copy.graded);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : copy.gradeFailed, copy.gradeFailed);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleUnlock() {
+    if (!window.confirm(copy.unlockConfirm)) return;
+    setUnlocking(true);
+    try {
+      const detail = await adminExamAttemptsApi.unlock(attemptId);
+      setAttempt(detail);
+      setGrades(buildGradeDraft(detail));
+      success(copy.unlocked);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : copy.unlockFailed, copy.unlockFailed);
+    } finally {
+      setUnlocking(false);
+    }
+  }
 
   async function handleExportPdf() {
     if (!attempt) return;
@@ -87,7 +230,21 @@ export default function AdminExamAttemptDetailPage() {
   }
 
   const answers = [...(attempt.answers ?? [])].sort((a, b) => a.order - b.order);
+  const canGrade =
+    attempt.status === 'SUBMITTED' ||
+    attempt.status === 'GRADED' ||
+    attempt.status === 'EXPIRED';
   const canExport = isAttemptExportable(attempt.status);
+  const gradedCount = answers.filter((item) => item.earnedScore != null).length;
+  const hasInvalidScores = answers.some((item) =>
+    Boolean(
+      getScoreFieldError(
+        grades[item.questionShortId]?.earnedScore ?? '',
+        item.score,
+        scoreMessages(),
+      ),
+    ),
+  );
 
   return (
     <div className='space-y-6'>
@@ -107,6 +264,17 @@ export default function AdminExamAttemptDetailPage() {
           >
             <Download className='size-4' />
             {exporting ? copy.exportingPdf : copy.exportPdf}
+          </Button>
+        ) : null}
+        {attempt.status === 'LOCKED' ? (
+          <Button
+            variant='default'
+            className='gap-2'
+            disabled={unlocking}
+            onClick={() => void handleUnlock()}
+          >
+            <Unlock className='size-4' />
+            {unlocking ? copy.unlocking : copy.unlock}
           </Button>
         ) : null}
       </div>
@@ -131,54 +299,158 @@ export default function AdminExamAttemptDetailPage() {
           <span>
             {copy.colEndedAt}:{' '}
             {formatDateTime(
-              attempt.submittedAt || (attempt.status === 'EXPIRED' ? attempt.expiresAt : null),
+              attempt.submittedAt ||
+                attempt.lockedAt ||
+                (attempt.status === 'EXPIRED' ? attempt.expiresAt : null),
             )}
+          </span>
+          <span>
+            {copy.scoreLabel
+              .replace('{total}', String(attempt.totalScore ?? 0))
+              .replace('{max}', String(attempt.maxScore ?? 0))}
+          </span>
+          <span>
+            {copy.gradedProgress
+              .replace('{graded}', String(gradedCount))
+              .replace('{total}', String(answers.length))}
           </span>
           <Badge variant='outline'>{statusLabel(attempt.status)}</Badge>
         </CardContent>
       </Card>
 
       <div className='space-y-4'>
-        {answers.map((item, index) => (
-          <Card key={item.questionShortId}>
-            <CardHeader>
-              <div className='flex flex-wrap items-center gap-2'>
-                <CardTitle className='text-base'>
-                  {copy.questionLabel.replace('{n}', String(index + 1))}
-                </CardTitle>
-                <Badge variant='outline' className='font-mono'>
-                  {item.questionShortId}
-                </Badge>
-                <Badge variant='outline'>
-                  {item.type === 'MULTIPLE_CHOICE' ? copy.pdfTypeMcq : copy.pdfTypeEssay}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className='space-y-3 text-sm'>
-              <p className='whitespace-pre-wrap'>{item.question?.content}</p>
-              {item.type === 'MULTIPLE_CHOICE' && item.question?.options?.length ? (
-                <ul className='space-y-1 text-muted-foreground'>
-                  {item.question.options.map((option) => (
-                    <li key={option.key}>
-                      <span className='font-medium text-foreground'>{option.key}.</span> {option.text}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              <p>
-                <span className='text-muted-foreground'>{copy.userAnswer}: </span>
-                {item.userAnswer || '—'}
-              </p>
-              {item.type === 'MULTIPLE_CHOICE' ? (
+        {answers.map((item, index) => {
+          const draft = grades[item.questionShortId] || { earnedScore: '', feedback: '' };
+          return (
+            <Card key={item.questionShortId}>
+              <CardHeader>
+                <div className='flex flex-wrap items-center gap-2'>
+                  <CardTitle className='text-base'>
+                    {copy.questionLabel.replace('{n}', String(index + 1))}
+                  </CardTitle>
+                  <Badge variant='outline' className='font-mono'>
+                    {item.questionShortId}
+                  </Badge>
+                  <Badge variant='outline'>
+                    {item.type === 'MULTIPLE_CHOICE' ? copy.pdfTypeMcq : copy.pdfTypeEssay}
+                  </Badge>
+                  {item.earnedScore != null ? (
+                    <Badge variant='outline'>{copy.questionGraded}</Badge>
+                  ) : (
+                    <Badge variant='outline'>{copy.questionUngraded}</Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className='space-y-3 text-sm'>
+                <p className='whitespace-pre-wrap'>{item.question?.content}</p>
+                {item.type === 'MULTIPLE_CHOICE' && item.question?.options?.length ? (
+                  <ul className='space-y-1 text-muted-foreground'>
+                    {item.question.options.map((option) => (
+                      <li key={option.key}>
+                        <span className='font-medium text-foreground'>{option.key}.</span>{' '}
+                        {option.text}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 <p>
-                  <span className='text-muted-foreground'>{copy.correctAnswer}: </span>
-                  {item.question?.correctAnswer || '—'}
+                  <span className='text-muted-foreground'>{copy.userAnswer}: </span>
+                  {item.userAnswer || '—'}
                 </p>
-              ) : null}
-            </CardContent>
-          </Card>
-        ))}
+                {item.type === 'MULTIPLE_CHOICE' ? (
+                  <p>
+                    <span className='text-muted-foreground'>{copy.correctAnswer}: </span>
+                    {item.question?.correctAnswer || '—'}
+                  </p>
+                ) : null}
+
+                {canGrade ? (
+                  <div className='grid gap-3 border-t border-border/60 pt-3 sm:grid-cols-2'>
+                    <div className='space-y-1'>
+                      <Label>
+                        {copy.earnedScore} (max {item.score})
+                      </Label>
+                      <Input
+                        type='number'
+                        min={0}
+                        max={item.score}
+                        step={0.1}
+                        value={draft.earnedScore}
+                        aria-invalid={Boolean(
+                          getScoreFieldError(draft.earnedScore, item.score, scoreMessages()),
+                        )}
+                        className={
+                          getScoreFieldError(draft.earnedScore, item.score, scoreMessages())
+                            ? 'border-destructive focus-visible:ring-destructive'
+                            : undefined
+                        }
+                        onChange={(event) =>
+                          setGrades((current) => ({
+                            ...current,
+                            [item.questionShortId]: {
+                              earnedScore: event.target.value,
+                              feedback: current[item.questionShortId]?.feedback ?? '',
+                            },
+                          }))
+                        }
+                      />
+                      {getScoreFieldError(draft.earnedScore, item.score, scoreMessages()) ? (
+                        <p className='text-xs text-destructive'>
+                          {getScoreFieldError(draft.earnedScore, item.score, scoreMessages())}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className='space-y-1 sm:col-span-2'>
+                      <Label>{copy.feedback}</Label>
+                      <Textarea
+                        rows={3}
+                        value={draft.feedback}
+                        onChange={(event) =>
+                          setGrades((current) => ({
+                            ...current,
+                            [item.questionShortId]: {
+                              earnedScore: current[item.questionShortId]?.earnedScore ?? '',
+                              feedback: event.target.value,
+                            },
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className='sm:col-span-2'>
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        disabled={
+                          saving ||
+                          savingQuestionId === item.questionShortId ||
+                          Boolean(getScoreFieldError(draft.earnedScore, item.score, scoreMessages())) ||
+                          !draft.earnedScore.trim()
+                        }
+                        onClick={() => void saveOneQuestion(item.questionShortId)}
+                      >
+                        {savingQuestionId === item.questionShortId
+                          ? dictionary.common.loading
+                          : copy.saveQuestionGrade}
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
+
+      {canGrade && answers.length > 0 ? (
+        <div className='flex justify-end'>
+          <Button
+            disabled={saving || Boolean(savingQuestionId) || hasInvalidScores}
+            onClick={() => void saveAllGrades()}
+          >
+            {saving ? dictionary.common.loading : copy.saveGrades}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ClipboardCheck, Download } from 'lucide-react';
+import { ClipboardCheck, Download, Unlock } from 'lucide-react';
 import { adminExamAttemptsApi } from '@/features/admin-exam-attempts/api';
 import {
   buildAttemptPdfLabelsFromCopy,
@@ -48,6 +48,8 @@ export default function AdminExamAttemptsPage() {
   const [emailFilter, setEmailFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [unlockingId, setUnlockingId] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,7 +80,7 @@ export default function AdminExamAttemptsPage() {
     return () => {
       cancelled = true;
     };
-  }, [copy.loadFailed, emailFilter, notifyError, page, pageSize, statusFilter]);
+  }, [copy.loadFailed, emailFilter, notifyError, page, pageSize, reloadKey, statusFilter]);
 
   function applyEmailFilter() {
     setPage(1);
@@ -88,13 +90,30 @@ export default function AdminExamAttemptsPage() {
   function statusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return copy.statusInProgress;
     if (status === 'SUBMITTED') return copy.statusSubmitted;
+    if (status === 'GRADED') return copy.statusGraded;
+    if (status === 'LOCKED') return copy.statusLocked;
     return copy.statusExpired;
   }
 
   function endedAt(attempt: ExamAttemptSummary) {
     if (attempt.submittedAt) return attempt.submittedAt;
+    if (attempt.lockedAt) return attempt.lockedAt;
     if (attempt.status === 'EXPIRED') return attempt.expiresAt;
     return null;
+  }
+
+  async function handleUnlock(attemptId: string) {
+    if (!window.confirm(copy.unlockConfirm)) return;
+    setUnlockingId(attemptId);
+    try {
+      await adminExamAttemptsApi.unlock(attemptId);
+      success(copy.unlocked);
+      setReloadKey((value) => value + 1);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : copy.unlockFailed, copy.unlockFailed);
+    } finally {
+      setUnlockingId(null);
+    }
   }
 
   async function handleExportPdf(attemptId: string) {
@@ -158,8 +177,10 @@ export default function AdminExamAttemptsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='ALL'>{copy.filterAllStatuses}</SelectItem>
-                <SelectItem value='IN_PROGRESS'>{copy.statusInProgress}</SelectItem>
                 <SelectItem value='SUBMITTED'>{copy.statusSubmitted}</SelectItem>
+                <SelectItem value='GRADED'>{copy.statusGraded}</SelectItem>
+                <SelectItem value='IN_PROGRESS'>{copy.statusInProgress}</SelectItem>
+                <SelectItem value='LOCKED'>{copy.statusLocked}</SelectItem>
                 <SelectItem value='EXPIRED'>{copy.statusExpired}</SelectItem>
               </SelectContent>
             </Select>
@@ -176,19 +197,20 @@ export default function AdminExamAttemptsPage() {
                   <TableHead>{copy.colStatus}</TableHead>
                   <TableHead>{copy.colStartedAt}</TableHead>
                   <TableHead>{copy.colEndedAt}</TableHead>
+                  <TableHead>{copy.colScore}</TableHead>
                   <TableHead className='text-right'>{copy.colActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
                       {copy.empty}
                     </TableCell>
                   </TableRow>
@@ -221,8 +243,27 @@ export default function AdminExamAttemptsPage() {
                       <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
                         {formatDateTime(endedAt(attempt), locale)}
                       </TableCell>
+                      <TableCell className='whitespace-nowrap text-sm'>
+                        {attempt.status === 'GRADED'
+                          ? copy.scoreLabel
+                              .replace('{total}', String(attempt.totalScore ?? 0))
+                              .replace('{max}', String(attempt.maxScore ?? 0))
+                          : '—'}
+                      </TableCell>
                       <TableCell className='text-right'>
                         <div className='flex justify-end gap-2'>
+                          {attempt.status === 'LOCKED' ? (
+                            <Button
+                              size='sm'
+                              variant='default'
+                              className='gap-1'
+                              disabled={unlockingId === attempt.id}
+                              onClick={() => void handleUnlock(attempt.id)}
+                            >
+                              <Unlock className='size-3.5' />
+                              {unlockingId === attempt.id ? copy.unlocking : copy.unlock}
+                            </Button>
+                          ) : null}
                           {isAttemptExportable(attempt.status) ? (
                             <Button
                               size='sm'
@@ -235,7 +276,7 @@ export default function AdminExamAttemptsPage() {
                               {exportingId === attempt.id ? copy.exportingPdf : copy.exportPdf}
                             </Button>
                           ) : null}
-                          <Button asChild size='sm'>
+                          <Button asChild size='sm' variant={attempt.status === 'LOCKED' ? 'outline' : 'default'}>
                             <Link href={`/admin/exam-attempts/${attempt.id}`}>{copy.review}</Link>
                           </Button>
                         </div>

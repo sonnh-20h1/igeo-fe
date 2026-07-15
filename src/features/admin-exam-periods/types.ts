@@ -100,4 +100,6 @@ export type ExamEntryResponse = {
     school: string;
   };
   current: ExamPeriodCurrent | null;
+  /** true nếu vừa đăng ký mới; false nếu đã có tài khoản (email/CCCD) */
+  isNew: boolean;
 };

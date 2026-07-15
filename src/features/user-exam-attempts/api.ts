@@ -5,6 +5,7 @@ import type {
   ExamAttemptListResult,
   ExamAttemptResult,
   ListAttemptsQuery,
+  LockAttemptPayload,
   SaveAttemptAnswersPayload,
 } from './types';
 
@@ -43,6 +44,14 @@ export const userExamAttemptsApi = {
     return apiRequest<ExamAttemptResult>(`/public/exam-attempts/${attemptId}/submit`, {
       method: 'POST',
       examSession: requireExamSessionToken(),
+    });
+  },
+
+  lock(attemptId: string, payload: LockAttemptPayload = {}) {
+    return apiRequest<ExamAttemptResult>(`/public/exam-attempts/${attemptId}/lock`, {
+      method: 'POST',
+      examSession: requireExamSessionToken(),
+      body: payload,
     });
   },
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, startTransition } from 'react';
+import { useEffect, useState, startTransition, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, History, Play } from 'lucide-react';
@@ -9,6 +9,7 @@ import { userExamsApi } from '@/features/user-exams/api';
 import type { ExamUserDetail } from '@/features/user-exams/types';
 import { userExamAttemptsApi } from '@/features/user-exam-attempts/api';
 import type { ExamAttemptStatus, ExamAttemptSummary } from '@/features/user-exam-attempts/types';
+import { HomeHeader } from '@/features/home/home-header';
 import { useI18n } from '@/features/i18n/provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,15 @@ function formatDate(value?: string | Date | null) {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleString();
+}
+
+function ExamDetailChrome({ children }: { children: ReactNode }) {
+  return (
+    <div className='home-page min-h-screen bg-[#F2E5D2]/40 text-[#022648]'>
+      <HomeHeader hideAuth solid brandHref='/' sectionBase='/' />
+      <div className='pt-20 sm:pt-24'>{children}</div>
+    </div>
+  );
 }
 
 export default function UserExamDetailPage() {
@@ -108,114 +118,130 @@ export default function UserExamDetailPage() {
   function statusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return attemptsCopy.statusInProgress;
     if (status === 'SUBMITTED') return attemptsCopy.statusSubmitted;
+    if (status === 'GRADED') return attemptsCopy.statusGraded;
+    if (status === 'LOCKED') return attemptsCopy.statusLocked;
     return attemptsCopy.statusExpired;
   }
 
   if (loading) {
-    return <p className='py-16 text-center text-muted-foreground'>{dictionary.common.loading}</p>;
+    return (
+      <ExamDetailChrome>
+        <p className='py-16 text-center text-muted-foreground'>{dictionary.common.loading}</p>
+      </ExamDetailChrome>
+    );
   }
 
   if (!exam) {
-    return <p className='py-16 text-center text-muted-foreground'>{copy.empty}</p>;
+    return (
+      <ExamDetailChrome>
+        <p className='py-16 text-center text-muted-foreground'>{copy.empty}</p>
+      </ExamDetailChrome>
+    );
   }
 
   return (
-    <div className='mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6'>
-      <Button asChild variant='outline' className='gap-2'>
-        <Link href='/exams'>
-          <ArrowLeft className='size-4' />
-          {copy.backToList}
-        </Link>
-      </Button>
+    <ExamDetailChrome>
+      <div className='mx-auto max-w-5xl space-y-6 px-4 pb-10 sm:px-6'>
+        <Button asChild variant='outline' className='gap-2'>
+          <Link href='/exams'>
+            <ArrowLeft className='size-4' />
+            {copy.backToList}
+          </Link>
+        </Button>
 
-      <Card>
-        <CardHeader>
-          <div className='flex flex-wrap items-center gap-2'>
-            <CardTitle>{exam.title}</CardTitle>
-            <Badge variant='outline' className='font-mono'>
-              {exam.shortId}
-            </Badge>
-            {exam.hasAttempted ? (
-              <Badge className='bg-secondary text-foreground'>{copy.attempted}</Badge>
+        <Card>
+          <CardHeader>
+            <div className='flex flex-wrap items-center gap-2'>
+              <CardTitle>{exam.title}</CardTitle>
+              <Badge variant='outline' className='font-mono'>
+                {exam.shortId}
+              </Badge>
+              {exam.hasAttempted ? (
+                <Badge className='bg-secondary text-foreground'>{copy.attempted}</Badge>
+              ) : null}
+              {exam.hasDynamicQuestions ? (
+                <Badge variant='outline'>{copy.dynamicBadge}</Badge>
+              ) : null}
+            </div>
+            <CardDescription>{exam.description || copy.noDescription}</CardDescription>
+          </CardHeader>
+          <CardContent className='space-y-4'>
+            <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
+              <span>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</span>
+              <span>{copy.questions.replace('{n}', String(exam.questionCount))}</span>
+              <span>{copy.totalScore.replace('{n}', String(exam.totalScore))}</span>
+            </div>
+            {(exam.tags ?? []).length ? (
+              <div className='flex flex-wrap gap-2'>
+                {exam.tags.map((tag) => (
+                  <Badge key={tag} variant='outline'>
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
             ) : null}
             {exam.hasDynamicQuestions ? (
-              <Badge variant='outline'>{copy.dynamicBadge}</Badge>
+              <p className='text-sm text-muted-foreground'>{copy.dynamicHint}</p>
             ) : null}
-          </div>
-          <CardDescription>{exam.description || copy.noDescription}</CardDescription>
-        </CardHeader>
-        <CardContent className='space-y-4'>
-          <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
-            <span>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</span>
-            <span>{copy.questions.replace('{n}', String(exam.questionCount))}</span>
-            <span>{copy.totalScore.replace('{n}', String(exam.totalScore))}</span>
-          </div>
-          {(exam.tags ?? []).length ? (
-            <div className='flex flex-wrap gap-2'>
-              {exam.tags.map((tag) => (
-                <Badge key={tag} variant='outline'>
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          ) : null}
-          {exam.hasDynamicQuestions ? (
-            <p className='text-sm text-muted-foreground'>{copy.dynamicHint}</p>
-          ) : null}
-          <Button className='gap-2' disabled={starting} onClick={() => void startExam()}>
-            <Play className='size-4' />
-            {starting
-              ? dictionary.common.loading
-              : exam.hasAttempted
-                ? copy.retake
-                : copy.start}
-          </Button>
-        </CardContent>
-      </Card>
+            <Button className='gap-2' disabled={starting} onClick={() => void startExam()}>
+              <Play className='size-4' />
+              {starting
+                ? dictionary.common.loading
+                : exam.hasAttempted
+                  ? copy.retake
+                  : copy.start}
+            </Button>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2 text-lg'>
-            <History className='size-5 text-primary' />
-            {copy.attemptsTitle}
-          </CardTitle>
-          <CardDescription>{copy.attemptsDescription}</CardDescription>
-        </CardHeader>
-        <CardContent className='space-y-3'>
-          {attemptsLoading ? (
-            <p className='py-8 text-center text-muted-foreground'>{dictionary.common.loading}</p>
-          ) : attempts.length === 0 ? (
-            <p className='py-8 text-center text-muted-foreground'>{copy.attemptsEmpty}</p>
-          ) : (
-            attempts.map((attempt) => (
-              <div
-                key={attempt.id}
-                className='flex flex-col gap-3 rounded-2xl border border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between'
-              >
-                <div>
-                  <div className='flex flex-wrap items-center gap-2'>
-                    <p className='font-mono text-sm font-semibold text-primary'>{attempt.shortId}</p>
-                    <Badge variant='outline'>{statusLabel(attempt.status)}</Badge>
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2 text-lg'>
+              <History className='size-5 text-primary' />
+              {copy.attemptsTitle}
+            </CardTitle>
+            <CardDescription>{copy.attemptsDescription}</CardDescription>
+          </CardHeader>
+          <CardContent className='space-y-3'>
+            {attemptsLoading ? (
+              <p className='py-8 text-center text-muted-foreground'>{dictionary.common.loading}</p>
+            ) : attempts.length === 0 ? (
+              <p className='py-8 text-center text-muted-foreground'>{copy.attemptsEmpty}</p>
+            ) : (
+              attempts.map((attempt) => (
+                <div
+                  key={attempt.id}
+                  className='flex flex-col gap-3 rounded-2xl border border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between'
+                >
+                  <div>
+                    <div className='flex flex-wrap items-center gap-2'>
+                      <p className='font-mono text-sm font-semibold text-primary'>{attempt.shortId}</p>
+                      <Badge variant='outline'>{statusLabel(attempt.status)}</Badge>
+                    </div>
+                    <p className='mt-1 text-sm text-muted-foreground'>
+                      {formatDate(attempt.startedAt)}
+                      {attempt.submittedAt ? ` → ${formatDate(attempt.submittedAt)}` : ''}
+                    </p>
                   </div>
-                  <p className='mt-1 text-sm text-muted-foreground'>
-                    {formatDate(attempt.startedAt)}
-                    {attempt.submittedAt ? ` → ${formatDate(attempt.submittedAt)}` : ''}
-                  </p>
+                  <div>
+                    {attempt.status === 'IN_PROGRESS' ? (
+                      <Button asChild>
+                        <Link href={`/attempts/${attempt.id}`}>{attemptsCopy.resume}</Link>
+                      </Button>
+                    ) : (
+                      <Badge variant='outline'>
+                        {attempt.status === 'LOCKED'
+                          ? attemptsCopy.contactAdminToResume
+                          : attemptsCopy.submittedDone}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  {attempt.status === 'IN_PROGRESS' ? (
-                    <Button asChild>
-                      <Link href={`/attempts/${attempt.id}`}>{attemptsCopy.resume}</Link>
-                    </Button>
-                  ) : (
-                    <Badge variant='outline'>{attemptsCopy.submittedDone}</Badge>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-    </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </ExamDetailChrome>
   );
 }

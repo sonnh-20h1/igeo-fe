@@ -16,6 +16,7 @@ export type ExamUserTypeConfig = {
   type: 'MULTIPLE_CHOICE' | 'ESSAY';
   selectionMode: 'MANUAL' | 'RANDOM' | 'DYNAMIC';
   score: number;
+  durationMinutes?: number;
   count: number;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
   tags: string[];
@@ -36,6 +37,7 @@ export type ExamUserQuestionItem = {
   type: 'MULTIPLE_CHOICE' | 'ESSAY';
   score: number;
   order: number;
+  durationMinutes?: number;
   question: ExamUserQuestionContent | null;
 };
 

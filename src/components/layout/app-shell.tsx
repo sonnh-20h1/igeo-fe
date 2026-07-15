@@ -255,7 +255,7 @@ export function AppShellInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className='min-h-screen lg:grid lg:grid-cols-[280px_1fr]'>
-      <aside className='hidden border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] lg:block'>
+      <aside className='sticky top-0 hidden h-screen overflow-y-auto border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] lg:block'>
         <SidebarContent />
       </aside>
       <div className='flex min-h-screen min-w-0 flex-col'>

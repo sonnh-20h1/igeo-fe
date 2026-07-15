@@ -1,4 +1,6 @@
-export type ExamAttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'EXPIRED';
+export type ExamAttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'GRADED' | 'EXPIRED' | 'LOCKED';
+
+export type ExamAttemptLockReason = 'TAB_SWITCH' | 'EXIT';
 
 export type AttemptQuestionSnapshot = {
   shortId: string;
@@ -17,6 +19,8 @@ export type AttemptAnswer = {
   type: 'MULTIPLE_CHOICE' | 'ESSAY';
   score: number;
   order: number;
+  /** Minutes allocated for this question */
+  durationMinutes?: number;
   userAnswer?: string | null;
   question?: AttemptQuestionSnapshot | null;
   isCorrect?: boolean | null;
@@ -33,6 +37,8 @@ export type ExamAttemptSummary = {
   startedAt: string | Date;
   expiresAt: string | Date;
   submittedAt?: string | Date | null;
+  lockedAt?: string | Date | null;
+  lockReason?: ExamAttemptLockReason | null;
   mcScore: number;
   essayScore?: number | null;
   totalScore: number;
@@ -71,4 +77,17 @@ export type ListAttemptsQuery = {
 
 export type SaveAttemptAnswersPayload = {
   answers: Array<{ questionShortId: string; userAnswer: string }>;
+};
+
+export type LockAttemptPayload = {
+  reason?: ExamAttemptLockReason;
+};
+
+export type GradeQuestionPayload = {
+  earnedScore: number;
+  feedback?: string;
+};
+
+export type GradeAttemptPayload = {
+  grades: Array<{ questionShortId: string; earnedScore: number; feedback?: string }>;
 };

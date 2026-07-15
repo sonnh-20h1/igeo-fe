@@ -44,6 +44,8 @@ type TypeConfigForm = {
   enabled: boolean;
   selectionMode: ExamQuestionSelectionMode;
   score: string;
+  /** Minutes per question */
+  durationMinutes: string;
   count: string;
   difficulty: QuestionDifficulty | 'ALL';
   tags: string;
@@ -53,7 +55,6 @@ type TypeConfigForm = {
 type ExamFormState = {
   title: string;
   description: string;
-  durationMinutes: string;
   status: ExamStatus;
   tags: string;
   mc: TypeConfigForm;
@@ -62,10 +63,18 @@ type ExamFormState = {
 
 const QUESTION_TYPES: QuestionType[] = ['MULTIPLE_CHOICE', 'ESSAY'];
 
-const emptyTypeConfig = (mode: ExamQuestionSelectionMode = 'RANDOM'): TypeConfigForm => ({
+function defaultDurationForType(type: QuestionType) {
+  return type === 'ESSAY' ? 5 : 1;
+}
+
+const emptyTypeConfig = (
+  mode: ExamQuestionSelectionMode = 'RANDOM',
+  type: QuestionType = 'MULTIPLE_CHOICE',
+): TypeConfigForm => ({
   enabled: false,
   selectionMode: mode,
   score: '1',
+  durationMinutes: String(defaultDurationForType(type)),
   count: '10',
   difficulty: 'ALL',
   tags: '',
@@ -75,11 +84,21 @@ const emptyTypeConfig = (mode: ExamQuestionSelectionMode = 'RANDOM'): TypeConfig
 const emptyForm = (): ExamFormState => ({
   title: '',
   description: '',
-  durationMinutes: '60',
   status: 'DRAFT',
   tags: '',
-  mc: { ...emptyTypeConfig('RANDOM'), enabled: true, count: '15', score: '1' },
-  essay: { ...emptyTypeConfig('MANUAL'), score: '5', count: '2' },
+  mc: {
+    ...emptyTypeConfig('RANDOM', 'MULTIPLE_CHOICE'),
+    enabled: true,
+    count: '15',
+    score: '1',
+    durationMinutes: '1',
+  },
+  essay: {
+    ...emptyTypeConfig('MANUAL', 'ESSAY'),
+    score: '5',
+    count: '2',
+    durationMinutes: '5',
+  },
 });
 
 function parseTags(value: string) {
@@ -108,17 +127,19 @@ function toForm(exam: Exam): ExamFormState {
   const next = emptyForm();
   next.title = exam.title ?? '';
   next.description = exam.description ?? '';
-  next.durationMinutes = String(exam.durationMinutes ?? 60);
   next.status = exam.status ?? 'DRAFT';
   next.tags = (exam.tags ?? []).join(', ');
-  next.mc = emptyTypeConfig('RANDOM');
-  next.essay = emptyTypeConfig('MANUAL');
+  next.mc = emptyTypeConfig('RANDOM', 'MULTIPLE_CHOICE');
+  next.essay = emptyTypeConfig('MANUAL', 'ESSAY');
 
   for (const config of exam.typeConfigs ?? []) {
     const mapped: TypeConfigForm = {
       enabled: true,
       selectionMode: config.selectionMode,
       score: String(config.score ?? 1),
+      durationMinutes: String(
+        config.durationMinutes ?? defaultDurationForType(config.type),
+      ),
       count: String(config.count ?? 1),
       difficulty: config.difficulty ?? 'ALL',
       tags: (config.tags ?? []).join(', '),
@@ -129,6 +150,30 @@ function toForm(exam: Exam): ExamFormState {
   }
 
   return next;
+}
+
+function getTypeFormQuestionCount(config: TypeConfigForm) {
+  if (config.selectionMode === 'MANUAL') {
+    return config.shortIds.length;
+  }
+  const count = Number(config.count);
+  return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+}
+
+function computeSuggestedDuration(form: ExamFormState) {
+  let total = 0;
+  for (const type of QUESTION_TYPES) {
+    const config = getConfig(form, type);
+    if (!config.enabled) continue;
+    const count = getTypeFormQuestionCount(config);
+    const perQuestion = Number(config.durationMinutes);
+    const duration =
+      Number.isFinite(perQuestion) && perQuestion >= 1
+        ? Math.floor(perQuestion)
+        : defaultDurationForType(type);
+    total += count * duration;
+  }
+  return Math.max(1, total || 1);
 }
 
 function getConfigQuestionCount(config: { selectionMode: ExamQuestionSelectionMode; count?: number | null; shortIds?: string[] }) {
@@ -325,6 +370,12 @@ export default function AdminExamsPage() {
         return null;
       }
 
+      const durationMinutes = Number(config.durationMinutes);
+      if (!Number.isFinite(durationMinutes) || durationMinutes < 1) {
+        setFormError(copy.invalidQuestionDuration);
+        return null;
+      }
+
       if (config.selectionMode === 'RANDOM' || config.selectionMode === 'DYNAMIC') {
         const count = Number(config.count);
         if (!Number.isFinite(count) || count < 1) {
@@ -335,6 +386,7 @@ export default function AdminExamsPage() {
           type,
           selectionMode: config.selectionMode,
           score,
+          durationMinutes: Math.floor(durationMinutes),
           count,
           difficulty: config.difficulty === 'ALL' ? undefined : config.difficulty,
           tags: parseTags(config.tags).length ? parseTags(config.tags) : undefined,
@@ -356,6 +408,7 @@ export default function AdminExamsPage() {
         type,
         selectionMode: 'MANUAL',
         score,
+        durationMinutes: Math.floor(durationMinutes),
         shortIds,
       });
     }
@@ -377,23 +430,17 @@ export default function AdminExamsPage() {
       return;
     }
 
-    const durationMinutes = Number(form.durationMinutes);
-    if (!Number.isFinite(durationMinutes) || durationMinutes < 1) {
-      setFormError(copy.requiredDuration);
-      return;
-    }
-
     const typeConfigs = buildTypeConfigs();
     if (!typeConfigs) return;
 
     setSaving(true);
     try {
       const tags = parseTags(form.tags);
+      // Omit durationMinutes so BE auto-sums from typeConfigs (count × minutes/question).
       if (editingExam) {
         const payload: UpdateExamPayload = {
           title: form.title.trim(),
           description: form.description.trim() ? form.description.trim() : null,
-          durationMinutes,
           status: form.status,
           tags: tags.length ? tags : [],
           typeConfigs,
@@ -407,7 +454,6 @@ export default function AdminExamsPage() {
         const payload: CreateExamPayload = {
           title: form.title.trim(),
           description: form.description.trim() || undefined,
-          durationMinutes,
           status: form.status,
           tags: tags.length ? tags : undefined,
           typeConfigs,
@@ -653,15 +699,10 @@ export default function AdminExamsPage() {
             <div className='grid gap-4 sm:grid-cols-2'>
               <div className='space-y-2'>
                 <Label>{copy.fieldDuration}</Label>
-                <Input
-                  type='number'
-                  min={1}
-                  value={form.durationMinutes}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, durationMinutes: event.target.value }))
-                  }
-                  required
-                />
+                <div className='flex h-10 items-center rounded-sm border border-border/60 bg-[#faf8f5] px-3 text-sm text-foreground/80 sm:h-11'>
+                  {copy.minutes.replace('{n}', String(computeSuggestedDuration(form)))}
+                </div>
+                <p className='text-xs text-muted-foreground'>{copy.durationAutoHint}</p>
               </div>
               <div className='space-y-2'>
                 <Label>{copy.fieldStatus}</Label>
@@ -764,7 +805,7 @@ export default function AdminExamsPage() {
                           </button>
                         </div>
 
-                        <div className='grid gap-3 sm:grid-cols-2'>
+                        <div className='grid gap-3 sm:grid-cols-3'>
                           <div className='space-y-1'>
                             <Label>{copy.fieldScorePerQuestion}</Label>
                             <Input
@@ -775,6 +816,22 @@ export default function AdminExamsPage() {
                               onChange={(event) =>
                                 setForm((current) =>
                                   setConfig(current, type, { score: event.target.value }),
+                                )
+                              }
+                            />
+                          </div>
+                          <div className='space-y-1'>
+                            <Label>{copy.fieldDurationPerQuestion}</Label>
+                            <Input
+                              type='number'
+                              min={1}
+                              step={1}
+                              value={config.durationMinutes}
+                              onChange={(event) =>
+                                setForm((current) =>
+                                  setConfig(current, type, {
+                                    durationMinutes: event.target.value,
+                                  }),
                                 )
                               }
                             />
@@ -919,6 +976,10 @@ export default function AdminExamsPage() {
                         <Badge variant='outline'>{typeLabel(item.type)}</Badge>
                         <span>
                           {copy.fieldScorePerQuestion}: {item.score}
+                        </span>
+                        <span>
+                          {copy.fieldDurationPerQuestion}:{' '}
+                          {item.durationMinutes ?? defaultDurationForType(item.type)}
                         </span>
                       </div>
                       {item.question?.content ? (

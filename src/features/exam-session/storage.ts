@@ -11,6 +11,7 @@ export type ExamCandidateProfile = {
 
 const EXAM_SESSION_KEY = 'igeo:examSession';
 const EXAM_CANDIDATE_KEY = 'igeo:examCandidate';
+const EXAM_JUST_REGISTERED_KEY = 'igeo:examJustRegistered';
 
 export function readExamSessionToken(): string | null {
   if (typeof localStorage === 'undefined') return null;
@@ -48,6 +49,22 @@ export function clearExamSession() {
   if (typeof localStorage === 'undefined') return;
   localStorage.removeItem(EXAM_SESSION_KEY);
   localStorage.removeItem(EXAM_CANDIDATE_KEY);
+  clearJustRegistered();
+}
+
+export function markJustRegistered() {
+  if (typeof sessionStorage === 'undefined') return;
+  sessionStorage.setItem(EXAM_JUST_REGISTERED_KEY, '1');
+}
+
+export function isJustRegistered(): boolean {
+  if (typeof sessionStorage === 'undefined') return false;
+  return sessionStorage.getItem(EXAM_JUST_REGISTERED_KEY) === '1';
+}
+
+export function clearJustRegistered() {
+  if (typeof sessionStorage === 'undefined') return;
+  sessionStorage.removeItem(EXAM_JUST_REGISTERED_KEY);
 }
 
 export function hasExamSession() {

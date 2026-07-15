@@ -8,6 +8,7 @@ import type { ExamPeriodCurrent, ExamPeriodExamItem } from '@/features/admin-exa
 import {
   clearExamSession,
   hasExamSession,
+  markJustRegistered,
   readExamCandidate,
   writeExamCandidate,
   writeExamSession,
@@ -263,6 +264,13 @@ function UserExamsPageContent() {
         school: result.user.school,
       };
       writeExamSession(result.sessionToken, profile);
+
+      if (result.isNew) {
+        markJustRegistered();
+        router.push('/exams/welcome?registered=1');
+        return;
+      }
+
       setCandidate(profile);
       setLoadingCurrent(true);
       setCurrent(result.current);
@@ -276,7 +284,7 @@ function UserExamsPageContent() {
         setLoadingCurrent(false);
       }
 
-      success(examsCopy.entrySuccess);
+      success(examsCopy.welcomeBack);
     } catch (error) {
       notifyError(
         error instanceof Error ? error.message : examsCopy.entryFailed,
@@ -796,6 +804,8 @@ function AttemptsHistoryTab({
   function statusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return copy.statusInProgress;
     if (status === 'SUBMITTED') return copy.statusSubmitted;
+    if (status === 'GRADED') return copy.statusGraded;
+    if (status === 'LOCKED') return copy.statusLocked;
     return copy.statusExpired;
   }
 
@@ -823,6 +833,8 @@ function AttemptsHistoryTab({
             <SelectItem value='ALL'>{copy.filterAllStatuses}</SelectItem>
             <SelectItem value='IN_PROGRESS'>{copy.statusInProgress}</SelectItem>
             <SelectItem value='SUBMITTED'>{copy.statusSubmitted}</SelectItem>
+            <SelectItem value='GRADED'>{copy.statusGraded}</SelectItem>
+            <SelectItem value='LOCKED'>{copy.statusLocked}</SelectItem>
             <SelectItem value='EXPIRED'>{copy.statusExpired}</SelectItem>
           </SelectContent>
         </Select>
@@ -853,7 +865,13 @@ function AttemptsHistoryTab({
                     </Button>
                   ) : (
                     <Badge variant='outline'>
-                      {attempt.status === 'SUBMITTED' ? copy.submittedDone : statusLabel(attempt.status)}
+                      {attempt.status === 'LOCKED'
+                        ? copy.contactAdminToResume
+                        : attempt.status === 'SUBMITTED' || attempt.status === 'GRADED'
+                          ? attempt.status === 'GRADED'
+                            ? copy.statusGraded
+                            : copy.submittedDone
+                          : statusLabel(attempt.status)}
                     </Badge>
                   )}
                 </div>

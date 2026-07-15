@@ -20,7 +20,9 @@ export type AttemptPdfLabels = {
   noAnswer: string;
   statusInProgress: string;
   statusSubmitted: string;
+  statusGraded: string;
   statusExpired: string;
+  statusLocked: string;
 };
 
 export function isAttemptExportable(status: ExamAttemptStatus) {
@@ -38,11 +40,14 @@ function formatDateTime(value: string | Date | null | undefined, locale: string)
 function statusLabel(status: ExamAttemptStatus, labels: AttemptPdfLabels) {
   if (status === 'IN_PROGRESS') return labels.statusInProgress;
   if (status === 'SUBMITTED') return labels.statusSubmitted;
+  if (status === 'GRADED') return labels.statusGraded;
+  if (status === 'LOCKED') return labels.statusLocked;
   return labels.statusExpired;
 }
 
 function endedAt(attempt: ExamAttemptAdminDetail) {
   if (attempt.submittedAt) return attempt.submittedAt;
+  if (attempt.lockedAt) return attempt.lockedAt;
   if (attempt.status === 'EXPIRED') return attempt.expiresAt;
   return null;
 }
@@ -276,7 +281,9 @@ export function buildAttemptPdfLabelsFromCopy(copy: {
   correctAnswer: string;
   statusInProgress: string;
   statusSubmitted: string;
+  statusGraded: string;
   statusExpired: string;
+  statusLocked: string;
   pdfTypeMcq: string;
   pdfTypeEssay: string;
   pdfOptions: string;
@@ -301,6 +308,8 @@ export function buildAttemptPdfLabelsFromCopy(copy: {
     noAnswer: copy.pdfNoAnswer,
     statusInProgress: copy.statusInProgress,
     statusSubmitted: copy.statusSubmitted,
+    statusGraded: copy.statusGraded,
     statusExpired: copy.statusExpired,
+    statusLocked: copy.statusLocked,
   };
 }

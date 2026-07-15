@@ -188,6 +188,8 @@ export default function AdminExamPeriodDetailPage() {
   function attemptStatusLabel(status: ExamAttemptStatus) {
     if (status === 'IN_PROGRESS') return attemptsCopy.statusInProgress;
     if (status === 'SUBMITTED') return attemptsCopy.statusSubmitted;
+    if (status === 'GRADED') return attemptsCopy.statusGraded;
+    if (status === 'LOCKED') return attemptsCopy.statusLocked;
     return attemptsCopy.statusExpired;
   }
 
@@ -374,8 +376,10 @@ export default function AdminExamPeriodDetailPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='ALL'>{attemptsCopy.filterAllStatuses}</SelectItem>
-                <SelectItem value='IN_PROGRESS'>{attemptsCopy.statusInProgress}</SelectItem>
                 <SelectItem value='SUBMITTED'>{attemptsCopy.statusSubmitted}</SelectItem>
+                <SelectItem value='GRADED'>{attemptsCopy.statusGraded}</SelectItem>
+                <SelectItem value='IN_PROGRESS'>{attemptsCopy.statusInProgress}</SelectItem>
+                <SelectItem value='LOCKED'>{attemptsCopy.statusLocked}</SelectItem>
                 <SelectItem value='EXPIRED'>{attemptsCopy.statusExpired}</SelectItem>
               </SelectContent>
             </Select>
