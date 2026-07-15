@@ -16,6 +16,12 @@ export const dictionaries = {
       user: 'Người dùng',
       profile: 'Hồ sơ cá nhân',
       supportEmailSubject: 'Hỗ trợ Igeo',
+      paginationEmpty: 'Chưa có {itemLabel}',
+      paginationShowing: 'Hiển thị {start}-{end} / {total} {itemLabel}',
+      paginationPerPage: 'Mỗi trang',
+      paginationPrevious: 'Trước',
+      paginationNext: 'Sau',
+      paginationPage: 'Trang {current}/{total}',
     },
     locale: {
       label: 'Ngôn ngữ',
@@ -378,9 +384,13 @@ export const dictionaries = {
       leavePageConfirm:
         'Rời trang sẽ khóa bài thi. Để làm tiếp bạn cần liên hệ admin. Bạn chắc chắn muốn thoát?',
       tabSwitchWarning:
-        'Bạn đã chuyển sang tab/cửa sổ khác nên bài thi đã bị khóa. Vui lòng liên hệ admin nếu muốn tiếp tục làm bài.',
+        'Bạn đã rời khỏi màn hình làm bài (đổi tab, mở cửa sổ khác hoặc chuyển sang ứng dụng khác) nên bài thi đã bị khóa. Vui lòng liên hệ admin nếu muốn tiếp tục làm bài.',
       tabSwitchTitle: 'Bài thi đã bị khóa',
       tabSwitchConfirm: 'Đã hiểu',
+      clipboardBlocked: 'Không được sao chép / dán văn bản trong lúc làm bài.',
+      screenshotBlocked:
+        'Không được chụp màn hình. Nội dung đề đã được ẩn — vui lòng quay lại cửa sổ bài thi.',
+      screenshotWatermark: 'Bài thi bảo mật · {name} · {id}',
       navigatorLabel: 'Danh sách câu hỏi',
       legendCurrent: 'Đang làm',
       legendAnswered: 'Đã trả lời',
@@ -862,6 +872,12 @@ export const dictionaries = {
       user: 'User',
       profile: 'Profile',
       supportEmailSubject: 'Igeo support',
+      paginationEmpty: 'No {itemLabel} yet',
+      paginationShowing: 'Showing {start}-{end} of {total} {itemLabel}',
+      paginationPerPage: 'Per page',
+      paginationPrevious: 'Previous',
+      paginationNext: 'Next',
+      paginationPage: 'Page {current}/{total}',
     },
     locale: {
       label: 'Language',
@@ -1225,9 +1241,13 @@ export const dictionaries = {
       leavePageConfirm:
         'Leaving this page will lock the attempt. Contact an admin to continue. Are you sure you want to leave?',
       tabSwitchWarning:
-        'You switched to another tab or window, so this attempt has been locked. Contact an admin if you want to continue.',
+        'You left the exam screen (switched tab, opened another window, or moved to another app), so this attempt has been locked. Contact an admin if you want to continue.',
       tabSwitchTitle: 'Attempt locked',
       tabSwitchConfirm: 'Got it',
+      clipboardBlocked: 'Copy and paste are disabled while taking the exam.',
+      screenshotBlocked:
+        'Screenshots are not allowed. Exam content is hidden — return to the exam window.',
+      screenshotWatermark: 'Secure exam · {name} · {id}',
       navigatorLabel: 'Question list',
       legendCurrent: 'Current',
       legendAnswered: 'Answered',

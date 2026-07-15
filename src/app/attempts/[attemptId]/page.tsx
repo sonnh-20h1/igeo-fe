@@ -16,7 +16,8 @@ import type {
   ExamAttemptInProgress,
   ExamAttemptLockReason,
 } from '@/features/user-exam-attempts/types';
-import { hasExamSession } from '@/features/exam-session/storage';
+import { hasExamSession, readExamCandidate } from '@/features/exam-session/storage';
+import { formatMessage } from '@/features/i18n/format';
 import { userExamsApi } from '@/features/user-exams/api';
 import type { ExamUserDetail } from '@/features/user-exams/types';
 import { useI18n } from '@/features/i18n/provider';
@@ -33,6 +34,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useNotification } from '@/components/ui/notification';
 import { APP_NAME } from '@/lib/app-config';
 import { cn } from '@/lib/utils';
+import { useExamAntiCheat } from '@/features/user-exam-attempts/use-exam-anti-cheat';
 
 function formatRemaining(ms: number) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -331,6 +333,23 @@ export default function TakeAttemptPage() {
     inProgressRef.current = Boolean(attempt && attempt.status === 'IN_PROGRESS' && !submitting);
   }, [attempt, submitting]);
 
+  const antiCheatEnabled = Boolean(attempt && attempt.status === 'IN_PROGRESS' && !submitting);
+  const lastAntiCheatWarnRef = useRef(0);
+  const warnAntiCheat = useCallback(
+    (message: string) => {
+      const now = Date.now();
+      if (now - lastAntiCheatWarnRef.current < 2500) return;
+      lastAntiCheatWarnRef.current = now;
+      notifyError(message, message);
+    },
+    [notifyError],
+  );
+  const { privacyShield } = useExamAntiCheat({
+    enabled: antiCheatEnabled,
+    onClipboardBlocked: () => warnAntiCheat(copy.clipboardBlocked),
+    onScreenshotAttempt: () => warnAntiCheat(copy.screenshotBlocked),
+  });
+
   const leaveAfterLock = useCallback(
     (examId?: string | null) => {
       allowLeaveRef.current = true;
@@ -377,8 +396,14 @@ export default function TakeAttemptPage() {
   useEffect(() => {
     if (!attempt || attempt.status !== 'IN_PROGRESS') return;
 
+    const lockBecauseLeft = () => {
+      if (!inProgressRef.current || allowLeaveRef.current || lockingRef.current) return;
+      void lockAttempt('TAB_SWITCH', { showDialog: true });
+    };
+
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
       if (allowLeaveRef.current || !inProgressRef.current) return;
+      // Không lock ở đây — user có thể Cancel. Lock thực sự qua blur / pagehide / visibility.
       event.preventDefault();
       event.returnValue = copy.leavePageConfirm;
       return copy.leavePageConfirm;
@@ -395,20 +420,32 @@ export default function TakeAttemptPage() {
     };
 
     const onVisibilityChange = () => {
-      if (!inProgressRef.current || allowLeaveRef.current || lockingRef.current) return;
       if (document.hidden) {
-        void lockAttempt('TAB_SWITCH', { showDialog: true });
+        lockBecauseLeft();
       }
+    };
+
+    const onWindowBlur = () => {
+      // Đổi tab, mở cửa sổ khác, chuyển sang app khác, thanh địa chỉ, Snipping Tool...
+      lockBecauseLeft();
+    };
+
+    const onPageHide = () => {
+      lockBecauseLeft();
     };
 
     window.history.pushState(null, '', window.location.href);
     window.addEventListener('beforeunload', onBeforeUnload);
     window.addEventListener('popstate', onPopState);
+    window.addEventListener('blur', onWindowBlur);
+    window.addEventListener('pagehide', onPageHide);
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       window.removeEventListener('beforeunload', onBeforeUnload);
       window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('blur', onWindowBlur);
+      window.removeEventListener('pagehide', onPageHide);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [attempt, copy.leavePageConfirm, lockAttempt]);
@@ -482,14 +519,57 @@ export default function TakeAttemptPage() {
   const maxScore = exam?.totalScore ?? attempt.maxScore;
   const progressPercent =
     sortedAnswers.length > 0 ? Math.round((answeredCount / sortedAnswers.length) * 100) : 0;
+  const candidate = readExamCandidate();
+  const watermarkText = formatMessage(copy.screenshotWatermark, {
+    name: candidate?.fullName || '—',
+    id: candidate?.cccd || candidate?.email || attempt.shortId,
+  });
 
   return (
     <div
       className={cn(
-        'min-h-screen bg-[linear-gradient(180deg,#f7efe4_0%,#f2e5d2_45%,#ebe0d0_100%)]',
-        tabWarningOpen && 'pointer-events-none select-none',
+        'relative min-h-screen select-none bg-[linear-gradient(180deg,#f7efe4_0%,#f2e5d2_45%,#ebe0d0_100%)]',
+        tabWarningOpen && 'pointer-events-none',
       )}
+      onCopy={(event) => event.preventDefault()}
+      onCut={(event) => event.preventDefault()}
+      onPaste={(event) => event.preventDefault()}
+      onContextMenu={(event) => event.preventDefault()}
     >
+      {/* Watermark — makes leaked captures identifiable */}
+      <div
+        aria-hidden
+        className='pointer-events-none fixed inset-0 z-[30] overflow-hidden opacity-[0.07]'
+      >
+        <div className='flex h-[200%] w-[200%] origin-center -translate-x-1/4 -translate-y-1/4 rotate-[-28deg] flex-wrap content-start gap-x-16 gap-y-20'>
+          {Array.from({ length: 48 }).map((_, index) => (
+            <span
+              key={index}
+              className='whitespace-nowrap font-mono text-sm font-semibold uppercase tracking-[0.2em] text-[#022648]'
+            >
+              {watermarkText}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {privacyShield ? (
+        <div
+          className='fixed inset-0 z-[200] flex items-center justify-center bg-[#022648] px-6 text-center text-white transition-none'
+          style={{ transition: 'none' }}
+          aria-live='assertive'
+        >
+          <div className='max-w-md space-y-3'>
+            <p className='text-lg font-semibold'>{copy.screenshotBlocked}</p>
+            <p className='text-sm text-white/70'>{copy.clipboardBlocked}</p>
+          </div>
+        </div>
+      ) : null}
+
+      <div
+        className={cn(privacyShield && 'invisible')}
+        aria-hidden={privacyShield || undefined}
+      >
       <Dialog
         open={tabWarningOpen}
         onOpenChange={(open) => {
@@ -681,7 +761,9 @@ export default function TakeAttemptPage() {
               <img
                 src={current.question.imageUrl}
                 alt=''
-                className='max-h-80 w-full rounded-xl border border-[#022648]/15 object-contain bg-[#f7efe4]'
+                draggable={false}
+                onContextMenu={(event) => event.preventDefault()}
+                className='pointer-events-none max-h-80 w-full select-none rounded-xl border border-[#022648]/15 object-contain bg-[#f7efe4]'
               />
             ) : null}
 
@@ -745,8 +827,21 @@ export default function TakeAttemptPage() {
                   value={answers[current.questionShortId] || ''}
                   disabled={currentQuestionLocked}
                   onChange={(event) => updateAnswer(current.questionShortId, event.target.value)}
+                  onPaste={(event) => {
+                    event.preventDefault();
+                    warnAntiCheat(copy.clipboardBlocked);
+                  }}
+                  onCopy={(event) => {
+                    event.preventDefault();
+                    warnAntiCheat(copy.clipboardBlocked);
+                  }}
+                  onCut={(event) => {
+                    event.preventDefault();
+                    warnAntiCheat(copy.clipboardBlocked);
+                  }}
+                  onDrop={(event) => event.preventDefault()}
                   placeholder={copy.essayPlaceholder}
-                  className='border-[#022648]/20 bg-[#f7efe4] text-[#022648] placeholder:text-[#4a6480] focus-visible:ring-[#022648]/40'
+                  className='select-text border-[#022648]/20 bg-[#f7efe4] text-[#022648] placeholder:text-[#4a6480] focus-visible:ring-[#022648]/40'
                 />
               </div>
             )}
@@ -784,6 +879,7 @@ export default function TakeAttemptPage() {
             </div>
           </div>
         </section>
+      </div>
       </div>
     </div>
   );
