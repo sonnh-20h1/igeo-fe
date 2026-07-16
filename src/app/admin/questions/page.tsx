@@ -1,7 +1,7 @@
 'use client';
 
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
-import { BookOpen, Download, Pencil, Plus, Search, Trash2, Upload } from 'lucide-react';
+import { BookOpen, Download, Pencil, Plus, Search, Trash2, Upload, Eye } from 'lucide-react';
 import { adminQuestionsApi } from '@/features/admin-questions/api';
 import type {
   CreateQuestionPayload,
@@ -41,6 +41,7 @@ import { useNotification } from '@/components/ui/notification';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { CategoriesPanel } from './categories-panel';
+import { Tooltip } from '@/components/ui/tooltip';
 
 
 function formatDateTime(value: string | Date | null | undefined, locale: string) {
@@ -130,6 +131,7 @@ export default function AdminQuestionsPage() {
   const [importResult, setImportResult] = useState<QuestionImportResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [activeTab, setActiveTab] = useState<QuestionsTab>('questions');
+  const [previewQuestion, setPreviewQuestion] = useState<Question | null>(null);
 
   const refresh = useCallback(() => {
     setReloadKey((current) => current + 1);
@@ -613,6 +615,16 @@ export default function AdminQuestionsPage() {
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='inline-flex gap-2'>
+                          <Tooltip content={locale === 'en' ? 'Preview' : 'Xem trước'}>
+                            <Button
+                              size='icon'
+                              variant='outline'
+                              onClick={() => setPreviewQuestion(question)}
+                              aria-label={locale === 'en' ? 'Preview' : 'Xem trước'}
+                            >
+                              <Eye className='size-4' />
+                            </Button>
+                          </Tooltip>
                           <Button
                             size='icon'
                             variant='outline'
@@ -848,6 +860,148 @@ export default function AdminQuestionsPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!previewQuestion} onOpenChange={(open) => !open && setPreviewQuestion(null)}>
+        <DialogContent className='sm:max-w-2xl max-h-[90vh] overflow-y-auto'>
+          <DialogHeader>
+            <DialogTitle className='flex items-center gap-2 text-xl font-semibold text-[#022648]'>
+              <Eye className='size-5 text-primary' />
+              {locale === 'en' ? 'Question Preview' : 'Xem trước câu hỏi'}
+            </DialogTitle>
+            <DialogDescription>
+              {locale === 'en'
+                ? 'Below is exactly how this question appears to students during an exam.'
+                : 'Dưới đây là giao diện hiển thị thực tế của câu hỏi này đối với học sinh.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {previewQuestion ? (
+            <div className='mt-4 space-y-6'>
+              {/* Question metadata strip similar to student view */}
+              <div className='flex items-center justify-between gap-3 border-b border-[#022648]/10 bg-[rgba(2,38,72,0.03)] px-5 py-3 rounded-xl'>
+                <div>
+                  <p className='text-[10px] font-mono font-medium uppercase tracking-[0.18em] text-[#4a6480]'>
+                    {previewQuestion.shortId || 'QUESTION'}
+                  </p>
+                  <p className='mt-0.5 truncate text-xs text-[#022648]'>
+                    {previewQuestion.type === 'MULTIPLE_CHOICE'
+                      ? (locale === 'en' ? 'Multiple choice' : 'Trắc nghiệm')
+                      : (locale === 'en' ? 'Essay' : 'Tự luận')}
+                    <span className='mx-2 text-[#4a6480]'>·</span>
+                    {locale === 'en' ? 'Score' : 'Điểm'}: {previewQuestion.score ?? 1}
+                    <span className='mx-2 text-[#4a6480]'>·</span>
+                    {locale === 'en' ? 'Difficulty' : 'Độ khó'}: {difficultyLabel(previewQuestion.difficulty)}
+                  </p>
+                </div>
+                <Badge variant='outline' className='border-[#022648]/15 bg-white text-[#022648] text-[11px] font-medium'>
+                  {locale === 'en' ? 'Student View' : 'Học sinh thấy'}
+                </Badge>
+              </div>
+
+              {/* Question content */}
+              <div className='space-y-4 rounded-2xl border border-[#022648]/10 bg-white p-5 shadow-sm'>
+                <p className='whitespace-pre-wrap text-base leading-7 text-[#022648] font-medium'>
+                  {previewQuestion.content}
+                </p>
+
+                {previewQuestion.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewQuestion.imageUrl}
+                    alt=''
+                    draggable={false}
+                    className='pointer-events-none max-h-80 w-full select-none rounded-xl border border-[#022648]/15 object-contain bg-[#f7efe4]'
+                  />
+                ) : null}
+
+                {previewQuestion.audioUrl ? (
+                  <audio controls className='w-full' src={previewQuestion.audioUrl}>
+                    <track kind='captions' />
+                  </audio>
+                ) : null}
+
+                {/* Options/Answers section */}
+                {previewQuestion.type === 'MULTIPLE_CHOICE' ? (
+                  <div className='space-y-2.5 pt-2'>
+                    {(previewQuestion.options ?? []).map((option) => {
+                      const isCorrect = previewQuestion.correctAnswer === option.key;
+                      return (
+                        <div
+                          key={option.key}
+                          className={cn(
+                            'flex items-start gap-3 rounded-xl border px-4 py-3.5 transition',
+                            isCorrect
+                              ? 'border-[#022648] bg-[rgba(2,38,72,0.04)] shadow-sm'
+                              : 'border-[#022648]/10 bg-white opacity-85',
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold',
+                              isCorrect
+                                ? 'border-[#022648] bg-[#022648] text-white'
+                                : 'border-[#022648]/35 text-[#022648]',
+                            )}
+                          >
+                            {option.key}
+                          </span>
+                          <div className='pt-0.5 flex-1'>
+                            <span className='text-[#022648] font-medium'>{option.text}</span>
+                            {isCorrect ? (
+                              <Badge className='ml-2 bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 text-[10px] h-4 px-1.5 rounded-full'>
+                                {locale === 'en' ? 'Correct Answer' : 'Đáp án đúng'}
+                              </Badge>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className='space-y-2 pt-2'>
+                    <Label className='text-[#022648] font-semibold'>
+                      {locale === 'en' ? 'Student Answer Box' : 'Khung trả lời của học sinh'}
+                    </Label>
+                    <Textarea
+                      rows={4}
+                      disabled
+                      placeholder={locale === 'en' ? 'Enter essay answer here...' : 'Nhập câu trả lời tự luận tại đây...'}
+                      className='border-[#022648]/15 bg-slate-50/50'
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Correct Explanation / Solution Guideline (visible only in Admin preview mode) */}
+              {previewQuestion.explanation || (previewQuestion.type === 'ESSAY' && previewQuestion.correctAnswer) ? (
+                <div className='rounded-xl border border-amber-200 bg-amber-50/30 p-4 space-y-2'>
+                  <p className='text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1'>
+                    💡 {locale === 'en' ? 'Grading & Explanation' : 'Gợi ý chấm điểm & Giải thích'}
+                  </p>
+                  {previewQuestion.type === 'ESSAY' && previewQuestion.correctAnswer ? (
+                    <div className='text-sm text-[#022648]'>
+                      <p className='font-semibold text-amber-900'>{locale === 'en' ? 'Sample Answer:' : 'Đáp án mẫu:'}</p>
+                      <p className='whitespace-pre-wrap mt-1 bg-white p-3 rounded-lg border border-amber-200/50'>{previewQuestion.correctAnswer}</p>
+                    </div>
+                  ) : null}
+                  {previewQuestion.explanation ? (
+                    <div className='text-sm text-[#022648] pt-1'>
+                      <p className='font-semibold text-amber-900'>{locale === 'en' ? 'Explanation:' : 'Giải thích chi tiết:'}</p>
+                      <p className='whitespace-pre-wrap mt-1'>{previewQuestion.explanation}</p>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className='mt-6 flex justify-end gap-3 border-t border-border/50 pt-4'>
+            <Button type='button' variant='outline' onClick={() => setPreviewQuestion(null)}>
+              {locale === 'en' ? 'Close Preview' : 'Đóng xem trước'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
         </>
