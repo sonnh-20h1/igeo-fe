@@ -3,7 +3,7 @@
 import { startTransition, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, ClipboardList, Download, Power } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Download, Power, Settings, HelpCircle, CheckCircle2, Award, Lock, Clock, Unlock, Eye } from 'lucide-react';
 import { adminExamPeriodsApi } from '@/features/admin-exam-periods/api';
 import type {
   ExamPeriod,
@@ -31,6 +31,16 @@ import {
 } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useNotification } from '@/components/ui/notification';
+import { Tooltip } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 function formatDateTime(value: string | Date | null | undefined, locale: string) {
   if (!value) return '—';
@@ -53,6 +63,22 @@ function periodExamIds(period: ExamPeriod | null) {
   return [];
 }
 
+function toDatetimeLocalString(dateVal: string | Date | null | undefined): string {
+  if (!dateVal) return '';
+  const d = new Date(dateVal);
+  if (Number.isNaN(d.getTime())) return '';
+  
+  const pad = (num: number) => String(num).padStart(2, '0');
+  
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 export default function AdminExamPeriodDetailPage() {
   const params = useParams<{ periodId: string }>();
   const periodId = params.periodId;
@@ -71,9 +97,18 @@ export default function AdminExamPeriodDetailPage() {
   const [attemptsPage, setAttemptsPage] = useState(1);
   const [attemptsPageSize, setAttemptsPageSize] = useState(10);
   const [attemptsStatus, setAttemptsStatus] = useState<ExamAttemptStatus | 'ALL'>('ALL');
+  const [sortScore, setSortScore] = useState<'DEFAULT' | 'asc' | 'desc'>('DEFAULT');
   const [examFilter, setExamFilter] = useState<string>('ALL');
   const [attemptsLoading, setAttemptsLoading] = useState(false);
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [unlockingId, setUnlockingId] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // States for Score and Publish Date Editing Dialog
+  const [scorePublishAttempt, setScorePublishAttempt] = useState<ExamAttemptSummary | null>(null);
+  const [scoreInput, setScoreInput] = useState('');
+  const [publishDateInput, setPublishDateInput] = useState('');
+  const [savingScorePublish, setSavingScorePublish] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -124,6 +159,7 @@ export default function AdminExamPeriodDetailPage() {
             size: attemptsPageSize,
             status,
             examId: examFilter,
+            sortScore: sortScore === 'DEFAULT' ? undefined : sortScore,
           });
           if (cancelled) return;
           startTransition(() => {
@@ -146,9 +182,16 @@ export default function AdminExamPeriodDetailPage() {
         );
         if (cancelled) return;
 
-        const merged = pages
-          .flatMap((page) => page.items ?? [])
-          .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+        let merged = pages.flatMap((page) => page.items ?? []);
+
+        if (sortScore === 'asc') {
+          merged.sort((a, b) => (a.totalScore ?? 0) - (b.totalScore ?? 0));
+        } else if (sortScore === 'desc') {
+          merged.sort((a, b) => (b.totalScore ?? 0) - (a.totalScore ?? 0));
+        } else {
+          merged.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+        }
+
         const start = (attemptsPage - 1) * attemptsPageSize;
         startTransition(() => {
           setAttempts(merged.slice(start, start + attemptsPageSize));
@@ -177,6 +220,8 @@ export default function AdminExamPeriodDetailPage() {
     examFilter,
     notifyError,
     period,
+    sortScore,
+    reloadKey,
   ]);
 
   function statusLabel(status: ExamPeriodStatus) {
@@ -193,6 +238,70 @@ export default function AdminExamPeriodDetailPage() {
     return attemptsCopy.statusExpired;
   }
 
+  function handleOpenScorePublish(attempt: ExamAttemptSummary) {
+    setScorePublishAttempt(attempt);
+    setScoreInput(attempt.totalScore != null ? String(attempt.totalScore) : '');
+    setPublishDateInput(toDatetimeLocalString(attempt.publishScoresAt));
+  }
+
+  async function handleSaveScorePublish(event: React.FormEvent) {
+    event.preventDefault();
+    if (!scorePublishAttempt) return;
+
+    const scoreNum = Number(scoreInput);
+    if (scoreInput.trim() !== '' && (Number.isNaN(scoreNum) || scoreNum < 0)) {
+      alert(attemptsCopy.invalidScore);
+      return;
+    }
+
+    setSavingScorePublish(true);
+    try {
+      await adminExamAttemptsApi.updateScoreAndPublish(scorePublishAttempt.id, {
+        totalScore: scoreInput.trim() !== '' ? scoreNum : undefined,
+        publishScoresAt: publishDateInput ? new Date(publishDateInput).toISOString() : null,
+      });
+      success(attemptsCopy.graded);
+      setReloadKey((prev) => prev + 1);
+      setScorePublishAttempt(null);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : attemptsCopy.gradeFailed, attemptsCopy.gradeFailed);
+    } finally {
+      setSavingScorePublish(false);
+    }
+  }
+
+  function renderStatusBadge(status: ExamAttemptStatus) {
+    const label = attemptStatusLabel(status);
+    let icon = <HelpCircle className="size-4" />;
+    let colorClass = "bg-slate-100 text-slate-700 border-slate-200";
+
+    if (status === 'IN_PROGRESS') {
+      icon = <Clock className="size-4 animate-pulse text-amber-600" />;
+      colorClass = "bg-amber-50 text-amber-700 border-amber-200";
+    } else if (status === 'SUBMITTED') {
+      icon = <CheckCircle2 className="size-4 text-emerald-600" />;
+      colorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+    } else if (status === 'GRADED') {
+      icon = <Award className="size-4 text-indigo-600" />;
+      colorClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
+    } else if (status === 'LOCKED') {
+      icon = <Lock className="size-4 text-rose-600" />;
+      colorClass = "bg-rose-50 text-rose-700 border-rose-200";
+    } else if (status === 'EXPIRED') {
+      icon = <Clock className="size-4 text-slate-400" />;
+      colorClass = "bg-slate-50 text-slate-500 border-slate-200";
+    }
+
+    return (
+      <Tooltip content={label}>
+        <Badge variant="outline" className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium text-xs select-none ${colorClass}`}>
+          {icon}
+          <span>{label}</span>
+        </Badge>
+      </Tooltip>
+    );
+  }
+
   async function handleExportPdf(attemptId: string) {
     setExportingId(attemptId);
     try {
@@ -206,6 +315,20 @@ export default function AdminExamPeriodDetailPage() {
       );
     } finally {
       setExportingId(null);
+    }
+  }
+
+  async function handleUnlock(attemptId: string) {
+    if (!window.confirm(attemptsCopy.unlockConfirm)) return;
+    setUnlockingId(attemptId);
+    try {
+      await adminExamAttemptsApi.unlock(attemptId);
+      success(attemptsCopy.unlocked);
+      setReloadKey((value) => value + 1);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : attemptsCopy.unlockFailed, attemptsCopy.unlockFailed);
+    } finally {
+      setUnlockingId(null);
     }
   }
 
@@ -371,7 +494,7 @@ export default function AdminExamPeriodDetailPage() {
                 setAttemptsStatus(value as ExamAttemptStatus | 'ALL');
               }}
             >
-              <SelectTrigger className='w-[220px]'>
+              <SelectTrigger className='w-[200px]'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -383,11 +506,28 @@ export default function AdminExamPeriodDetailPage() {
                 <SelectItem value='EXPIRED'>{attemptsCopy.statusExpired}</SelectItem>
               </SelectContent>
             </Select>
+
+            <Select
+              value={sortScore}
+              onValueChange={(value) => {
+                setAttemptsPage(1);
+                setSortScore(value as 'DEFAULT' | 'asc' | 'desc');
+              }}
+            >
+              <SelectTrigger className='w-[200px]'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='DEFAULT'>{attemptsCopy.sortDefault}</SelectItem>
+                <SelectItem value='asc'>{attemptsCopy.sortScoreAsc}</SelectItem>
+                <SelectItem value='desc'>{attemptsCopy.sortScoreDesc}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='overflow-x-auto rounded-xl border border-border/70'>
-            <Table>
+          <div className='overflow-x-auto rounded-xl border border-border/70 scrollbar-thin'>
+            <Table className='min-w-[1000px]'>
               <TableHeader>
                 <TableRow>
                   <TableHead>{attemptsCopy.colShortId}</TableHead>
@@ -396,19 +536,20 @@ export default function AdminExamPeriodDetailPage() {
                   <TableHead>{attemptsCopy.colStatus}</TableHead>
                   <TableHead>{attemptsCopy.colStartedAt}</TableHead>
                   <TableHead>{attemptsCopy.colEndedAt}</TableHead>
+                  <TableHead>{attemptsCopy.colScore}</TableHead>
                   <TableHead className='text-right'>{attemptsCopy.colActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {attemptsLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : attempts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
                       {copy.attemptsEmpty}
                     </TableCell>
                   </TableRow>
@@ -434,8 +575,8 @@ export default function AdminExamPeriodDetailPage() {
                           <p className='text-xs text-muted-foreground'>{attempt.examId}</p>
                         ) : null}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant='outline'>{attemptStatusLabel(attempt.status)}</Badge>
+                      <TableCell className='whitespace-nowrap'>
+                        {renderStatusBadge(attempt.status)}
                       </TableCell>
                       <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
                         {formatDateTime(attempt.startedAt, locale)}
@@ -443,27 +584,58 @@ export default function AdminExamPeriodDetailPage() {
                       <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
                         {formatDateTime(attemptEndedAt(attempt), locale)}
                       </TableCell>
-                      <TableCell className='text-right'>
+                      <TableCell className='whitespace-nowrap text-sm'>
+                        {attempt.totalScore != null
+                          ? attemptsCopy.scoreLabel
+                              .replace('{total}', String(attempt.totalScore))
+                              .replace('{max}', String(attempt.maxScore ?? 0))
+                          : '—'}
+                      </TableCell>
+                      <TableCell className='text-right whitespace-nowrap'>
                         <div className='flex justify-end gap-2'>
-                          {isAttemptExportable(attempt.status) ? (
+                          <Tooltip content={attemptsCopy.dialogGradeTitle}>
                             <Button
-                              size='sm'
+                              size='icon'
                               variant='outline'
-                              className='gap-1'
-                              disabled={exportingId === attempt.id}
-                              onClick={() => void handleExportPdf(attempt.id)}
+                              className='shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-50'
+                              onClick={() => handleOpenScorePublish(attempt)}
                             >
-                              <Download className='size-3.5' />
-                              {exportingId === attempt.id
-                                ? attemptsCopy.exportingPdf
-                                : attemptsCopy.exportPdf}
+                              <Settings className='size-4' />
                             </Button>
+                          </Tooltip>
+                          {attempt.status === 'LOCKED' ? (
+                            <Tooltip content={unlockingId === attempt.id ? attemptsCopy.unlocking : attemptsCopy.unlock}>
+                              <Button
+                                size='icon'
+                                variant='outline'
+                                className='shrink-0'
+                                disabled={unlockingId === attempt.id}
+                                onClick={() => void handleUnlock(attempt.id)}
+                              >
+                                <Unlock className='size-4' />
+                              </Button>
+                            </Tooltip>
                           ) : null}
-                          <Button asChild size='sm'>
-                            <Link href={`/admin/exam-attempts/${attempt.id}`}>
-                              {attemptsCopy.review}
-                            </Link>
-                          </Button>
+                          {isAttemptExportable(attempt.status) ? (
+                            <Tooltip content={exportingId === attempt.id ? attemptsCopy.exportingPdf : attemptsCopy.exportPdf}>
+                              <Button
+                                size='icon'
+                                variant='outline'
+                                className='shrink-0'
+                                disabled={exportingId === attempt.id}
+                                onClick={() => void handleExportPdf(attempt.id)}
+                              >
+                                <Download className='size-4' />
+                              </Button>
+                            </Tooltip>
+                          ) : null}
+                          <Tooltip content={attemptsCopy.review}>
+                            <Button asChild size='icon' variant={attempt.status === 'LOCKED' ? 'outline' : 'default'} className='shrink-0'>
+                              <Link href={`/admin/exam-attempts/${attempt.id}`}>
+                                <Eye className='size-4' />
+                              </Link>
+                            </Button>
+                          </Tooltip>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -486,6 +658,52 @@ export default function AdminExamPeriodDetailPage() {
           />
         </CardContent>
       </Card>
+
+      <Dialog open={!!scorePublishAttempt} onOpenChange={(open) => !open && setScorePublishAttempt(null)}>
+        <DialogContent className='sm:max-w-[425px]'>
+          <form onSubmit={handleSaveScorePublish}>
+            <DialogHeader>
+              <DialogTitle>{attemptsCopy.dialogGradeTitle}</DialogTitle>
+              <DialogDescription>
+                {scorePublishAttempt?.userFullName || attemptsCopy.unknownUser} ({scorePublishAttempt?.shortId})
+              </DialogDescription>
+            </DialogHeader>
+            <div className='grid gap-4 py-4'>
+              <div className='grid gap-2'>
+                <Label htmlFor='totalScore'>{attemptsCopy.fieldTotalScore}</Label>
+                <Input
+                  id='totalScore'
+                  type='number'
+                  step='any'
+                  min='0'
+                  max={scorePublishAttempt?.maxScore}
+                  value={scoreInput}
+                  onChange={(e) => setScoreInput(e.target.value)}
+                  placeholder={`0 - ${scorePublishAttempt?.maxScore ?? 10}`}
+                />
+              </div>
+              <div className='grid gap-2'>
+                <Label htmlFor='publishScoresAt'>{attemptsCopy.fieldPublishDate}</Label>
+                <Input
+                  id='publishScoresAt'
+                  type='datetime-local'
+                  value={publishDateInput}
+                  onChange={(e) => setPublishDateInput(e.target.value)}
+                />
+                <p className='text-xs text-muted-foreground'>{attemptsCopy.fieldPublishDateHint}</p>
+              </div>
+            </div>
+            <div className='mt-6 flex justify-end gap-3'>
+              <Button type='button' variant='outline' onClick={() => setScorePublishAttempt(null)}>
+                {attemptsCopy.btnCancel}
+              </Button>
+              <Button type='submit' disabled={savingScorePublish}>
+                {savingScorePublish ? attemptsCopy.btnSaving : attemptsCopy.btnSave}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

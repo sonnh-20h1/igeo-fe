@@ -2,7 +2,7 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ClipboardCheck, Download, Unlock, Eye, Clock, CheckCircle2, Award, Lock, HelpCircle } from 'lucide-react';
+import { ClipboardCheck, Download, Unlock, Eye, Clock, CheckCircle2, Award, Lock, HelpCircle, Calendar, SlidersHorizontal, Settings } from 'lucide-react';
 import { adminExamAttemptsApi } from '@/features/admin-exam-attempts/api';
 import {
   buildAttemptPdfLabelsFromCopy,
@@ -26,6 +26,14 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useNotification } from '@/components/ui/notification';
 import { Tooltip } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 function formatDateTime(value: string | Date | null | undefined, locale: string) {
   if (!value) return '—';
@@ -33,6 +41,22 @@ function formatDateTime(value: string | Date | null | undefined, locale: string)
     dateStyle: 'short',
     timeStyle: 'short',
   });
+}
+
+function toDatetimeLocalString(dateVal: string | Date | null | undefined): string {
+  if (!dateVal) return '';
+  const d = new Date(dateVal);
+  if (Number.isNaN(d.getTime())) return '';
+  
+  const pad = (num: number) => String(num).padStart(2, '0');
+  
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 export default function AdminExamAttemptsPage() {
@@ -45,12 +69,19 @@ export default function AdminExamAttemptsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState<ExamAttemptStatus | 'ALL'>('ALL');
+  const [sortScore, setSortScore] = useState<'DEFAULT' | 'asc' | 'desc'>('DEFAULT');
   const [emailInput, setEmailInput] = useState('');
   const [emailFilter, setEmailFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [exportingId, setExportingId] = useState<string | null>(null);
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  // States for Score and Publish Date Editing Dialog
+  const [scorePublishAttempt, setScorePublishAttempt] = useState<ExamAttemptSummary | null>(null);
+  const [scoreInput, setScoreInput] = useState('');
+  const [publishDateInput, setPublishDateInput] = useState('');
+  const [savingScorePublish, setSavingScorePublish] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,6 +95,7 @@ export default function AdminExamAttemptsPage() {
           size: pageSize,
           status: statusFilter === 'ALL' ? undefined : statusFilter,
           email: emailFilter || undefined,
+          sortScore: sortScore === 'DEFAULT' ? undefined : sortScore,
         });
         if (cancelled) return;
         startTransition(() => {
@@ -81,7 +113,7 @@ export default function AdminExamAttemptsPage() {
     return () => {
       cancelled = true;
     };
-  }, [copy.loadFailed, emailFilter, notifyError, page, pageSize, reloadKey, statusFilter]);
+  }, [copy.loadFailed, emailFilter, notifyError, page, pageSize, reloadKey, statusFilter, sortScore]);
 
   function applyEmailFilter() {
     setPage(1);
@@ -127,6 +159,38 @@ export default function AdminExamAttemptsPage() {
       notifyError(error instanceof Error ? error.message : copy.exportPdfFailed, copy.exportPdfFailed);
     } finally {
       setExportingId(null);
+    }
+  }
+
+  function handleOpenScorePublish(attempt: ExamAttemptSummary) {
+    setScorePublishAttempt(attempt);
+    setScoreInput(attempt.totalScore != null ? String(attempt.totalScore) : '');
+    setPublishDateInput(toDatetimeLocalString(attempt.publishScoresAt));
+  }
+
+  async function handleSaveScorePublish(event: React.FormEvent) {
+    event.preventDefault();
+    if (!scorePublishAttempt) return;
+
+    const scoreNum = Number(scoreInput);
+    if (scoreInput.trim() !== '' && (Number.isNaN(scoreNum) || scoreNum < 0)) {
+      alert(copy.invalidScore);
+      return;
+    }
+
+    setSavingScorePublish(true);
+    try {
+      await adminExamAttemptsApi.updateScoreAndPublish(scorePublishAttempt.id, {
+        totalScore: scoreInput.trim() !== '' ? scoreNum : undefined,
+        publishScoresAt: publishDateInput ? new Date(publishDateInput).toISOString() : null,
+      });
+      success(copy.graded);
+      setReloadKey((prev) => prev + 1);
+      setScorePublishAttempt(null);
+    } catch (error) {
+      notifyError(error instanceof Error ? error.message : copy.gradeFailed, copy.gradeFailed);
+    } finally {
+      setSavingScorePublish(false);
     }
   }
 
@@ -205,7 +269,7 @@ export default function AdminExamAttemptsPage() {
                 setStatusFilter(value as ExamAttemptStatus | 'ALL');
               }}
             >
-              <SelectTrigger className='w-[220px]'>
+              <SelectTrigger className='w-[200px]'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -215,6 +279,23 @@ export default function AdminExamAttemptsPage() {
                 <SelectItem value='IN_PROGRESS'>{copy.statusInProgress}</SelectItem>
                 <SelectItem value='LOCKED'>{copy.statusLocked}</SelectItem>
                 <SelectItem value='EXPIRED'>{copy.statusExpired}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={sortScore}
+              onValueChange={(value) => {
+                setPage(1);
+                setSortScore(value as 'DEFAULT' | 'asc' | 'desc');
+              }}
+            >
+              <SelectTrigger className='w-[200px]'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='DEFAULT'>{copy.sortDefault}</SelectItem>
+                <SelectItem value='asc'>{copy.sortScoreAsc}</SelectItem>
+                <SelectItem value='desc'>{copy.sortScoreDesc}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -277,14 +358,24 @@ export default function AdminExamAttemptsPage() {
                         {formatDateTime(endedAt(attempt), locale)}
                       </TableCell>
                       <TableCell className='whitespace-nowrap text-sm'>
-                        {attempt.status === 'GRADED'
+                        {attempt.totalScore != null
                           ? copy.scoreLabel
-                              .replace('{total}', String(attempt.totalScore ?? 0))
+                              .replace('{total}', String(attempt.totalScore))
                               .replace('{max}', String(attempt.maxScore ?? 0))
                           : '—'}
                       </TableCell>
                       <TableCell className='text-right whitespace-nowrap'>
                         <div className='flex justify-end gap-2'>
+                          <Tooltip content={copy.dialogGradeTitle}>
+                            <Button
+                              size='icon'
+                              variant='outline'
+                              className='shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-50'
+                              onClick={() => handleOpenScorePublish(attempt)}
+                            >
+                              <Settings className='size-4' />
+                            </Button>
+                          </Tooltip>
                           {attempt.status === 'LOCKED' ? (
                             <Tooltip content={unlockingId === attempt.id ? copy.unlocking : copy.unlock}>
                               <Button
@@ -340,6 +431,52 @@ export default function AdminExamAttemptsPage() {
           />
         </CardContent>
       </Card>
+
+      <Dialog open={!!scorePublishAttempt} onOpenChange={(open) => !open && setScorePublishAttempt(null)}>
+        <DialogContent className='sm:max-w-[425px]'>
+          <form onSubmit={handleSaveScorePublish}>
+            <DialogHeader>
+              <DialogTitle>{copy.dialogGradeTitle}</DialogTitle>
+              <DialogDescription>
+                {scorePublishAttempt?.userFullName || copy.unknownUser} ({scorePublishAttempt?.shortId})
+              </DialogDescription>
+            </DialogHeader>
+            <div className='grid gap-4 py-4'>
+              <div className='grid gap-2'>
+                <Label htmlFor='totalScore'>{copy.fieldTotalScore}</Label>
+                <Input
+                  id='totalScore'
+                  type='number'
+                  step='any'
+                  min='0'
+                  max={scorePublishAttempt?.maxScore}
+                  value={scoreInput}
+                  onChange={(e) => setScoreInput(e.target.value)}
+                  placeholder={`0 - ${scorePublishAttempt?.maxScore ?? 10}`}
+                />
+              </div>
+              <div className='grid gap-2'>
+                <Label htmlFor='publishScoresAt'>{copy.fieldPublishDate}</Label>
+                <Input
+                  id='publishScoresAt'
+                  type='datetime-local'
+                  value={publishDateInput}
+                  onChange={(e) => setPublishDateInput(e.target.value)}
+                />
+                <p className='text-xs text-muted-foreground'>{copy.fieldPublishDateHint}</p>
+              </div>
+            </div>
+            <div className='mt-6 flex justify-end gap-3'>
+              <Button type='button' variant='outline' onClick={() => setScorePublishAttempt(null)}>
+                {copy.btnCancel}
+              </Button>
+              <Button type='submit' disabled={savingScorePublish}>
+                {savingScorePublish ? copy.btnSaving : copy.btnSave}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -43,6 +43,7 @@ export type ExamAttemptSummary = {
   essayScore?: number | null;
   totalScore: number;
   maxScore: number;
+  publishScoresAt?: string | null;
   createdDate?: string | Date;
   userId?: string;
   userFullName?: string | null;
@@ -73,6 +74,7 @@ export type ListAttemptsQuery = {
   status?: ExamAttemptStatus;
   examId?: string;
   email?: string;
+  sortScore?: 'asc' | 'desc';
 };
 
 export type SaveAttemptAnswersPayload = {

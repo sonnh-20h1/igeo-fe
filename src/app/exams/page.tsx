@@ -764,6 +764,7 @@ function AttemptsHistoryTab({
   loadingLabel: string;
   notifyError: (message: string, title?: string) => void;
 }) {
+  const { locale } = useI18n();
   const [items, setItems] = useState<ExamAttemptSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -869,7 +870,11 @@ function AttemptsHistoryTab({
                         ? copy.contactAdminToResume
                         : attempt.status === 'SUBMITTED' || attempt.status === 'GRADED'
                           ? attempt.status === 'GRADED'
-                            ? copy.statusGraded
+                            ? attempt.totalScore != null
+                              ? `${copy.statusGraded} (${copy.scoreLabel.replace('{total}', String(attempt.totalScore)).replace('{max}', String(attempt.maxScore))})`
+                              : attempt.publishScoresAt
+                                ? `${copy.statusGraded} (${locale === 'en' ? 'Publish scores' : 'Công bố điểm'}: ${formatDateTime(attempt.publishScoresAt, locale)})`
+                                : copy.statusGraded
                             : copy.submittedDone
                           : statusLabel(attempt.status)}
                     </Badge>

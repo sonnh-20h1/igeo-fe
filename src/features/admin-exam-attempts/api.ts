@@ -55,4 +55,12 @@ export const adminExamAttemptsApi = {
       },
     );
   },
+
+  updateScoreAndPublish(attemptId: string, payload: { totalScore?: number; publishScoresAt?: string | null }) {
+    return apiRequest<ExamAttemptAdminDetail>(`/admin/exam-attempts/${attemptId}/score-publish`, {
+      method: 'PATCH',
+      token: requireToken(),
+      body: payload,
+    });
+  },
 };
