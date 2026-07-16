@@ -1,7 +1,7 @@
 'use client';
 
 import { startTransition, useCallback, useEffect, useState } from 'react';
-import { ClipboardList, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { ClipboardList, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { adminExamsApi } from '@/features/admin-exams/api';
 import type {
   CreateExamPayload,
@@ -12,8 +12,9 @@ import type {
   ExamTypeConfigPayload,
   UpdateExamPayload,
 } from '@/features/admin-exams/types';
-import { adminQuestionsApi } from '@/features/admin-questions/api';
-import type { Question, QuestionDifficulty, QuestionType } from '@/features/admin-questions/types';
+import type { QuestionDifficulty, QuestionType } from '@/features/admin-questions/types';
+import { adminCategoriesApi } from '@/features/admin-categories/api';
+import type { QuestionCategory } from '@/features/admin-categories/types';
 import { useI18n } from '@/features/i18n/provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,16 +50,18 @@ function formatDateTime(value: string | Date | null | undefined, locale: string)
 
 import { cn } from '@/lib/utils';
 
-type TypeConfigForm = {
-  enabled: boolean;
-  selectionMode: ExamQuestionSelectionMode;
-  score: string;
+type ExamSelectionMode = 'RANDOM' | 'DYNAMIC';
+
+type CategoryConfigForm = {
+  id: string; // unique local ID
+  categoryId: string; // 'ALL' or CAT#####
+  type: QuestionType;
+  selectionMode: ExamSelectionMode;
+  count: string;
   /** Minutes per question */
   durationMinutes: string;
-  count: string;
   difficulty: QuestionDifficulty | 'ALL';
   tags: string;
-  shortIds: string[];
 };
 
 type ExamFormState = {
@@ -66,49 +69,8 @@ type ExamFormState = {
   description: string;
   status: ExamStatus;
   tags: string;
-  mc: TypeConfigForm;
-  essay: TypeConfigForm;
+  configs: CategoryConfigForm[];
 };
-
-const QUESTION_TYPES: QuestionType[] = ['MULTIPLE_CHOICE', 'ESSAY'];
-
-function defaultDurationForType(type: QuestionType) {
-  return type === 'ESSAY' ? 5 : 1;
-}
-
-const emptyTypeConfig = (
-  mode: ExamQuestionSelectionMode = 'RANDOM',
-  type: QuestionType = 'MULTIPLE_CHOICE',
-): TypeConfigForm => ({
-  enabled: false,
-  selectionMode: mode,
-  score: '1',
-  durationMinutes: String(defaultDurationForType(type)),
-  count: '10',
-  difficulty: 'ALL',
-  tags: '',
-  shortIds: [],
-});
-
-const emptyForm = (): ExamFormState => ({
-  title: '',
-  description: '',
-  status: 'DRAFT',
-  tags: '',
-  mc: {
-    ...emptyTypeConfig('RANDOM', 'MULTIPLE_CHOICE'),
-    enabled: true,
-    count: '15',
-    score: '1',
-    durationMinutes: '1',
-  },
-  essay: {
-    ...emptyTypeConfig('MANUAL', 'ESSAY'),
-    score: '5',
-    count: '2',
-    durationMinutes: '5',
-  },
-});
 
 function parseTags(value: string) {
   return value
@@ -117,20 +79,30 @@ function parseTags(value: string) {
     .filter(Boolean);
 }
 
-function getConfig(form: ExamFormState, type: QuestionType): TypeConfigForm {
-  return type === 'MULTIPLE_CHOICE' ? form.mc : form.essay;
+function defaultDurationForType(type: QuestionType) {
+  return type === 'ESSAY' ? 5 : 1;
 }
 
-function setConfig(
-  form: ExamFormState,
-  type: QuestionType,
-  patch: Partial<TypeConfigForm>,
-): ExamFormState {
-  if (type === 'MULTIPLE_CHOICE') {
-    return { ...form, mc: { ...form.mc, ...patch } };
-  }
-  return { ...form, essay: { ...form.essay, ...patch } };
+function emptyCategoryConfig(type: QuestionType = 'MULTIPLE_CHOICE'): CategoryConfigForm {
+  return {
+    id: String(Date.now() + Math.random()),
+    categoryId: 'ALL',
+    type,
+    selectionMode: 'RANDOM',
+    count: type === 'ESSAY' ? '2' : '15',
+    durationMinutes: String(defaultDurationForType(type)),
+    difficulty: 'ALL',
+    tags: '',
+  };
 }
+
+const emptyForm = (): ExamFormState => ({
+  title: '',
+  description: '',
+  status: 'DRAFT',
+  tags: '',
+  configs: [emptyCategoryConfig()],
+});
 
 function toForm(exam: Exam): ExamFormState {
   const next = emptyForm();
@@ -138,49 +110,34 @@ function toForm(exam: Exam): ExamFormState {
   next.description = exam.description ?? '';
   next.status = exam.status ?? 'DRAFT';
   next.tags = (exam.tags ?? []).join(', ');
-  next.mc = emptyTypeConfig('RANDOM', 'MULTIPLE_CHOICE');
-  next.essay = emptyTypeConfig('MANUAL', 'ESSAY');
 
-  for (const config of exam.typeConfigs ?? []) {
-    const mapped: TypeConfigForm = {
-      enabled: true,
-      selectionMode: config.selectionMode,
-      score: String(config.score ?? 1),
-      durationMinutes: String(
-        config.durationMinutes ?? defaultDurationForType(config.type),
-      ),
-      count: String(config.count ?? 1),
+  // Each BE typeConfig (already single-type) maps 1:1 to a local config row.
+  const configs: CategoryConfigForm[] = (exam.typeConfigs ?? []).map((config, index) => {
+    const categoryId = config.categoryIds?.[0] || 'ALL';
+    const selectionMode: ExamSelectionMode = config.selectionMode === 'DYNAMIC' ? 'DYNAMIC' : 'RANDOM';
+
+    return {
+      id: `${index}_${Date.now()}`,
+      categoryId,
+      type: config.type,
+      selectionMode,
+      count: String(config.count ?? config.shortIds?.length ?? 1),
+      durationMinutes: String(config.durationMinutes ?? defaultDurationForType(config.type)),
       difficulty: config.difficulty ?? 'ALL',
       tags: (config.tags ?? []).join(', '),
-      shortIds: [...(config.shortIds ?? [])],
     };
-    if (config.type === 'MULTIPLE_CHOICE') next.mc = mapped;
-    if (config.type === 'ESSAY') next.essay = mapped;
-  }
+  });
 
+  next.configs = configs.length ? configs : [emptyCategoryConfig()];
   return next;
-}
-
-function getTypeFormQuestionCount(config: TypeConfigForm) {
-  if (config.selectionMode === 'MANUAL') {
-    return config.shortIds.length;
-  }
-  const count = Number(config.count);
-  return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
 }
 
 function computeSuggestedDuration(form: ExamFormState) {
   let total = 0;
-  for (const type of QUESTION_TYPES) {
-    const config = getConfig(form, type);
-    if (!config.enabled) continue;
-    const count = getTypeFormQuestionCount(config);
-    const perQuestion = Number(config.durationMinutes);
-    const duration =
-      Number.isFinite(perQuestion) && perQuestion >= 1
-        ? Math.floor(perQuestion)
-        : defaultDurationForType(type);
-    total += count * duration;
+  for (const config of form.configs) {
+    const count = Number(config.count) || 0;
+    const perQuestion = Number(config.durationMinutes) || defaultDurationForType(config.type);
+    total += count * perQuestion;
   }
   return Math.max(1, total || 1);
 }
@@ -193,23 +150,35 @@ function getConfigQuestionCount(config: { selectionMode: ExamQuestionSelectionMo
 }
 
 function getExamDisplayStats(exam: Exam) {
-  const configs = exam.typeConfigs ?? [];
-  if (!configs.length) {
-    return { questionCount: exam.questionCount, totalScore: exam.totalScore };
+  const fixedQuestions = exam.questions ?? [];
+  const fixedCount = fixedQuestions.length;
+  const fixedScore = fixedQuestions.reduce((sum, item) => sum + (Number(item.score) || 0), 0);
+
+  const dynamicConfigs = (exam.typeConfigs ?? []).filter(
+    (config) => config.selectionMode === 'DYNAMIC',
+  );
+  const dynamicCount = dynamicConfigs.reduce((sum, config) => sum + getConfigQuestionCount(config), 0);
+  const dynamicScore = dynamicConfigs.reduce(
+    (sum, config) => sum + getConfigQuestionCount(config) * (Number(config.score) || 1),
+    0,
+  );
+
+  if (fixedCount > 0 || dynamicCount > 0) {
+    return {
+      questionCount: fixedCount + dynamicCount,
+      totalScore: fixedScore + dynamicScore,
+    };
   }
-  return configs.reduce(
+
+  return (exam.typeConfigs ?? []).reduce(
     (acc, config) => {
       const count = getConfigQuestionCount(config);
       acc.questionCount += count;
-      acc.totalScore += count * (Number(config.score) || 0);
+      acc.totalScore += count * (Number(config.score) || 1);
       return acc;
     },
-    { questionCount: 0, totalScore: 0 },
+    { questionCount: exam.questionCount ?? 0, totalScore: exam.totalScore ?? 0 },
   );
-}
-
-function expectedPrefix(type: QuestionType) {
-  return type === 'MULTIPLE_CHOICE' ? 'MC' : 'WE';
 }
 
 export default function AdminExamsPage() {
@@ -232,15 +201,27 @@ export default function AdminExamsPage() {
   const [form, setForm] = useState<ExamFormState>(emptyForm());
   const [formError, setFormError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerType, setPickerType] = useState<QuestionType>('MULTIPLE_CHOICE');
-  const [pickerSearch, setPickerSearch] = useState('');
-  const [pickerItems, setPickerItems] = useState<Question[]>([]);
-  const [pickerLoading, setPickerLoading] = useState(false);
+  const [categories, setCategories] = useState<QuestionCategory[]>([]);
 
   const refresh = useCallback(() => {
     setReloadKey((current) => current + 1);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadCategories() {
+      try {
+        const result = await adminCategoriesApi.list({ page: 1, size: 200 });
+        if (cancelled) return;
+        setCategories(result.items ?? []);
+      } catch {
+        // Category filter still usable without the list.
+      }
+    }
+    void loadCategories();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -277,45 +258,6 @@ export default function AdminExamsPage() {
     };
   }, [copy.loadFailed, notifyError, page, pageSize, reloadKey, search, statusFilter]);
 
-  useEffect(() => {
-    if (!pickerOpen) return;
-    let cancelled = false;
-
-    async function loadPicker() {
-      startTransition(() => {
-        if (!cancelled) setPickerLoading(true);
-      });
-      try {
-        const result = await adminQuestionsApi.list({
-          page: 1,
-          size: 20,
-          search: pickerSearch.trim() || undefined,
-          type: pickerType,
-        });
-        if (cancelled) return;
-        startTransition(() => {
-          setPickerItems(result.items ?? []);
-          setPickerLoading(false);
-        });
-      } catch {
-        if (cancelled) return;
-        startTransition(() => {
-          setPickerItems([]);
-          setPickerLoading(false);
-        });
-      }
-    }
-
-    const timer = window.setTimeout(() => {
-      void loadPicker();
-    }, 250);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [pickerOpen, pickerSearch, pickerType]);
-
   function openCreate() {
     setEditingExam(null);
     setResolvedQuestions([]);
@@ -340,42 +282,13 @@ export default function AdminExamsPage() {
     }
   }
 
-  function openPicker(type: QuestionType) {
-    setPickerType(type);
-    setPickerSearch('');
-    setPickerOpen(true);
-  }
-
-  function addShortId(type: QuestionType, shortId?: string) {
-    const normalized = (shortId ?? '').trim().toUpperCase();
-    setForm((current) => {
-      const config = getConfig(current, type);
-      if (normalized && config.shortIds.includes(normalized)) return current;
-      return setConfig(current, type, {
-        shortIds: [...config.shortIds, normalized],
-      });
-    });
-  }
-
-  function removeShortId(type: QuestionType, index: number) {
-    setForm((current) => {
-      const config = getConfig(current, type);
-      return setConfig(current, type, {
-        shortIds: config.shortIds.filter((_, i) => i !== index),
-      });
-    });
-  }
-
   function buildTypeConfigs(): ExamTypeConfigPayload[] | null {
     const configs: ExamTypeConfigPayload[] = [];
 
-    for (const type of QUESTION_TYPES) {
-      const config = getConfig(form, type);
-      if (!config.enabled) continue;
-
-      const score = Number(config.score);
-      if (!Number.isFinite(score) || score <= 0) {
-        setFormError(copy.invalidScore);
+    for (const config of form.configs) {
+      const count = Number(config.count) || 0;
+      if (count <= 0) {
+        setFormError(copy.invalidCount);
         return null;
       }
 
@@ -385,40 +298,18 @@ export default function AdminExamsPage() {
         return null;
       }
 
-      if (config.selectionMode === 'RANDOM' || config.selectionMode === 'DYNAMIC') {
-        const count = Number(config.count);
-        if (!Number.isFinite(count) || count < 1) {
-          setFormError(copy.invalidCount);
-          return null;
-        }
-        configs.push({
-          type,
-          selectionMode: config.selectionMode,
-          score,
-          durationMinutes: Math.floor(durationMinutes),
-          count,
-          difficulty: config.difficulty === 'ALL' ? undefined : config.difficulty,
-          tags: parseTags(config.tags).length ? parseTags(config.tags) : undefined,
-        });
-        continue;
-      }
+      const categoryIds = config.categoryId !== 'ALL' ? [config.categoryId] : undefined;
+      const difficulty = config.difficulty !== 'ALL' ? config.difficulty : undefined;
+      const tags = parseTags(config.tags).length ? parseTags(config.tags) : undefined;
 
-      const shortIds = config.shortIds.map((id) => id.trim().toUpperCase()).filter(Boolean);
-      if (!shortIds.length) {
-        setFormError(copy.invalidShortIds);
-        return null;
-      }
-      const prefix = expectedPrefix(type);
-      if (shortIds.some((id) => !id.startsWith(prefix))) {
-        setFormError(copy.invalidShortIdPrefix);
-        return null;
-      }
       configs.push({
-        type,
-        selectionMode: 'MANUAL',
-        score,
+        type: config.type,
+        selectionMode: config.selectionMode,
         durationMinutes: Math.floor(durationMinutes),
-        shortIds,
+        count,
+        difficulty,
+        tags,
+        categoryIds,
       });
     }
 
@@ -428,6 +319,27 @@ export default function AdminExamsPage() {
     }
 
     return configs;
+  }
+
+  function addConfigRow() {
+    setForm((current) => ({
+      ...current,
+      configs: [...current.configs, emptyCategoryConfig()],
+    }));
+  }
+
+  function removeConfigRow(id: string) {
+    setForm((current) => ({
+      ...current,
+      configs: current.configs.filter((c) => c.id !== id),
+    }));
+  }
+
+  function updateConfigRow(id: string, patch: Partial<CategoryConfigForm>) {
+    setForm((current) => ({
+      ...current,
+      configs: current.configs.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+    }));
   }
 
   async function submitForm(event: React.FormEvent) {
@@ -502,8 +414,6 @@ export default function AdminExamsPage() {
     return type === 'MULTIPLE_CHOICE' ? copy.typeMultipleChoice : copy.typeEssay;
   }
 
-  const selectedShortIds = new Set(getConfig(form, pickerType).shortIds.map((id) => id.toUpperCase()));
-
   return (
     <div className='space-y-6'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
@@ -527,7 +437,7 @@ export default function AdminExamsPage() {
             </CardTitle>
             <CardDescription>{copy.listDescription}</CardDescription>
           </div>
-          <div className='flex flex-col gap-3 lg:flex-row lg:items-center'>
+          <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <form
               className='flex w-full max-w-md gap-2'
               onSubmit={(event) => {
@@ -545,7 +455,7 @@ export default function AdminExamsPage() {
                   placeholder={copy.searchPlaceholder}
                 />
               </div>
-              <Button type='submit' variant='outline'>
+              <Button type='submit' variant='outline' className='shrink-0'>
                 {copy.search}
               </Button>
             </form>
@@ -556,7 +466,7 @@ export default function AdminExamsPage() {
                 setStatusFilter(value as ExamStatus | 'ALL');
               }}
             >
-              <SelectTrigger className='w-[200px]'>
+              <SelectTrigger className='w-full sm:w-[200px] shrink-0'>
                 <SelectValue placeholder={copy.filterStatus} />
               </SelectTrigger>
               <SelectContent>
@@ -569,8 +479,8 @@ export default function AdminExamsPage() {
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='overflow-x-auto rounded-xl border border-border/70'>
-            <Table>
+          <div className='overflow-x-auto rounded-xl border border-border/70 scrollbar-thin'>
+            <Table className='min-w-[1000px]'>
               <TableHeader>
                 <TableRow>
                   <TableHead>{copy.colShortId}</TableHead>
@@ -605,11 +515,11 @@ export default function AdminExamsPage() {
                     );
                     return (
                     <TableRow key={exam.id}>
-                      <TableCell>
+                      <TableCell className='whitespace-nowrap'>
                         <span className='font-mono text-sm font-semibold text-primary'>{exam.shortId}</span>
                       </TableCell>
-                      <TableCell className='max-w-sm'>
-                        <p className='font-medium'>{exam.title}</p>
+                      <TableCell className='min-w-[200px] max-w-sm'>
+                        <p className='font-medium line-clamp-2'>{exam.title}</p>
                         {exam.description ? (
                           <p className='mt-1 line-clamp-1 text-sm text-muted-foreground'>{exam.description}</p>
                         ) : null}
@@ -619,16 +529,16 @@ export default function AdminExamsPage() {
                           </Badge>
                         ) : null}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className='whitespace-nowrap'>
                         <Badge variant='outline'>{statusLabel(exam.status)}</Badge>
                       </TableCell>
-                      <TableCell>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</TableCell>
-                      <TableCell>{stats.questionCount}</TableCell>
-                      <TableCell>{stats.totalScore}</TableCell>
-                      <TableCell>
+                      <TableCell className='whitespace-nowrap'>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</TableCell>
+                      <TableCell className='whitespace-nowrap'>{stats.questionCount}</TableCell>
+                      <TableCell className='whitespace-nowrap'>{stats.totalScore}</TableCell>
+                      <TableCell className='min-w-[120px]'>
                         <div className='flex flex-wrap gap-1'>
                           {(exam.tags ?? []).slice(0, 3).map((tag) => (
-                            <Badge key={tag} variant='outline'>
+                            <Badge key={tag} variant='outline' className='whitespace-nowrap'>
                               {tag}
                             </Badge>
                           ))}
@@ -637,13 +547,14 @@ export default function AdminExamsPage() {
                       <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
                         {formatDateTime(exam.createdDate, locale)}
                       </TableCell>
-                      <TableCell className='text-right'>
+                      <TableCell className='text-right whitespace-nowrap'>
                         <div className='inline-flex gap-2'>
                           <Button
                             size='icon'
                             variant='outline'
                             onClick={() => void openEdit(exam)}
                             aria-label={copy.edit}
+                            className='shrink-0'
                           >
                             <Pencil className='size-4' />
                           </Button>
@@ -652,6 +563,7 @@ export default function AdminExamsPage() {
                             variant='outline'
                             onClick={() => void handleDelete(exam)}
                             aria-label={copy.delete}
+                            className='shrink-0'
                           >
                             <Trash2 className='size-4' />
                           </Button>
@@ -746,236 +658,162 @@ export default function AdminExamsPage() {
               />
             </div>
 
-            <div className='space-y-3'>
-              <Label>{copy.fieldQuestions}</Label>
-              {QUESTION_TYPES.map((type) => {
-                const config = getConfig(form, type);
-                return (
-                  <div key={type} className='space-y-3 rounded-xl border border-border/70 p-4'>
-                    <div className='flex flex-wrap items-center justify-between gap-2'>
-                      <label className='flex items-center gap-2 text-sm font-semibold'>
-                        <input
-                          type='checkbox'
-                          checked={config.enabled}
-                          onChange={(event) =>
-                            setForm((current) =>
-                              setConfig(current, type, { enabled: event.target.checked }),
-                            )
-                          }
-                        />
-                        {copy.typeConfigTitle.replace('{type}', typeLabel(type))}
-                      </label>
-                      <span className='text-xs text-muted-foreground'>{copy.enableType}</span>
+            <div className='space-y-4'>
+              <div className='flex items-center justify-between gap-2'>
+                <Label className='text-base font-semibold'>{copy.fieldQuestions}</Label>
+                <Button type='button' variant='outline' size='sm' onClick={addConfigRow} className='gap-1'>
+                  <Plus className='size-3.5' />
+                  {copy.addCategoryConfig}
+                </Button>
+              </div>
+
+              <div className='space-y-4'>
+                {form.configs.map((config, index) => (
+                  <div key={config.id} className='relative space-y-3 rounded-xl border border-border/70 p-4 bg-muted/10'>
+                    <div className='flex items-center justify-between gap-4'>
+                      <span className='text-sm font-semibold text-primary'>
+                        # {index + 1}
+                      </span>
+                      {form.configs.length > 1 ? (
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='icon'
+                          className='size-7 text-red-600 hover:bg-red-50 hover:text-red-700'
+                          onClick={() => removeConfigRow(config.id)}
+                          aria-label={copy.removeCategoryConfig}
+                          title={copy.removeCategoryConfig}
+                        >
+                          <X className='size-4' />
+                        </Button>
+                      ) : null}
                     </div>
 
-                    {config.enabled ? (
-                      <>
-                        <div className='grid gap-2 sm:grid-cols-3'>
-                          <button
-                            type='button'
-                            className={cn(
-                              'rounded-xl border px-3 py-2 text-left text-sm transition',
-                              config.selectionMode === 'MANUAL'
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border/70 hover:bg-muted/40',
-                            )}
-                            onClick={() =>
-                              setForm((current) => setConfig(current, type, { selectionMode: 'MANUAL' }))
-                            }
-                          >
-                            <p className='font-semibold'>{copy.modeManual}</p>
-                            <p className='mt-1 text-xs text-muted-foreground'>{copy.modeManualHint}</p>
-                          </button>
-                          <button
-                            type='button'
-                            className={cn(
-                              'rounded-xl border px-3 py-2 text-left text-sm transition',
-                              config.selectionMode === 'RANDOM'
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border/70 hover:bg-muted/40',
-                            )}
-                            onClick={() =>
-                              setForm((current) => setConfig(current, type, { selectionMode: 'RANDOM' }))
-                            }
-                          >
-                            <p className='font-semibold'>{copy.modeRandom}</p>
-                            <p className='mt-1 text-xs text-muted-foreground'>{copy.modeRandomHint}</p>
-                          </button>
-                          <button
-                            type='button'
-                            className={cn(
-                              'rounded-xl border px-3 py-2 text-left text-sm transition',
-                              config.selectionMode === 'DYNAMIC'
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border/70 hover:bg-muted/40',
-                            )}
-                            onClick={() =>
-                              setForm((current) => setConfig(current, type, { selectionMode: 'DYNAMIC' }))
-                            }
-                          >
-                            <p className='font-semibold'>{copy.modeDynamic}</p>
-                            <p className='mt-1 text-xs text-muted-foreground'>{copy.modeDynamicHint}</p>
-                          </button>
-                        </div>
-
-                        <div className='grid gap-3 sm:grid-cols-3'>
-                          <div className='space-y-1'>
-                            <Label>{copy.fieldScorePerQuestion}</Label>
-                            <Input
-                              type='number'
-                              min={0.1}
-                              step={0.1}
-                              value={config.score}
-                              onChange={(event) =>
-                                setForm((current) =>
-                                  setConfig(current, type, { score: event.target.value }),
-                                )
-                              }
-                            />
-                          </div>
-                          <div className='space-y-1'>
-                            <Label>{copy.fieldDurationPerQuestion}</Label>
-                            <Input
-                              type='number'
-                              min={1}
-                              step={1}
-                              value={config.durationMinutes}
-                              onChange={(event) =>
-                                setForm((current) =>
-                                  setConfig(current, type, {
-                                    durationMinutes: event.target.value,
-                                  }),
-                                )
-                              }
-                            />
-                          </div>
-                          {config.selectionMode === 'RANDOM' || config.selectionMode === 'DYNAMIC' ? (
-                            <div className='space-y-1'>
-                              <Label>{copy.fieldCount}</Label>
-                              <Input
-                                type='number'
-                                min={1}
-                                value={config.count}
-                                onChange={(event) =>
-                                  setForm((current) =>
-                                    setConfig(current, type, { count: event.target.value }),
-                                  )
-                                }
-                              />
-                            </div>
-                          ) : null}
-                        </div>
-
-                        {config.selectionMode === 'RANDOM' || config.selectionMode === 'DYNAMIC' ? (
-                          <div className='grid gap-3 sm:grid-cols-2'>
-                            <div className='space-y-1'>
-                              <Label>{copy.fieldDifficulty}</Label>
-                              <Select
-                                value={config.difficulty}
-                                onValueChange={(value) =>
-                                  setForm((current) =>
-                                    setConfig(current, type, {
-                                      difficulty: value as QuestionDifficulty | 'ALL',
-                                    }),
-                                  )
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value='ALL'>{copy.difficultyAll}</SelectItem>
-                                  <SelectItem value='EASY'>{copy.difficultyEasy}</SelectItem>
-                                  <SelectItem value='MEDIUM'>{copy.difficultyMedium}</SelectItem>
-                                  <SelectItem value='HARD'>{copy.difficultyHard}</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className='space-y-1'>
-                              <Label>{copy.fieldTypeTags}</Label>
-                              <Input
-                                value={config.tags}
-                                onChange={(event) =>
-                                  setForm((current) =>
-                                    setConfig(current, type, { tags: event.target.value }),
-                                  )
-                                }
-                                placeholder={copy.tagsPlaceholder}
-                              />
-                            </div>
-                          </div>
+                    <div className='grid gap-4 sm:grid-cols-2'>
+                      <div className='space-y-1'>
+                        <Label>{copy.categoriesLabel}</Label>
+                        {categories.length === 0 ? (
+                          <p className='text-sm text-muted-foreground'>{copy.noCategoriesAvailable}</p>
                         ) : (
-                          <div className='space-y-2'>
-                            <div className='flex flex-wrap items-center justify-between gap-2'>
-                              <Label>{copy.shortIdsLabel}</Label>
-                              <div className='flex gap-2'>
-                                <Button
-                                  type='button'
-                                  size='sm'
-                                  variant='outline'
-                                  onClick={() => openPicker(type)}
-                                >
-                                  {copy.pickQuestion}
-                                </Button>
-                                <Button
-                                  type='button'
-                                  size='sm'
-                                  variant='outline'
-                                  onClick={() => addShortId(type)}
-                                >
-                                  {copy.addShortId}
-                                </Button>
-                              </div>
-                            </div>
-                            {config.shortIds.length === 0 ? (
-                              <p className='text-sm text-muted-foreground'>{copy.invalidShortIds}</p>
-                            ) : (
-                              <div className='space-y-2'>
-                                {config.shortIds.map((shortId, index) => (
-                                  <div key={`${shortId}-${index}`} className='flex gap-2'>
-                                    <Input
-                                      value={shortId}
-                                      className='font-mono'
-                                      placeholder={
-                                        type === 'MULTIPLE_CHOICE' ? 'MC00001' : 'WE00001'
-                                      }
-                                      onChange={(event) => {
-                                        const value = event.target.value.toUpperCase();
-                                        setForm((current) => {
-                                          const nextIds = [...getConfig(current, type).shortIds];
-                                          nextIds[index] = value;
-                                          return setConfig(current, type, { shortIds: nextIds });
-                                        });
-                                      }}
-                                    />
-                                    <Button
-                                      type='button'
-                                      size='icon'
-                                      variant='outline'
-                                      onClick={() => removeShortId(type, index)}
-                                      aria-label={copy.removeQuestion}
-                                    >
-                                      <Trash2 className='size-4' />
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                          <Select
+                            value={config.categoryId}
+                            onValueChange={(val) => updateConfigRow(config.id, { categoryId: val })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='ALL'>{copy.categoriesAll}</SelectItem>
+                              {categories.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.shortId}>
+                                  {cat.name} ({cat.shortId})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         )}
-                      </>
-                    ) : null}
+                      </div>
+
+                      <div className='space-y-1'>
+                        <Label>{copy.selectionMode}</Label>
+                        <Select
+                          value={config.selectionMode}
+                          onValueChange={(val) => updateConfigRow(config.id, { selectionMode: val as ExamSelectionMode })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='RANDOM'>{copy.modeRandom}</SelectItem>
+                            <SelectItem value='DYNAMIC'>{copy.modeDynamic}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className='grid gap-4 sm:grid-cols-3'>
+                      <div className='space-y-1'>
+                        <Label>{copy.fieldQuestionType}</Label>
+                        <Select
+                          value={config.type}
+                          onValueChange={(val) =>
+                            updateConfigRow(config.id, {
+                              type: val as QuestionType,
+                              durationMinutes: String(defaultDurationForType(val as QuestionType)),
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='MULTIPLE_CHOICE'>{copy.typeMultipleChoice}</SelectItem>
+                            <SelectItem value='ESSAY'>{copy.typeEssay}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className='space-y-1'>
+                        <Label>{copy.fieldCount}</Label>
+                        <Input
+                          type='number'
+                          min={1}
+                          value={config.count}
+                          onChange={(e) => updateConfigRow(config.id, { count: e.target.value })}
+                        />
+                      </div>
+                      <div className='space-y-1'>
+                        <Label>{copy.fieldDurationPerQuestion}</Label>
+                        <Input
+                          type='number'
+                          min={1}
+                          step={1}
+                          value={config.durationMinutes}
+                          onChange={(e) => updateConfigRow(config.id, { durationMinutes: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className='grid gap-4 sm:grid-cols-2'>
+                      <div className='space-y-1'>
+                        <Label>{copy.fieldDifficulty}</Label>
+                        <Select
+                          value={config.difficulty}
+                          onValueChange={(val) =>
+                            updateConfigRow(config.id, {
+                              difficulty: val as QuestionDifficulty | 'ALL',
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='ALL'>{copy.difficultyAll}</SelectItem>
+                            <SelectItem value='EASY'>{copy.difficultyEasy}</SelectItem>
+                            <SelectItem value='MEDIUM'>{copy.difficultyMedium}</SelectItem>
+                            <SelectItem value='HARD'>{copy.difficultyHard}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className='space-y-1'>
+                        <Label>{copy.fieldTypeTags}</Label>
+                        <Input
+                          value={config.tags}
+                          onChange={(e) => updateConfigRow(config.id, { tags: e.target.value })}
+                          placeholder={copy.tagsPlaceholder}
+                        />
+                      </div>
+                    </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
 
             <div className='space-y-2 rounded-xl border border-dashed border-border/80 p-4'>
               <Label>
                 {copy.resolvedPreview.replace('{count}', String(resolvedQuestions.length))}
               </Label>
-              {(form.mc.enabled && form.mc.selectionMode === 'DYNAMIC') ||
-              (form.essay.enabled && form.essay.selectionMode === 'DYNAMIC') ? (
+              {form.configs.some((c) => c.selectionMode === 'DYNAMIC') ? (
                 <p className='text-sm text-muted-foreground'>{copy.resolvedDynamicNote}</p>
               ) : null}
               {resolvedQuestions.length === 0 ? (
@@ -983,16 +821,16 @@ export default function AdminExamsPage() {
               ) : (
                 <div className='space-y-2'>
                   {resolvedQuestions.map((item) => (
-                    <div key={`${item.shortId}-${item.order}`} className='rounded-lg border border-border/60 p-3'>
+                    <div key={`${item.shortId}-${item.order}`} className='rounded-lg border border-border/60 p-3 bg-card'>
                       <div className='flex flex-wrap items-center gap-2 text-xs text-muted-foreground'>
                         <span className='font-mono font-semibold text-primary'>{item.shortId}</span>
                         <Badge variant='outline'>{typeLabel(item.type)}</Badge>
                         <span>
-                          {copy.fieldScorePerQuestion}: {item.score}
+                          {dictionary.adminQuestions.colScore}: {item.score}
                         </span>
                         <span>
                           {copy.fieldDurationPerQuestion}:{' '}
-                          {item.durationMinutes ?? defaultDurationForType(item.type)}
+                          {item.durationMinutes}
                         </span>
                       </div>
                       {item.question?.content ? (
@@ -1015,59 +853,6 @@ export default function AdminExamsPage() {
               </Button>
             </div>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
-        <DialogContent className='max-h-[85vh] overflow-y-auto sm:max-w-2xl'>
-          <DialogHeader>
-            <DialogTitle>{copy.pickerTitle}</DialogTitle>
-            <DialogDescription>
-              {copy.pickerDescription} ({typeLabel(pickerType)})
-            </DialogDescription>
-          </DialogHeader>
-          <div className='space-y-4'>
-            <div className='relative'>
-              <Search className='pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
-              <Input
-                className='pl-9'
-                value={pickerSearch}
-                onChange={(event) => setPickerSearch(event.target.value)}
-                placeholder={copy.pickerSearch}
-              />
-            </div>
-            <div className='space-y-2'>
-              {pickerLoading ? (
-                <p className='py-8 text-center text-sm text-muted-foreground'>{dictionary.common.loading}</p>
-              ) : pickerItems.length === 0 ? (
-                <p className='py-8 text-center text-sm text-muted-foreground'>{copy.pickerEmpty}</p>
-              ) : (
-                pickerItems.map((question) => {
-                  const added = selectedShortIds.has(question.shortId.toUpperCase());
-                  return (
-                    <div
-                      key={question.id}
-                      className='flex items-start justify-between gap-3 rounded-xl border border-border/70 p-3'
-                    >
-                      <div className='min-w-0'>
-                        <p className='font-mono text-xs font-semibold text-primary'>{question.shortId}</p>
-                        <p className='mt-1 line-clamp-2 text-sm'>{question.content}</p>
-                      </div>
-                      <Button
-                        type='button'
-                        size='sm'
-                        variant={added ? 'outline' : 'default'}
-                        disabled={added}
-                        onClick={() => addShortId(pickerType, question.shortId)}
-                      >
-                        {added ? copy.pickerAdded : copy.pickerAdd}
-                      </Button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </div>

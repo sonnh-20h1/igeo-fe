@@ -19,6 +19,7 @@ export type Question = {
   correctAnswer?: string | null;
   explanation?: string;
   difficulty: QuestionDifficulty;
+  score?: number;
   tags: string[];
   categoryId?: string | null;
   createdDate?: string | Date;
@@ -53,6 +54,7 @@ export type CreateQuestionPayload = {
   correctAnswer?: string;
   explanation?: string;
   difficulty?: QuestionDifficulty;
+  score?: number;
   tags?: string[];
   categoryId?: string;
 };
@@ -66,6 +68,7 @@ export type UpdateQuestionPayload = {
   correctAnswer?: string;
   explanation?: string;
   difficulty?: QuestionDifficulty;
+  score?: number;
   tags?: string[];
   categoryId?: string | null;
 };

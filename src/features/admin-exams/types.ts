@@ -6,24 +6,26 @@ export type ExamQuestionSelectionMode = 'MANUAL' | 'RANDOM' | 'DYNAMIC';
 export type ExamTypeConfig = {
   type: QuestionType;
   selectionMode: ExamQuestionSelectionMode;
-  score: number;
+  /** Legacy score override, no longer settable from the exam form. Kept for reading old data. */
+  score?: number | null;
   /** Minutes per question for this type */
   durationMinutes?: number | null;
   count?: number | null;
   difficulty?: QuestionDifficulty | null;
   tags?: string[];
+  categoryIds?: string[];
+  /** Legacy manual question codes, no longer settable from the exam form. Kept for reading old data. */
   shortIds?: string[];
 };
 
 export type ExamTypeConfigPayload = {
   type: QuestionType;
   selectionMode: ExamQuestionSelectionMode;
-  score: number;
   durationMinutes?: number;
   count?: number;
   difficulty?: QuestionDifficulty;
   tags?: string[];
-  shortIds?: string[];
+  categoryIds?: string[];
 };
 
 export type ExamQuestionEntry = {

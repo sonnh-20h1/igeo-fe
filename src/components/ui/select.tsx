@@ -15,14 +15,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-lg border border-input bg-card px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-ring sm:h-11 sm:rounded-xl sm:text-sm",
+      "flex h-10 w-full items-center justify-between rounded-lg border border-input bg-card px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-ring sm:h-11 sm:rounded-xl sm:text-sm [&>span]:line-clamp-1 [&>span]:truncate [&>span]:text-left",
       className,
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="size-4 text-muted-foreground" />
+      <ChevronDown className="size-4 text-muted-foreground shrink-0 ml-2" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -37,6 +37,7 @@ const SelectContent = React.forwardRef<
       ref={ref}
       className={cn(
         "z-50 max-h-60 min-w-[8rem] overflow-hidden rounded-2xl border border-border bg-popover text-popover-foreground shadow-lg",
+        position === "popper" && "w-[var(--radix-select-trigger-width)]",
         className,
       )}
       position={position}

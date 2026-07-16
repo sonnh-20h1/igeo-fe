@@ -2,7 +2,7 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ClipboardCheck, Download, Unlock } from 'lucide-react';
+import { ClipboardCheck, Download, Unlock, Eye, Clock, CheckCircle2, Award, Lock, HelpCircle } from 'lucide-react';
 import { adminExamAttemptsApi } from '@/features/admin-exam-attempts/api';
 import {
   buildAttemptPdfLabelsFromCopy,
@@ -25,6 +25,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useNotification } from '@/components/ui/notification';
+import { Tooltip } from '@/components/ui/tooltip';
 
 function formatDateTime(value: string | Date | null | undefined, locale: string) {
   if (!value) return '—';
@@ -129,6 +130,38 @@ export default function AdminExamAttemptsPage() {
     }
   }
 
+  function renderStatusBadge(status: ExamAttemptStatus) {
+    const label = statusLabel(status);
+    let icon = <HelpCircle className="size-4" />;
+    let colorClass = "bg-slate-100 text-slate-700 border-slate-200";
+
+    if (status === 'IN_PROGRESS') {
+      icon = <Clock className="size-4 animate-pulse text-amber-600" />;
+      colorClass = "bg-amber-50 text-amber-700 border-amber-200";
+    } else if (status === 'SUBMITTED') {
+      icon = <CheckCircle2 className="size-4 text-emerald-600" />;
+      colorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+    } else if (status === 'GRADED') {
+      icon = <Award className="size-4 text-indigo-600" />;
+      colorClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
+    } else if (status === 'LOCKED') {
+      icon = <Lock className="size-4 text-rose-600" />;
+      colorClass = "bg-rose-50 text-rose-700 border-rose-200";
+    } else if (status === 'EXPIRED') {
+      icon = <Clock className="size-4 text-slate-400" />;
+      colorClass = "bg-slate-50 text-slate-500 border-slate-200";
+    }
+
+    return (
+      <Tooltip content={label}>
+        <Badge variant="outline" className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium text-xs select-none ${colorClass}`}>
+          {icon}
+          <span>{label}</span>
+        </Badge>
+      </Tooltip>
+    );
+  }
+
   return (
     <div className='space-y-6'>
       <div>
@@ -187,8 +220,8 @@ export default function AdminExamAttemptsPage() {
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='overflow-x-auto rounded-xl border border-border/70'>
-            <Table>
+          <div className='overflow-x-auto rounded-xl border border-border/70 scrollbar-thin'>
+            <Table className='min-w-[1000px]'>
               <TableHeader>
                 <TableRow>
                   <TableHead>{copy.colShortId}</TableHead>
@@ -234,8 +267,8 @@ export default function AdminExamAttemptsPage() {
                           <p className='text-xs text-muted-foreground'>{attempt.examId}</p>
                         ) : null}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant='outline'>{statusLabel(attempt.status)}</Badge>
+                      <TableCell className='whitespace-nowrap'>
+                        {renderStatusBadge(attempt.status)}
                       </TableCell>
                       <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
                         {formatDateTime(attempt.startedAt, locale)}
@@ -250,35 +283,41 @@ export default function AdminExamAttemptsPage() {
                               .replace('{max}', String(attempt.maxScore ?? 0))
                           : '—'}
                       </TableCell>
-                      <TableCell className='text-right'>
+                      <TableCell className='text-right whitespace-nowrap'>
                         <div className='flex justify-end gap-2'>
                           {attempt.status === 'LOCKED' ? (
-                            <Button
-                              size='sm'
-                              variant='default'
-                              className='gap-1'
-                              disabled={unlockingId === attempt.id}
-                              onClick={() => void handleUnlock(attempt.id)}
-                            >
-                              <Unlock className='size-3.5' />
-                              {unlockingId === attempt.id ? copy.unlocking : copy.unlock}
-                            </Button>
+                            <Tooltip content={unlockingId === attempt.id ? copy.unlocking : copy.unlock}>
+                              <Button
+                                size='icon'
+                                variant='outline'
+                                className='shrink-0'
+                                disabled={unlockingId === attempt.id}
+                                onClick={() => void handleUnlock(attempt.id)}
+                              >
+                                <Unlock className='size-4' />
+                              </Button>
+                            </Tooltip>
                           ) : null}
                           {isAttemptExportable(attempt.status) ? (
-                            <Button
-                              size='sm'
-                              variant='outline'
-                              className='gap-1'
-                              disabled={exportingId === attempt.id}
-                              onClick={() => void handleExportPdf(attempt.id)}
-                            >
-                              <Download className='size-3.5' />
-                              {exportingId === attempt.id ? copy.exportingPdf : copy.exportPdf}
-                            </Button>
+                            <Tooltip content={exportingId === attempt.id ? copy.exportingPdf : copy.exportPdf}>
+                              <Button
+                                size='icon'
+                                variant='outline'
+                                className='shrink-0'
+                                disabled={exportingId === attempt.id}
+                                onClick={() => void handleExportPdf(attempt.id)}
+                              >
+                                <Download className='size-4' />
+                              </Button>
+                            </Tooltip>
                           ) : null}
-                          <Button asChild size='sm' variant={attempt.status === 'LOCKED' ? 'outline' : 'default'}>
-                            <Link href={`/admin/exam-attempts/${attempt.id}`}>{copy.review}</Link>
-                          </Button>
+                          <Tooltip content={copy.review}>
+                            <Button asChild size='icon' variant={attempt.status === 'LOCKED' ? 'outline' : 'default'} className='shrink-0'>
+                              <Link href={`/admin/exam-attempts/${attempt.id}`}>
+                                <Eye className='size-4' />
+                              </Link>
+                            </Button>
+                          </Tooltip>
                         </div>
                       </TableCell>
                     </TableRow>

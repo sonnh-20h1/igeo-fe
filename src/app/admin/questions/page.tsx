@@ -62,6 +62,7 @@ type QuestionFormState = {
   correctAnswer: string;
   explanation: string;
   difficulty: QuestionDifficulty;
+  score: string;
   categoryId: string;
   tags: string;
 };
@@ -75,6 +76,7 @@ const emptyForm = (): QuestionFormState => ({
   correctAnswer: '',
   explanation: '',
   difficulty: 'MEDIUM',
+  score: '1',
   categoryId: '',
   tags: '',
 });
@@ -89,6 +91,7 @@ function toForm(question: Question): QuestionFormState {
     correctAnswer: question.correctAnswer ?? '',
     explanation: question.explanation ?? '',
     difficulty: question.difficulty ?? 'MEDIUM',
+    score: String(question.score ?? 1),
     categoryId: question.categoryId ?? '',
     tags: (question.tags ?? []).join(', '),
   };
@@ -289,6 +292,12 @@ export default function AdminQuestionsPage() {
       }
     }
 
+    const score = Number(form.score);
+    if (!Number.isFinite(score) || score < 0.1) {
+      setFormError(copy.invalidScore);
+      return;
+    }
+
     setSaving(true);
     try {
       const tags = parseTags(form.tags);
@@ -296,6 +305,7 @@ export default function AdminQuestionsPage() {
         content: form.content.trim(),
         type: form.type,
         difficulty: form.difficulty,
+        score,
         explanation: form.explanation.trim() || undefined,
         tags: tags.length ? tags : undefined,
         imageUrl: form.imageUrl.trim() || undefined,
@@ -552,6 +562,7 @@ export default function AdminQuestionsPage() {
                   <TableHead>{copy.colContent}</TableHead>
                   <TableHead>{copy.colType}</TableHead>
                   <TableHead>{copy.colDifficulty}</TableHead>
+                  <TableHead>{copy.colScore}</TableHead>
                   <TableHead>{copy.colCategory}</TableHead>
                   <TableHead>{copy.colTags}</TableHead>
                   <TableHead>{copy.colCreatedAt}</TableHead>
@@ -561,13 +572,13 @@ export default function AdminQuestionsPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={9} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={9} className='py-10 text-center text-muted-foreground'>
                       {copy.empty}
                     </TableCell>
                   </TableRow>
@@ -584,6 +595,7 @@ export default function AdminQuestionsPage() {
                       </TableCell>
                       <TableCell>{typeLabel(question.type)}</TableCell>
                       <TableCell>{difficultyLabel(question.difficulty)}</TableCell>
+                      <TableCell>{question.score ?? 1}</TableCell>
                       <TableCell className='text-sm text-muted-foreground'>
                         {categoryLabel(question.categoryId)}
                       </TableCell>
@@ -709,6 +721,18 @@ export default function AdminQuestionsPage() {
                     <SelectItem value='HARD'>{copy.difficultyHard}</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className='space-y-2'>
+                <Label>{copy.fieldScore}</Label>
+                <Input
+                  type='number'
+                  min={0.1}
+                  step={0.1}
+                  value={form.score}
+                  onChange={(event) => setForm((current) => ({ ...current, score: event.target.value }))}
+                  required
+                />
+                <p className='text-xs text-muted-foreground'>{copy.scoreHint}</p>
               </div>
             </div>
 
