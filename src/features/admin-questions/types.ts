@@ -20,6 +20,7 @@ export type Question = {
   explanation?: string;
   difficulty: QuestionDifficulty;
   tags: string[];
+  categoryId?: string | null;
   createdDate?: string | Date;
   updatedDate?: string | Date;
 };
@@ -39,6 +40,7 @@ export type ListQuestionsQuery = {
   search?: string;
   type?: QuestionType;
   difficulty?: QuestionDifficulty;
+  categoryId?: string;
   tag?: string;
 };
 
@@ -52,6 +54,7 @@ export type CreateQuestionPayload = {
   explanation?: string;
   difficulty?: QuestionDifficulty;
   tags?: string[];
+  categoryId?: string;
 };
 
 export type UpdateQuestionPayload = {
@@ -64,6 +67,7 @@ export type UpdateQuestionPayload = {
   explanation?: string;
   difficulty?: QuestionDifficulty;
   tags?: string[];
+  categoryId?: string | null;
 };
 
 export type QuestionImportError = {

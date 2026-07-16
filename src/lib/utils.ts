@@ -13,8 +13,8 @@ export function formatDate(date: string) {
   }).format(new Date(date));
 }
 
-export function formatCompactDate(date: Date) {
-  return new Intl.DateTimeFormat("vi-VN", {
+export function formatCompactDate(date: Date, locale: string = "vi") {
+  return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "vi-VN", {
     weekday: "long",
     day: "2-digit",
     month: "long",

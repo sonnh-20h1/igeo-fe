@@ -21,6 +21,14 @@ import { PaginationControls } from '@/components/ui/pagination-controls';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useNotification } from '@/components/ui/notification';
 
+function formatDateTime(value: string | Date | null | undefined, locale: string) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString(locale === 'en' ? 'en-US' : 'vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+}
+
 type UserFormState = {
   email: string;
   password: string;
@@ -63,7 +71,7 @@ function toForm(user: ManagedUser): UserFormState {
 }
 
 export default function AdminUsersPage() {
-  const { dictionary } = useI18n();
+  const { dictionary, locale } = useI18n();
   const { success, error: notifyError } = useNotification();
   const copy = dictionary.adminUsers;
 
@@ -259,19 +267,20 @@ export default function AdminUsersPage() {
                   <TableHead>{copy.colClass}</TableHead>
                   <TableHead>{copy.colSchool}</TableHead>
                   <TableHead>{copy.colStatus}</TableHead>
+                  <TableHead>{copy.colCreatedAt}</TableHead>
                   <TableHead className='text-right'>{copy.colActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
                       {copy.empty}
                     </TableCell>
                   </TableRow>
@@ -289,6 +298,9 @@ export default function AdminUsersPage() {
                           : user.activated
                             ? copy.statusActive
                             : copy.statusInactive}
+                      </TableCell>
+                      <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
+                        {formatDateTime(user.createdDate, locale)}
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='inline-flex gap-2'>

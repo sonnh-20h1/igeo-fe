@@ -13,6 +13,8 @@ import type {
   UpdateQuestionPayload,
 } from '@/features/admin-questions/types';
 import { createEmptyMcqOptions, normalizeQuestionOptions } from '@/features/admin-questions/types';
+import { adminCategoriesApi } from '@/features/admin-categories/api';
+import type { QuestionCategory } from '@/features/admin-categories/types';
 import { useI18n } from '@/features/i18n/provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +39,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useNotification } from '@/components/ui/notification';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { CategoriesPanel } from './categories-panel';
+
+
+function formatDateTime(value: string | Date | null | undefined, locale: string) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString(locale === 'en' ? 'en-US' : 'vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+}
+
+type QuestionsTab = 'questions' | 'categories';
 
 type QuestionFormState = {
   content: string;
@@ -47,6 +62,7 @@ type QuestionFormState = {
   correctAnswer: string;
   explanation: string;
   difficulty: QuestionDifficulty;
+  categoryId: string;
   tags: string;
 };
 
@@ -59,6 +75,7 @@ const emptyForm = (): QuestionFormState => ({
   correctAnswer: '',
   explanation: '',
   difficulty: 'MEDIUM',
+  categoryId: '',
   tags: '',
 });
 
@@ -72,6 +89,7 @@ function toForm(question: Question): QuestionFormState {
     correctAnswer: question.correctAnswer ?? '',
     explanation: question.explanation ?? '',
     difficulty: question.difficulty ?? 'MEDIUM',
+    categoryId: question.categoryId ?? '',
     tags: (question.tags ?? []).join(', '),
   };
 }
@@ -84,7 +102,7 @@ function parseTags(value: string) {
 }
 
 export default function AdminQuestionsPage() {
-  const { dictionary } = useI18n();
+  const { dictionary, locale } = useI18n();
   const { success, error: notifyError } = useNotification();
   const copy = dictionary.adminQuestions;
 
@@ -96,6 +114,8 @@ export default function AdminQuestionsPage() {
   const [searchInput, setSearchInput] = useState('');
   const [typeFilter, setTypeFilter] = useState<QuestionType | 'ALL'>('ALL');
   const [difficultyFilter, setDifficultyFilter] = useState<QuestionDifficulty | 'ALL'>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [categories, setCategories] = useState<QuestionCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -106,6 +126,7 @@ export default function AdminQuestionsPage() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<QuestionImportResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [activeTab, setActiveTab] = useState<QuestionsTab>('questions');
 
   const refresh = useCallback(() => {
     setReloadKey((current) => current + 1);
@@ -161,6 +182,23 @@ export default function AdminQuestionsPage() {
 
   useEffect(() => {
     let cancelled = false;
+    async function loadCategories() {
+      try {
+        const result = await adminCategoriesApi.list({ page: 1, size: 200 });
+        if (cancelled) return;
+        setCategories(result.items ?? []);
+      } catch {
+        // Category filter/form still usable without list
+      }
+    }
+    void loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
+
+  useEffect(() => {
+    let cancelled = false;
 
     async function loadQuestions() {
       startTransition(() => {
@@ -174,6 +212,7 @@ export default function AdminQuestionsPage() {
           search: search.trim() || undefined,
           type: typeFilter === 'ALL' ? undefined : typeFilter,
           difficulty: difficultyFilter === 'ALL' ? undefined : difficultyFilter,
+          categoryId: categoryFilter === 'ALL' ? undefined : categoryFilter,
         });
         if (cancelled) return;
         startTransition(() => {
@@ -192,7 +231,17 @@ export default function AdminQuestionsPage() {
     return () => {
       cancelled = true;
     };
-  }, [copy.loadFailed, difficultyFilter, notifyError, page, pageSize, reloadKey, search, typeFilter]);
+  }, [
+    categoryFilter,
+    copy.loadFailed,
+    difficultyFilter,
+    notifyError,
+    page,
+    pageSize,
+    reloadKey,
+    search,
+    typeFilter,
+  ]);
 
   function openCreate() {
     setEditingQuestion(null);
@@ -253,6 +302,7 @@ export default function AdminQuestionsPage() {
         audioUrl: form.audioUrl.trim() || undefined,
         options: form.type === 'MULTIPLE_CHOICE' ? cleanedOptions : undefined,
         correctAnswer: form.type === 'MULTIPLE_CHOICE' ? form.correctAnswer.trim() : undefined,
+        categoryId: form.categoryId.trim() || undefined,
       };
 
       if (editingQuestion) {
@@ -262,6 +312,7 @@ export default function AdminQuestionsPage() {
           audioUrl: form.audioUrl.trim() ? form.audioUrl.trim() : null,
           options: form.type === 'MULTIPLE_CHOICE' ? cleanedOptions : [],
           correctAnswer: form.type === 'MULTIPLE_CHOICE' ? form.correctAnswer.trim() : undefined,
+          categoryId: form.categoryId.trim() ? form.categoryId.trim() : null,
         };
         await adminQuestionsApi.update(editingQuestion.id, payload);
         success(copy.updated);
@@ -303,6 +354,14 @@ export default function AdminQuestionsPage() {
     return copy.difficultyMedium;
   }
 
+  function categoryLabel(categoryId?: string | null) {
+    if (!categoryId) return copy.noCategory;
+    const found = categories.find(
+      (item) => item.shortId === categoryId || item.id === categoryId,
+    );
+    return found?.name || categoryId;
+  }
+
   return (
     <div className='space-y-6'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
@@ -311,35 +370,62 @@ export default function AdminQuestionsPage() {
           <h1 className='mt-2 text-2xl font-semibold sm:text-3xl'>{copy.title}</h1>
           <p className='mt-2 max-w-2xl text-muted-foreground'>{copy.description}</p>
         </div>
-        <div className='flex flex-wrap gap-2'>
-          <Button type='button' variant='outline' className='gap-2' onClick={() => void handleDownloadTemplate()}>
-            <Download className='size-4' />
-            {copy.downloadTemplate}
-          </Button>
-          <Button
-            type='button'
-            variant='outline'
-            className='gap-2'
-            disabled={importing}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload className='size-4' />
-            {importing ? copy.importing : copy.importExcel}
-          </Button>
-          <input
-            ref={fileInputRef}
-            type='file'
-            accept='.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            className='hidden'
-            onChange={(event) => void handleImportFile(event)}
-          />
-          <Button onClick={openCreate} className='gap-2'>
-            <Plus className='size-4' />
-            {copy.create}
-          </Button>
-        </div>
+        {activeTab === 'questions' ? (
+          <div className='flex flex-wrap gap-2'>
+            <Button type='button' variant='outline' className='gap-2' onClick={() => void handleDownloadTemplate()}>
+              <Download className='size-4' />
+              {copy.downloadTemplate}
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              className='gap-2'
+              disabled={importing}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className='size-4' />
+              {importing ? copy.importing : copy.importExcel}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type='file'
+              accept='.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+              className='hidden'
+              onChange={(event) => void handleImportFile(event)}
+            />
+            <Button onClick={openCreate} className='gap-2'>
+              <Plus className='size-4' />
+              {copy.create}
+            </Button>
+          </div>
+        ) : null}
       </div>
 
+      <div className='flex gap-1 rounded-xl border border-border/70 bg-muted/30 p-1 sm:w-fit'>
+        <Button
+          type='button'
+          size='sm'
+          variant={activeTab === 'questions' ? 'default' : 'ghost'}
+          className={cn('flex-1 sm:flex-none', activeTab !== 'questions' && 'text-muted-foreground')}
+          onClick={() => setActiveTab('questions')}
+        >
+          {copy.tabQuestions}
+        </Button>
+        <Button
+          type='button'
+          size='sm'
+          variant={activeTab === 'categories' ? 'default' : 'ghost'}
+          className={cn('flex-1 sm:flex-none', activeTab !== 'categories' && 'text-muted-foreground')}
+          onClick={() => setActiveTab('categories')}
+        >
+          {copy.tabCategories}
+        </Button>
+      </div>
+
+      {activeTab === 'categories' ? <CategoriesPanel /> : null}
+
+      {activeTab === 'questions' ? (
+        <>
       {importResult ? (
         <Card>
           <CardHeader>
@@ -435,6 +521,25 @@ export default function AdminQuestionsPage() {
                   <SelectItem value='HARD'>{copy.difficultyHard}</SelectItem>
                 </SelectContent>
               </Select>
+              <Select
+                value={categoryFilter}
+                onValueChange={(value) => {
+                  setPage(1);
+                  setCategoryFilter(value);
+                }}
+              >
+                <SelectTrigger className='w-[200px]'>
+                  <SelectValue placeholder={copy.filterCategory} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='ALL'>{copy.filterAllCategories}</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.shortId}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
@@ -447,20 +552,22 @@ export default function AdminQuestionsPage() {
                   <TableHead>{copy.colContent}</TableHead>
                   <TableHead>{copy.colType}</TableHead>
                   <TableHead>{copy.colDifficulty}</TableHead>
+                  <TableHead>{copy.colCategory}</TableHead>
                   <TableHead>{copy.colTags}</TableHead>
+                  <TableHead>{copy.colCreatedAt}</TableHead>
                   <TableHead className='text-right'>{copy.colActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
                       {copy.empty}
                     </TableCell>
                   </TableRow>
@@ -477,6 +584,9 @@ export default function AdminQuestionsPage() {
                       </TableCell>
                       <TableCell>{typeLabel(question.type)}</TableCell>
                       <TableCell>{difficultyLabel(question.difficulty)}</TableCell>
+                      <TableCell className='text-sm text-muted-foreground'>
+                        {categoryLabel(question.categoryId)}
+                      </TableCell>
                       <TableCell>
                         <div className='flex flex-wrap gap-1'>
                           {(question.tags ?? []).slice(0, 3).map((tag) => (
@@ -485,6 +595,9 @@ export default function AdminQuestionsPage() {
                             </Badge>
                           ))}
                         </div>
+                      </TableCell>
+                      <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
+                        {formatDateTime(question.createdDate, locale)}
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='inline-flex gap-2'>
@@ -599,6 +712,31 @@ export default function AdminQuestionsPage() {
               </div>
             </div>
 
+            <div className='space-y-2'>
+              <Label>{copy.fieldCategory}</Label>
+              <Select
+                value={form.categoryId || 'NONE'}
+                onValueChange={(value) =>
+                  setForm((current) => ({
+                    ...current,
+                    categoryId: value === 'NONE' ? '' : value,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={copy.filterCategory} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='NONE'>{copy.noCategory}</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.shortId}>
+                      {category.name} ({category.shortId})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {form.type === 'MULTIPLE_CHOICE' ? (
               <div className='space-y-3'>
                 <Label>{copy.fieldOptions}</Label>
@@ -688,6 +826,8 @@ export default function AdminQuestionsPage() {
           </form>
         </DialogContent>
       </Dialog>
+        </>
+      ) : null}
     </div>
   );
 }

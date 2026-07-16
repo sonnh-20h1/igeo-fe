@@ -155,7 +155,7 @@ function SidebarContent() {
 }
 
 export function AppShellInner({ children }: { children: React.ReactNode }) {
-  const { dictionary } = useI18n();
+  const { dictionary, locale } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
   const { ready, user, signOut } = useAuth();
@@ -165,11 +165,10 @@ export function AppShellInner({ children }: { children: React.ReactNode }) {
     () => hasStoredAuth(),
     () => false,
   );
-  const today = React.useSyncExternalStore(
-    () => () => {},
-    () => formatCompactDate(new Date()),
-    () => '',
-  );
+  const [today, setToday] = React.useState('');
+  React.useEffect(() => {
+    setToday(formatCompactDate(new Date(), locale));
+  }, [locale]);
   const [accountMenuOpen, setAccountMenuOpen] = React.useState(false);
   const accountMenuRef = React.useRef<HTMLDivElement | null>(null);
   const displayName = getUserDisplayName(user);

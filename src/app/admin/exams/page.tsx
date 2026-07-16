@@ -38,6 +38,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useNotification } from '@/components/ui/notification';
 import { Badge } from '@/components/ui/badge';
+
+function formatDateTime(value: string | Date | null | undefined, locale: string) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString(locale === 'en' ? 'en-US' : 'vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+}
+
 import { cn } from '@/lib/utils';
 
 type TypeConfigForm = {
@@ -204,7 +213,7 @@ function expectedPrefix(type: QuestionType) {
 }
 
 export default function AdminExamsPage() {
-  const { dictionary } = useI18n();
+  const { dictionary, locale } = useI18n();
   const { success, error: notifyError } = useNotification();
   const copy = dictionary.adminExams;
 
@@ -571,19 +580,20 @@ export default function AdminExamsPage() {
                   <TableHead>{copy.colQuestionCount}</TableHead>
                   <TableHead>{copy.colTotalScore}</TableHead>
                   <TableHead>{copy.colTags}</TableHead>
+                  <TableHead>{copy.colCreatedAt}</TableHead>
                   <TableHead className='text-right'>{copy.colActions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={9} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={9} className='py-10 text-center text-muted-foreground'>
                       {copy.empty}
                     </TableCell>
                   </TableRow>
@@ -623,6 +633,9 @@ export default function AdminExamsPage() {
                             </Badge>
                           ))}
                         </div>
+                      </TableCell>
+                      <TableCell className='whitespace-nowrap text-sm text-muted-foreground'>
+                        {formatDateTime(exam.createdDate, locale)}
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='inline-flex gap-2'>
