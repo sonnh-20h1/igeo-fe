@@ -16,8 +16,7 @@ import type {
   ExamAttemptInProgress,
   ExamAttemptLockReason,
 } from '@/features/user-exam-attempts/types';
-import { hasExamSession, readExamCandidate } from '@/features/exam-session/storage';
-import { formatMessage } from '@/features/i18n/format';
+import { hasExamSession } from '@/features/exam-session/storage';
 import { userExamsApi } from '@/features/user-exams/api';
 import type { ExamUserDetail } from '@/features/user-exams/types';
 import { useI18n } from '@/features/i18n/provider';
@@ -333,7 +332,9 @@ export default function TakeAttemptPage() {
     inProgressRef.current = Boolean(attempt && attempt.status === 'IN_PROGRESS' && !submitting);
   }, [attempt, submitting]);
 
-  const antiCheatEnabled = Boolean(attempt && attempt.status === 'IN_PROGRESS' && !submitting);
+  const antiCheatEnabled = Boolean(
+    attempt && attempt.status === 'IN_PROGRESS' && !submitting && !exiting && !tabWarningOpen,
+  );
   const lastAntiCheatWarnRef = useRef(0);
   const warnAntiCheat = useCallback(
     (message: string) => {
@@ -519,11 +520,6 @@ export default function TakeAttemptPage() {
   const maxScore = exam?.totalScore ?? attempt.maxScore;
   const progressPercent =
     sortedAnswers.length > 0 ? Math.round((answeredCount / sortedAnswers.length) * 100) : 0;
-  const candidate = readExamCandidate();
-  const watermarkText = formatMessage(copy.screenshotWatermark, {
-    name: candidate?.fullName || '—',
-    id: candidate?.cccd || candidate?.email || attempt.shortId,
-  });
 
   return (
     <div
@@ -536,23 +532,6 @@ export default function TakeAttemptPage() {
       onPaste={(event) => event.preventDefault()}
       onContextMenu={(event) => event.preventDefault()}
     >
-      {/* Watermark — makes leaked captures identifiable */}
-      <div
-        aria-hidden
-        className='pointer-events-none fixed inset-0 z-[30] overflow-hidden opacity-[0.07]'
-      >
-        <div className='flex h-[200%] w-[200%] origin-center -translate-x-1/4 -translate-y-1/4 rotate-[-28deg] flex-wrap content-start gap-x-16 gap-y-20'>
-          {Array.from({ length: 48 }).map((_, index) => (
-            <span
-              key={index}
-              className='whitespace-nowrap font-mono text-sm font-semibold uppercase tracking-[0.2em] text-[#022648]'
-            >
-              {watermarkText}
-            </span>
-          ))}
-        </div>
-      </div>
-
       {privacyShield ? (
         <div
           className='fixed inset-0 z-[200] flex items-center justify-center bg-[#022648] px-6 text-center text-white transition-none'

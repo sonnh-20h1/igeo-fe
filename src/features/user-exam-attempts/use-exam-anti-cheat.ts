@@ -32,7 +32,6 @@ export function useExamAntiCheat({
   const [privacyShield, setPrivacyShield] = useState(false);
   const holdUntilRef = useRef(0);
   const releaseTimerRef = useRef<number | null>(null);
-  const lastModifierAtRef = useRef(0);
   const warnScreenshotRef = useRef(onScreenshotAttempt);
   const warnClipboardRef = useRef(onClipboardBlocked);
 
@@ -93,15 +92,9 @@ export function useExamAntiCheat({
       const mod = event.ctrlKey || event.metaKey;
       const typing = isTypingTarget(event.target);
 
-      // Pre-emptive: macOS often swallows Digit3/4/5 for screenshots — shield as soon as Cmd+Shift held
+      // Pre-emptive: macOS often swallows Digit3/4/5 — shield as soon as Cmd+Shift held
       if (event.metaKey && event.shiftKey && !event.altKey) {
-        lastModifierAtRef.current = Date.now();
         raiseShield({ warn: false, holdMs: 2200 });
-      }
-
-      // Windows/Linux: Ctrl+Shift may precede Snipping Tool / browser tools
-      if (event.ctrlKey && event.shiftKey && !event.metaKey) {
-        lastModifierAtRef.current = Date.now();
       }
 
       const isScreenshotCombo =
@@ -139,35 +132,20 @@ export function useExamAntiCheat({
 
       if (event.key === 'F12' || (mod && event.shiftKey && ['i', 'j', 'c'].includes(key))) {
         event.preventDefault();
-        raiseShield({ warn: false, holdMs: 1200 });
       }
     };
 
     const onKeyUp = (event: KeyboardEvent) => {
       if (event.key === 'Meta' || event.key === 'Shift' || event.key === 'Control') {
-        // Keep shield while screenshot UI may still be open
         if (Date.now() < holdUntilRef.current + 400) {
           raiseShield({ warn: false, holdMs: 1400 });
         }
       }
     };
 
-    const onBlur = () => {
-      // Snipping tools steal focus quickly after shortcut keys
-      const recentModifier = Date.now() - lastModifierAtRef.current < 800;
-      raiseShield({ warn: recentModifier, holdMs: recentModifier ? 2800 : 1200 });
-    };
-
+    // blur / visibilitychange: không che chống-chụp — đã khóa bài khi rời cửa sổ/app
     const onFocus = () => {
       if (Date.now() >= holdUntilRef.current && !document.hidden) {
-        setPrivacyShield(false);
-      }
-    };
-
-    const onVisibilityChange = () => {
-      if (document.hidden) {
-        raiseShield({ warn: false, holdMs: 3000 });
-      } else if (Date.now() >= holdUntilRef.current) {
         setPrivacyShield(false);
       }
     };
@@ -202,9 +180,7 @@ export function useExamAntiCheat({
     document.addEventListener('dragstart', onDragStart, true);
     document.addEventListener('keydown', onKeyDown, true);
     document.addEventListener('keyup', onKeyUp, true);
-    window.addEventListener('blur', onBlur);
     window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       document.removeEventListener('copy', blockClipboard, true);
@@ -214,9 +190,7 @@ export function useExamAntiCheat({
       document.removeEventListener('dragstart', onDragStart, true);
       document.removeEventListener('keydown', onKeyDown, true);
       document.removeEventListener('keyup', onKeyUp, true);
-      window.removeEventListener('blur', onBlur);
       window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
       if (releaseTimerRef.current != null) {
         window.clearTimeout(releaseTimerRef.current);
         releaseTimerRef.current = null;
