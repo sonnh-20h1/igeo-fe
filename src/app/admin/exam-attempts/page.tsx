@@ -366,16 +366,18 @@ export default function AdminExamAttemptsPage() {
                       </TableCell>
                       <TableCell className='text-right whitespace-nowrap'>
                         <div className='flex justify-end gap-2'>
-                          <Tooltip content={copy.dialogGradeTitle}>
-                            <Button
-                              size='icon'
-                              variant='outline'
-                              className='shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-50'
-                              onClick={() => handleOpenScorePublish(attempt)}
-                            >
-                              <Settings className='size-4' />
-                            </Button>
-                          </Tooltip>
+                          {attempt.status === 'SUBMITTED' ? (
+                            <Tooltip content={copy.dialogGradeTitle}>
+                              <Button
+                                size='icon'
+                                variant='outline'
+                                className='shrink-0 text-amber-600 hover:text-amber-700 hover:bg-amber-50'
+                                onClick={() => handleOpenScorePublish(attempt)}
+                              >
+                                <Settings className='size-4' />
+                              </Button>
+                            </Tooltip>
+                          ) : null}
                           {attempt.status === 'LOCKED' ? (
                             <Tooltip content={unlockingId === attempt.id ? copy.unlocking : copy.unlock}>
                               <Button

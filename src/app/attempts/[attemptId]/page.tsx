@@ -735,21 +735,25 @@ export default function TakeAttemptPage() {
               {current.question?.content}
             </p>
 
-            {current.question?.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={current.question.imageUrl}
-                alt=''
-                draggable={false}
-                onContextMenu={(event) => event.preventDefault()}
-                className='pointer-events-none max-h-80 w-full select-none rounded-xl border border-[#022648]/15 object-contain bg-[#f7efe4]'
-              />
+            {current.question?.imageUrl?.trim() ? (
+              <div className='overflow-hidden rounded-xl border border-[#022648]/15 bg-[#f7efe4]'>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={current.question.imageUrl}
+                  alt=''
+                  draggable={false}
+                  onContextMenu={(event) => event.preventDefault()}
+                  className='pointer-events-none mx-auto max-h-80 w-full select-none object-contain'
+                />
+              </div>
             ) : null}
 
-            {current.question?.audioUrl ? (
-              <audio controls className='w-full' src={current.question.audioUrl}>
-                <track kind='captions' />
-              </audio>
+            {current.question?.audioUrl?.trim() ? (
+              <div className='rounded-xl border border-[#022648]/15 bg-[#f7efe4] p-3'>
+                <audio controls className='w-full' src={current.question.audioUrl} preload='metadata'>
+                  <track kind='captions' />
+                </audio>
+              </div>
             ) : null}
 
             {currentQuestionLocked ? (

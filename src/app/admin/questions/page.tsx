@@ -1,7 +1,7 @@
 'use client';
 
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
-import { BookOpen, Download, Pencil, Plus, Search, Trash2, Upload, Eye } from 'lucide-react';
+import { BookOpen, Download, Pencil, Plus, Search, Trash2, Upload, Eye, FileText, Image, Music } from 'lucide-react';
 import { adminQuestionsApi } from '@/features/admin-questions/api';
 import type {
   CreateQuestionPayload,
@@ -130,12 +130,57 @@ export default function AdminQuestionsPage() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<QuestionImportResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const audioInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
   const [activeTab, setActiveTab] = useState<QuestionsTab>('questions');
   const [previewQuestion, setPreviewQuestion] = useState<Question | null>(null);
+  const [formTab, setFormTab] = useState<'content' | 'media'>('content');
 
   const refresh = useCallback(() => {
     setReloadKey((current) => current + 1);
   }, []);
+
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const res = await adminQuestionsApi.uploadFile(file, 'questions');
+      setForm((current) => ({ ...current, imageUrl: res.url }));
+      success(copy.uploadSuccess);
+    } catch (err: any) {
+      notifyError(
+        err instanceof Error ? err.message : copy.uploadFailed,
+        copy.uploadFailed,
+      );
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
+  async function handleAudioUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setUploadingAudio(true);
+    try {
+      const res = await adminQuestionsApi.uploadFile(file, 'questions');
+      setForm((current) => ({ ...current, audioUrl: res.url }));
+      success(copy.uploadSuccess);
+    } catch (err: any) {
+      notifyError(
+        err instanceof Error ? err.message : copy.uploadFailed,
+        copy.uploadFailed,
+      );
+    } finally {
+      setUploadingAudio(false);
+    }
+  }
 
   async function handleDownloadTemplate() {
     try {
@@ -252,6 +297,7 @@ export default function AdminQuestionsPage() {
     setEditingQuestion(null);
     setForm(emptyForm());
     setFormError(null);
+    setFormTab('content');
     setDialogOpen(true);
   }
 
@@ -259,6 +305,7 @@ export default function AdminQuestionsPage() {
     setEditingQuestion(question);
     setForm(toForm(question));
     setFormError(null);
+    setFormTab('content');
     setDialogOpen(true);
   }
 
@@ -674,188 +721,381 @@ export default function AdminQuestionsPage() {
           </DialogHeader>
 
           <form className='space-y-4' onSubmit={(event) => void submitForm(event)}>
-            {editingQuestion?.shortId ? (
-              <div className='space-y-2'>
-                <Label>{copy.fieldShortId}</Label>
-                <Input value={editingQuestion.shortId} readOnly className='font-mono' />
-              </div>
-            ) : null}
-
-            <div className='space-y-2'>
-              <Label>{copy.fieldContent}</Label>
-              <Textarea
-                value={form.content}
-                onChange={(event) => setForm((current) => ({ ...current, content: event.target.value }))}
-                rows={4}
-                required
-              />
-            </div>
-
-            <div className='grid gap-4 sm:grid-cols-2'>
-              <div className='space-y-2'>
-                <Label>{copy.fieldType}</Label>
-                <Select
-                  value={form.type}
-                  onValueChange={(value) =>
-                    setForm((current) => ({
-                      ...current,
-                      type: value as QuestionType,
-                      options:
-                        value === 'MULTIPLE_CHOICE'
-                          ? normalizeQuestionOptions(current.options)
-                          : current.options,
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='MULTIPLE_CHOICE'>{copy.typeMultipleChoice}</SelectItem>
-                    <SelectItem value='ESSAY'>{copy.typeEssay}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className='space-y-2'>
-                <Label>{copy.fieldDifficulty}</Label>
-                <Select
-                  value={form.difficulty}
-                  onValueChange={(value) =>
-                    setForm((current) => ({ ...current, difficulty: value as QuestionDifficulty }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='EASY'>{copy.difficultyEasy}</SelectItem>
-                    <SelectItem value='MEDIUM'>{copy.difficultyMedium}</SelectItem>
-                    <SelectItem value='HARD'>{copy.difficultyHard}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className='space-y-2'>
-                <Label>{copy.fieldScore}</Label>
-                <Input
-                  type='number'
-                  min={0.1}
-                  step={0.1}
-                  value={form.score}
-                  onChange={(event) => setForm((current) => ({ ...current, score: event.target.value }))}
-                  required
-                />
-                <p className='text-xs text-muted-foreground'>{copy.scoreHint}</p>
-              </div>
-            </div>
-
-            <div className='space-y-2'>
-              <Label>{copy.fieldCategory}</Label>
-              <Select
-                value={form.categoryId || 'NONE'}
-                onValueChange={(value) =>
-                  setForm((current) => ({
-                    ...current,
-                    categoryId: value === 'NONE' ? '' : value,
-                  }))
-                }
+            {/* Tabs Header inside the Dialog */}
+            <div className='flex bg-muted/60 p-1 rounded-xl gap-1 mb-5 border border-border/20'>
+              <Button
+                type='button'
+                variant='ghost'
+                className={cn(
+                  'flex-1 py-2 h-auto rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-none border-none hover:bg-background/40',
+                  formTab === 'content'
+                    ? 'bg-background text-[#022648] shadow-sm hover:bg-background'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+                onClick={() => setFormTab('content')}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder={copy.filterCategory} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='NONE'>{copy.noCategory}</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.shortId}>
-                      {category.name} ({category.shortId})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <FileText className='size-4' />
+                {copy.tabQuestionInfo}
+              </Button>
+              <Button
+                type='button'
+                variant='ghost'
+                className={cn(
+                  'flex-1 py-2 h-auto rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-none border-none hover:bg-background/40',
+                  formTab === 'media'
+                    ? 'bg-background text-[#022648] shadow-sm hover:bg-background'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+                onClick={() => setFormTab('media')}
+              >
+                <Image className='size-4' />
+                {copy.tabMedia}
+                {(form.imageUrl || form.audioUrl) && (
+                  <Badge variant='secondary' className='px-1.5 py-0.5 text-[10px] bg-emerald-100 text-emerald-800 border-none shrink-0 font-bold'>
+                    ✓
+                  </Badge>
+                )}
+              </Button>
             </div>
 
-            {form.type === 'MULTIPLE_CHOICE' ? (
-              <div className='space-y-3'>
-                <Label>{copy.fieldOptions}</Label>
-                {form.options.map((option) => (
-                  <div key={option.key} className='flex items-center gap-2'>
-                    <div className='flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40 text-sm font-semibold'>
-                      {option.key}
-                    </div>
-                    <Input
-                      value={option.text}
-                      onChange={(event) => updateOptionText(option.key, event.target.value)}
-                      placeholder={`${copy.optionPlaceholder} ${option.key}`}
-                    />
+            {formTab === 'content' && (
+              <div className='space-y-4 animate-in fade-in duration-200'>
+                {editingQuestion?.shortId ? (
+                  <div className='space-y-2'>
+                    <Label>{copy.fieldShortId}</Label>
+                    <Input value={editingQuestion.shortId} readOnly className='font-mono bg-muted/30' />
                   </div>
-                ))}
+                ) : null}
+
                 <div className='space-y-2'>
-                  <Label>{copy.fieldCorrectAnswer}</Label>
+                  <Label className='font-semibold text-sm text-[#022648]'>{copy.fieldContent}</Label>
+                  <Textarea
+                    value={form.content}
+                    onChange={(event) => setForm((current) => ({ ...current, content: event.target.value }))}
+                    rows={4}
+                    required
+                    className='focus-visible:ring-primary'
+                  />
+                </div>
+
+                <div className='grid gap-4 sm:grid-cols-2'>
+                  <div className='space-y-2'>
+                    <Label className='font-semibold text-xs sm:text-sm text-[#022648]'>{copy.fieldType}</Label>
+                    <Select
+                      value={form.type}
+                      onValueChange={(value) =>
+                        setForm((current) => ({
+                          ...current,
+                          type: value as QuestionType,
+                          options:
+                            value === 'MULTIPLE_CHOICE'
+                              ? normalizeQuestionOptions(current.options)
+                              : current.options,
+                        }))
+                      }
+                    >
+                      <SelectTrigger className='focus:ring-primary'>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='MULTIPLE_CHOICE'>{copy.typeMultipleChoice}</SelectItem>
+                        <SelectItem value='ESSAY'>{copy.typeEssay}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='font-semibold text-xs sm:text-sm text-[#022648]'>{copy.fieldDifficulty}</Label>
+                    <Select
+                      value={form.difficulty}
+                      onValueChange={(value) =>
+                        setForm((current) => ({ ...current, difficulty: value as QuestionDifficulty }))
+                      }
+                    >
+                      <SelectTrigger className='focus:ring-primary'>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='EASY'>{copy.difficultyEasy}</SelectItem>
+                        <SelectItem value='MEDIUM'>{copy.difficultyMedium}</SelectItem>
+                        <SelectItem value='HARD'>{copy.difficultyHard}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className='space-y-2 sm:col-span-2'>
+                    <Label className='font-semibold text-xs sm:text-sm text-[#022648]'>{copy.fieldScore}</Label>
+                    <Input
+                      type='number'
+                      min={0.1}
+                      step={0.1}
+                      value={form.score}
+                      onChange={(event) => setForm((current) => ({ ...current, score: event.target.value }))}
+                      required
+                      className='focus-visible:ring-primary'
+                    />
+                    <p className='text-xs text-muted-foreground'>{copy.scoreHint}</p>
+                  </div>
+                </div>
+
+                <div className='space-y-2'>
+                  <Label className='font-semibold text-sm text-[#022648]'>{copy.fieldCategory}</Label>
                   <Select
-                    value={form.correctAnswer || undefined}
-                    onValueChange={(value) => setForm((current) => ({ ...current, correctAnswer: value }))}
+                    value={form.categoryId || 'NONE'}
+                    onValueChange={(value) =>
+                      setForm((current) => ({
+                        ...current,
+                        categoryId: value === 'NONE' ? '' : value,
+                      }))
+                    }
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder={copy.selectCorrectAnswer} />
+                    <SelectTrigger className='focus:ring-primary'>
+                      <SelectValue placeholder={copy.filterCategory} />
                     </SelectTrigger>
                     <SelectContent>
-                      {form.options.map((option) => (
-                        <SelectItem key={option.key} value={option.key}>
-                          {option.key}
-                          {option.text.trim() ? ` — ${option.text.trim()}` : ''}
+                      <SelectItem value='NONE'>{copy.noCategory}</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.shortId}>
+                          {category.name} ({category.shortId})
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+
+                {form.type === 'MULTIPLE_CHOICE' ? (
+                  <div className='space-y-4 rounded-xl border border-border p-4 bg-muted/10'>
+                    <div className='flex items-center justify-between border-b border-border/60 pb-2 mb-2'>
+                      <Label className='font-semibold text-sm text-[#022648] flex items-center gap-1.5'>
+                        <BookOpen className='size-4 text-primary' />
+                        {copy.fieldOptions}
+                      </Label>
+                    </div>
+                    <div className='grid gap-3'>
+                      {form.options.map((option) => (
+                        <div key={option.key} className='flex items-center gap-2.5'>
+                          <div className='flex size-10 shrink-0 items-center justify-center rounded-lg border border-border/80 bg-background text-sm font-bold text-[#022648] shadow-sm'>
+                            {option.key}
+                          </div>
+                          <Input
+                            value={option.text}
+                            onChange={(event) => updateOptionText(option.key, event.target.value)}
+                            placeholder={`${copy.optionPlaceholder} ${option.key}`}
+                            className='bg-background shadow-none border-border/80 focus-visible:ring-primary'
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className='space-y-2 pt-2 border-t border-border/60 mt-3'>
+                      <Label className='text-xs font-semibold text-muted-foreground'>{copy.fieldCorrectAnswer}</Label>
+                      <Select
+                        value={form.correctAnswer || undefined}
+                        onValueChange={(value) => setForm((current) => ({ ...current, correctAnswer: value }))}
+                      >
+                        <SelectTrigger className='bg-background border-border/80 shadow-none focus:ring-primary'>
+                          <SelectValue placeholder={copy.selectCorrectAnswer} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {form.options.map((option) => (
+                            <SelectItem key={option.key} value={option.key}>
+                              <span className='font-bold mr-1.5'>{option.key}</span>
+                              {option.text.trim() ? ` — ${option.text.trim()}` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className='space-y-2'>
+                  <Label className='font-semibold text-sm text-[#022648]'>{copy.fieldExplanation}</Label>
+                  <Textarea
+                    value={form.explanation}
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, explanation: event.target.value }))
+                    }
+                    rows={3}
+                    className='focus-visible:ring-primary'
+                  />
+                </div>
+
+                <div className='space-y-2'>
+                  <Label className='font-semibold text-sm text-[#022648]'>{copy.fieldTags}</Label>
+                  <Input
+                    value={form.tags}
+                    onChange={(event) => setForm((current) => ({ ...current, tags: event.target.value }))}
+                    placeholder={copy.tagsPlaceholder}
+                    className='focus-visible:ring-primary'
+                  />
+                </div>
               </div>
-            ) : null}
+            )}
 
-            <div className='space-y-2'>
-              <Label>{copy.fieldExplanation}</Label>
-              <Textarea
-                value={form.explanation}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, explanation: event.target.value }))
-                }
-                rows={3}
-              />
-            </div>
-
-            <div className='grid gap-4 sm:grid-cols-2'>
-              <div className='space-y-2'>
-                <Label>{copy.fieldImageUrl}</Label>
-                <Input
-                  value={form.imageUrl}
-                  onChange={(event) => setForm((current) => ({ ...current, imageUrl: event.target.value }))}
-                  placeholder='https://...'
+            {formTab === 'media' && (
+              <div className='space-y-6 animate-in fade-in duration-200'>
+                <input
+                  type='file'
+                  accept='image/*'
+                  className='hidden'
+                  ref={imageInputRef}
+                  onChange={handleImageUpload}
                 />
-              </div>
-              <div className='space-y-2'>
-                <Label>{copy.fieldAudioUrl}</Label>
-                <Input
-                  value={form.audioUrl}
-                  onChange={(event) => setForm((current) => ({ ...current, audioUrl: event.target.value }))}
-                  placeholder='https://...'
+                <input
+                  type='file'
+                  accept='audio/*'
+                  className='hidden'
+                  ref={audioInputRef}
+                  onChange={handleAudioUpload}
                 />
-              </div>
-            </div>
 
-            <div className='space-y-2'>
-              <Label>{copy.fieldTags}</Label>
-              <Input
-                value={form.tags}
-                onChange={(event) => setForm((current) => ({ ...current, tags: event.target.value }))}
-                placeholder={copy.tagsPlaceholder}
-              />
-            </div>
+                {/* Image Section */}
+                <div className='space-y-3 rounded-xl border border-border/80 p-5 bg-background shadow-sm'>
+                  <div className='flex items-center justify-between'>
+                    <Label className='font-bold text-sm text-[#022648] flex items-center gap-1.5'>
+                      <Image className='size-4 text-primary' />
+                      {locale === 'en' ? 'Image' : 'Hình ảnh'}
+                    </Label>
+                    {form.imageUrl ? (
+                      <div className='flex items-center gap-1'>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='sm'
+                          className='h-7 text-xs'
+                          disabled={uploadingImage}
+                          onClick={() => imageInputRef.current?.click()}
+                        >
+                          <Upload className='mr-1 size-3.5' />
+                          {uploadingImage ? copy.uploadingFile : (locale === 'en' ? 'Replace' : 'Đổi ảnh')}
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='sm'
+                          className='h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-2'
+                          onClick={() => setForm((current) => ({ ...current, imageUrl: '' }))}
+                        >
+                          <Trash2 className='mr-1 size-3.5' />
+                          {locale === 'en' ? 'Remove' : 'Xóa'}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {form.imageUrl ? (
+                    <div className='overflow-hidden rounded-xl border border-border bg-black/[0.02] p-3 flex items-center justify-center min-h-[160px] max-h-[300px]'>
+                      <img
+                        src={form.imageUrl}
+                        alt='Uploaded preview'
+                        className='max-h-[260px] object-contain rounded-lg'
+                      />
+                    </div>
+                  ) : (
+                    <button
+                      type='button'
+                      disabled={uploadingImage}
+                      onClick={() => imageInputRef.current?.click()}
+                      className='w-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 p-8 text-center text-muted-foreground min-h-[160px] disabled:opacity-60'
+                    >
+                      <div className='rounded-full bg-primary/5 p-3 mb-2 text-primary'>
+                        {uploadingImage ? (
+                          <Upload className='size-6 animate-pulse' />
+                        ) : (
+                          <Image className='size-6' />
+                        )}
+                      </div>
+                      <p className='text-sm font-semibold text-foreground mb-1'>
+                        {uploadingImage
+                          ? copy.uploadingFile
+                          : locale === 'en'
+                            ? 'Click to upload image'
+                            : 'Nhấp để tải ảnh lên'}
+                      </p>
+                      <p className='text-xs text-muted-foreground max-w-[280px]'>
+                        {locale === 'en'
+                          ? 'JPEG, PNG, GIF, WEBP, SVG · max 10MB'
+                          : 'JPEG, PNG, GIF, WEBP, SVG · tối đa 10MB'}
+                      </p>
+                    </button>
+                  )}
+                </div>
+
+                {/* Audio Section */}
+                <div className='space-y-3 rounded-xl border border-border/80 p-5 bg-background shadow-sm'>
+                  <div className='flex items-center justify-between'>
+                    <Label className='font-bold text-sm text-[#022648] flex items-center gap-1.5'>
+                      <Music className='size-4 text-primary' />
+                      {locale === 'en' ? 'Audio' : 'Âm thanh'}
+                    </Label>
+                    {form.audioUrl ? (
+                      <div className='flex items-center gap-1'>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='sm'
+                          className='h-7 text-xs'
+                          disabled={uploadingAudio}
+                          onClick={() => audioInputRef.current?.click()}
+                        >
+                          <Upload className='mr-1 size-3.5' />
+                          {uploadingAudio ? copy.uploadingFile : (locale === 'en' ? 'Replace' : 'Đổi audio')}
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='sm'
+                          className='h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-2'
+                          onClick={() => setForm((current) => ({ ...current, audioUrl: '' }))}
+                        >
+                          <Trash2 className='mr-1 size-3.5' />
+                          {locale === 'en' ? 'Remove' : 'Xóa'}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {form.audioUrl ? (
+                    <div className='rounded-xl border border-border bg-black/[0.02] p-4'>
+                      <audio controls src={form.audioUrl} className='w-full' />
+                    </div>
+                  ) : (
+                    <button
+                      type='button'
+                      disabled={uploadingAudio}
+                      onClick={() => audioInputRef.current?.click()}
+                      className='w-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 p-8 text-center text-muted-foreground min-h-[140px] disabled:opacity-60'
+                    >
+                      <div className='rounded-full bg-primary/5 p-3 mb-2 text-primary'>
+                        {uploadingAudio ? (
+                          <Upload className='size-6 animate-pulse' />
+                        ) : (
+                          <Music className='size-6' />
+                        )}
+                      </div>
+                      <p className='text-sm font-semibold text-foreground mb-1'>
+                        {uploadingAudio
+                          ? copy.uploadingFile
+                          : locale === 'en'
+                            ? 'Click to upload audio'
+                            : 'Nhấp để tải âm thanh lên'}
+                      </p>
+                      <p className='text-xs text-muted-foreground max-w-[280px]'>
+                        {locale === 'en'
+                          ? 'MP3, WAV, OGG, M4A, AAC · max 10MB'
+                          : 'MP3, WAV, OGG, M4A, AAC · tối đa 10MB'}
+                      </p>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             {formError ? <p className='text-sm text-red-600'>{formError}</p> : null}
 
-            <div className='flex justify-end gap-3 pt-2'>
+            <div className='flex justify-end gap-3 pt-4 border-t border-border/60 mt-6'>
               <Button type='button' variant='outline' onClick={() => setDialogOpen(false)}>
                 {dictionary.profile.cancel}
               </Button>
-              <Button type='submit' disabled={saving}>
+              <Button type='submit' disabled={saving} className='bg-[#022648] hover:bg-[#022648]/90 text-white'>
                 {saving ? dictionary.common.loading : dictionary.common.save}
               </Button>
             </div>

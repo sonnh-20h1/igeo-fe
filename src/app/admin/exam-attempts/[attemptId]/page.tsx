@@ -343,6 +343,19 @@ export default function AdminExamAttemptDetailPage() {
               </CardHeader>
               <CardContent className='space-y-3 text-sm'>
                 <p className='whitespace-pre-wrap'>{item.question?.content}</p>
+                {item.question?.imageUrl?.trim() ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.question.imageUrl}
+                    alt=''
+                    className='max-h-72 w-full rounded-xl border border-border object-contain bg-muted/20'
+                  />
+                ) : null}
+                {item.question?.audioUrl?.trim() ? (
+                  <audio controls className='w-full' src={item.question.audioUrl}>
+                    <track kind='captions' />
+                  </audio>
+                ) : null}
                 {item.type === 'MULTIPLE_CHOICE' && item.question?.options?.length ? (
                   <ul className='space-y-1 text-muted-foreground'>
                     {item.question.options.map((option) => (

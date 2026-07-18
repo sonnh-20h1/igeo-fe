@@ -103,4 +103,15 @@ export const adminQuestionsApi = {
       body: formData,
     });
   },
+
+  uploadFile(file: File, folder = 'questions') {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiRequest<{ url: string; key: string }>('/admin/upload', {
+      method: 'POST',
+      token: requireToken(),
+      body: formData,
+      query: { folder },
+    });
+  },
 };
