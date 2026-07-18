@@ -751,7 +751,7 @@ export default function AdminQuestionsPage() {
                 <Image className='size-4' />
                 {copy.tabMedia}
                 {(form.imageUrl || form.audioUrl) && (
-                  <Badge variant='secondary' className='px-1.5 py-0.5 text-[10px] bg-emerald-100 text-emerald-800 border-none shrink-0 font-bold'>
+                  <Badge variant='success' className='px-1.5 py-0.5 text-[10px] shrink-0 font-bold'>
                     ✓
                   </Badge>
                 )}
