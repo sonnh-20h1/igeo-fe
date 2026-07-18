@@ -696,7 +696,14 @@ function CurrentPeriodPanel({
             </div>
 
             <div className='space-y-3 border-t border-border/60 pt-4'>
-              {exams.map((exam) => (
+              {exams.map((exam) => {
+                const maxAttempts = exam.maxAttempts ?? 1;
+                const attemptCount = exam.attemptCount ?? (exam.hasAttempted ? 1 : 0);
+                const remainingAttempts =
+                  exam.remainingAttempts ?? Math.max(0, maxAttempts - attemptCount);
+                const canStartNew = remainingAttempts > 0;
+
+                return (
                 <div
                   key={exam.id || exam.shortId}
                   className='flex flex-col gap-4 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between'
@@ -707,8 +714,11 @@ function CurrentPeriodPanel({
                       <Badge variant='outline' className='font-mono text-[11px]'>
                         {exam.shortId}
                       </Badge>
-                      {exam.hasAttempted ? (
+                      {attemptCount > 0 ? (
                         <Badge className='bg-secondary text-foreground'>{copy.attempted}</Badge>
+                      ) : null}
+                      {!canStartNew ? (
+                        <Badge variant='outline'>{copy.noAttemptsLeft}</Badge>
                       ) : null}
                       {exam.hasDynamicQuestions ? (
                         <Badge variant='outline'>{copy.dynamicBadge}</Badge>
@@ -723,6 +733,11 @@ function CurrentPeriodPanel({
                       <span>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</span>
                       <span>{copy.questions.replace('{n}', String(exam.questionCount))}</span>
                       <span>{copy.totalScore.replace('{n}', String(exam.totalScore))}</span>
+                      <span>
+                        {copy.attemptsLeft
+                          .replace('{remaining}', String(remainingAttempts))
+                          .replace('{max}', String(maxAttempts))}
+                      </span>
                     </div>
                     {exam.hasDynamicQuestions ? (
                       <p className='mt-2 text-xs text-muted-foreground'>{copy.dynamicHint}</p>
@@ -740,13 +755,16 @@ function CurrentPeriodPanel({
                       <Play className='size-4' />
                       {startingId === exam.id
                         ? loadingLabel
-                        : exam.hasAttempted
-                          ? copy.retake
-                          : copy.start}
+                        : canStartNew
+                          ? attemptCount > 0
+                            ? copy.retake
+                            : copy.start
+                          : copy.continueExam}
                     </Button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

@@ -1,7 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME, type Locale } from './config';
+import {
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE_NAME,
+  setCurrentLocale,
+  type Locale,
+} from './config';
 import { dictionaries, type Dictionary } from './dictionaries';
 
 type I18nContextValue = {
@@ -26,8 +31,13 @@ export function I18nProvider({
   const [locale, setLocaleState] = React.useState<Locale>(initialLocale);
 
   React.useEffect(() => {
+    setCurrentLocale(initialLocale);
+  }, [initialLocale]);
+
+  React.useEffect(() => {
     document.documentElement.lang = locale;
     setCookie(locale);
+    setCurrentLocale(locale);
   }, [locale]);
 
   const value = React.useMemo<I18nContextValue>(

@@ -1,3 +1,4 @@
+import { getApiLang, getCurrentLocale } from '@/features/i18n/config';
 import { API_BASE_URL } from './config';
 
 export class ApiError extends Error {
@@ -41,6 +42,42 @@ function unwrapPayload<T>(payload: unknown): T {
   return payload as T;
 }
 
+function extractErrorMessage(payload: unknown, fallback: string): string {
+  if (typeof payload === 'string' && payload.trim()) {
+    return payload;
+  }
+
+  if (!payload || typeof payload !== 'object' || !('message' in payload)) {
+    return fallback;
+  }
+
+  const message = (payload as { message: unknown }).message;
+  if (typeof message === 'string' && message.trim()) {
+    return message;
+  }
+  if (Array.isArray(message)) {
+    const first = message.find((item) => typeof item === 'string' && item.trim());
+    if (typeof first === 'string') {
+      return first;
+    }
+  }
+
+  return fallback;
+}
+
+function defaultApiErrorMessage() {
+  return getCurrentLocale() === 'en' ? 'API request failed' : 'Yêu cầu tới API thất bại';
+}
+
+/** Headers for backend nestjs-i18n (`vn` | `en`). */
+export function getApiLocaleHeaders(): Record<string, string> {
+  const lang = getApiLang();
+  return {
+    'x-lang': lang,
+    'Accept-Language': lang === 'en' ? 'en' : 'vi,vn;q=0.9',
+  };
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, token, examSession, query } = options;
   const searchParams = new URLSearchParams();
@@ -62,6 +99,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     method,
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...getApiLocaleHeaders(),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(examSession ? { 'x-exam-session': examSession } : {}),
     },
@@ -72,15 +110,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const payload = await parseResponse(response);
 
   if (!response.ok) {
-    const message =
-      typeof payload === 'object' &&
-      payload !== null &&
-      'message' in payload &&
-      typeof payload.message === 'string'
-        ? payload.message
-        : 'Yêu cầu tới API thất bại';
-
-    throw new ApiError(message, response.status, payload);
+    throw new ApiError(extractErrorMessage(payload, defaultApiErrorMessage()), response.status, payload);
   }
 
   return unwrapPayload<T>(payload);

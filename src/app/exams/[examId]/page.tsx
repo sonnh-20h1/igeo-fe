@@ -139,6 +139,12 @@ export default function UserExamDetailPage() {
     );
   }
 
+  const maxAttempts = exam.maxAttempts ?? 1;
+  const attemptCount = exam.attemptCount ?? (exam.hasAttempted ? 1 : 0);
+  const remainingAttempts =
+    exam.remainingAttempts ?? Math.max(0, maxAttempts - attemptCount);
+  const canStartNew = remainingAttempts > 0;
+
   return (
     <ExamDetailChrome>
       <div className='mx-auto max-w-5xl space-y-6 px-4 pb-10 sm:px-6'>
@@ -156,8 +162,11 @@ export default function UserExamDetailPage() {
               <Badge variant='outline' className='font-mono'>
                 {exam.shortId}
               </Badge>
-              {exam.hasAttempted ? (
+              {attemptCount > 0 ? (
                 <Badge className='bg-secondary text-foreground'>{copy.attempted}</Badge>
+              ) : null}
+              {!canStartNew ? (
+                <Badge variant='outline'>{copy.noAttemptsLeft}</Badge>
               ) : null}
               {exam.hasDynamicQuestions ? (
                 <Badge variant='outline'>{copy.dynamicBadge}</Badge>
@@ -170,6 +179,11 @@ export default function UserExamDetailPage() {
               <span>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</span>
               <span>{copy.questions.replace('{n}', String(exam.questionCount))}</span>
               <span>{copy.totalScore.replace('{n}', String(exam.totalScore))}</span>
+              <span>
+                {copy.attemptsLeft
+                  .replace('{remaining}', String(remainingAttempts))
+                  .replace('{max}', String(maxAttempts))}
+              </span>
             </div>
             {(exam.tags ?? []).length ? (
               <div className='flex flex-wrap gap-2'>
@@ -187,9 +201,11 @@ export default function UserExamDetailPage() {
               <Play className='size-4' />
               {starting
                 ? dictionary.common.loading
-                : exam.hasAttempted
-                  ? copy.retake
-                  : copy.start}
+                : canStartNew
+                  ? attemptCount > 0
+                    ? copy.retake
+                    : copy.start
+                  : copy.continueExam}
             </Button>
           </CardContent>
         </Card>

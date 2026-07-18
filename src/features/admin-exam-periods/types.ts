@@ -55,6 +55,9 @@ export type ExamPeriodExamItem = {
   title: string;
   description?: string | null;
   durationMinutes: number;
+  maxAttempts?: number;
+  attemptCount?: number;
+  remainingAttempts?: number;
   tags: string[];
   questionCount: number;
   totalScore: number;

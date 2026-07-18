@@ -43,6 +43,8 @@ export type Exam = {
   title: string;
   description?: string | null;
   durationMinutes: number;
+  /** Max times each user may take this exam. Default 1. */
+  maxAttempts: number;
   typeConfigs: ExamTypeConfig[];
   status: ExamStatus;
   tags: string[];
@@ -75,6 +77,8 @@ export type CreateExamPayload = {
   description?: string;
   /** Omit to auto-sum from typeConfigs (count × durationMinutes) */
   durationMinutes?: number;
+  /** Max attempts per user. Default 1. */
+  maxAttempts?: number;
   typeConfigs: ExamTypeConfigPayload[];
   status?: ExamStatus;
   tags?: string[];
@@ -85,6 +89,7 @@ export type UpdateExamPayload = {
   description?: string | null;
   /** Omit together with typeConfigs to let BE recompute total duration */
   durationMinutes?: number;
+  maxAttempts?: number;
   typeConfigs?: ExamTypeConfigPayload[];
   status?: ExamStatus;
   tags?: string[];

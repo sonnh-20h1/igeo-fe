@@ -68,6 +68,7 @@ type ExamFormState = {
   title: string;
   description: string;
   status: ExamStatus;
+  maxAttempts: string;
   tags: string;
   configs: CategoryConfigForm[];
 };
@@ -100,6 +101,7 @@ const emptyForm = (): ExamFormState => ({
   title: '',
   description: '',
   status: 'DRAFT',
+  maxAttempts: '1',
   tags: '',
   configs: [emptyCategoryConfig()],
 });
@@ -109,6 +111,7 @@ function toForm(exam: Exam): ExamFormState {
   next.title = exam.title ?? '';
   next.description = exam.description ?? '';
   next.status = exam.status ?? 'DRAFT';
+  next.maxAttempts = String(exam.maxAttempts ?? 1);
   next.tags = (exam.tags ?? []).join(', ');
 
   // Each BE typeConfig (already single-type) maps 1:1 to a local config row.
@@ -351,6 +354,12 @@ export default function AdminExamsPage() {
       return;
     }
 
+    const maxAttempts = Number(form.maxAttempts);
+    if (!Number.isFinite(maxAttempts) || maxAttempts < 1) {
+      setFormError(copy.invalidMaxAttempts);
+      return;
+    }
+
     const typeConfigs = buildTypeConfigs();
     if (!typeConfigs) return;
 
@@ -363,6 +372,7 @@ export default function AdminExamsPage() {
           title: form.title.trim(),
           description: form.description.trim() ? form.description.trim() : null,
           status: form.status,
+          maxAttempts: Math.floor(maxAttempts),
           tags: tags.length ? tags : [],
           typeConfigs,
         };
@@ -376,6 +386,7 @@ export default function AdminExamsPage() {
           title: form.title.trim(),
           description: form.description.trim() || undefined,
           status: form.status,
+          maxAttempts: Math.floor(maxAttempts),
           tags: tags.length ? tags : undefined,
           typeConfigs,
         };
@@ -487,6 +498,7 @@ export default function AdminExamsPage() {
                   <TableHead>{copy.colTitle}</TableHead>
                   <TableHead>{copy.colStatus}</TableHead>
                   <TableHead>{copy.colDuration}</TableHead>
+                  <TableHead>{copy.colMaxAttempts}</TableHead>
                   <TableHead>{copy.colQuestionCount}</TableHead>
                   <TableHead>{copy.colTotalScore}</TableHead>
                   <TableHead>{copy.colTags}</TableHead>
@@ -497,13 +509,13 @@ export default function AdminExamsPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={10} className='py-10 text-center text-muted-foreground'>
                       {dictionary.common.loading}
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className='py-10 text-center text-muted-foreground'>
+                    <TableCell colSpan={10} className='py-10 text-center text-muted-foreground'>
                       {copy.empty}
                     </TableCell>
                   </TableRow>
@@ -533,6 +545,7 @@ export default function AdminExamsPage() {
                         <Badge variant='outline'>{statusLabel(exam.status)}</Badge>
                       </TableCell>
                       <TableCell className='whitespace-nowrap'>{copy.minutes.replace('{n}', String(exam.durationMinutes))}</TableCell>
+                      <TableCell className='whitespace-nowrap'>{exam.maxAttempts ?? 1}</TableCell>
                       <TableCell className='whitespace-nowrap'>{stats.questionCount}</TableCell>
                       <TableCell className='whitespace-nowrap'>{stats.totalScore}</TableCell>
                       <TableCell className='min-w-[120px]'>
@@ -621,13 +634,27 @@ export default function AdminExamsPage() {
               />
             </div>
 
-            <div className='grid gap-4 sm:grid-cols-2'>
+            <div className='grid gap-4 sm:grid-cols-3'>
               <div className='space-y-2'>
                 <Label>{copy.fieldDuration}</Label>
                 <div className='flex h-10 items-center rounded-sm border border-border/60 bg-[#faf8f5] px-3 text-sm text-foreground/80 sm:h-11'>
                   {copy.minutes.replace('{n}', String(computeSuggestedDuration(form)))}
                 </div>
                 <p className='text-xs text-muted-foreground'>{copy.durationAutoHint}</p>
+              </div>
+              <div className='space-y-2'>
+                <Label>{copy.fieldMaxAttempts}</Label>
+                <Input
+                  type='number'
+                  min={1}
+                  step={1}
+                  value={form.maxAttempts}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, maxAttempts: event.target.value }))
+                  }
+                  required
+                />
+                <p className='text-xs text-muted-foreground'>{copy.maxAttemptsHint}</p>
               </div>
               <div className='space-y-2'>
                 <Label>{copy.fieldStatus}</Label>

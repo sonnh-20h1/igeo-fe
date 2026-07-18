@@ -4,6 +4,12 @@ export type ExamUserSummary = {
   title: string;
   description?: string | null;
   durationMinutes: number;
+  /** Max times the user may take this exam */
+  maxAttempts?: number;
+  /** Times the user has already attempted */
+  attemptCount?: number;
+  /** Attempts still available */
+  remainingAttempts?: number;
   tags: string[];
   questionCount: number;
   totalScore: number;

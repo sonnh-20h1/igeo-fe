@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/lib/api/config';
-import { ApiError, apiRequest } from '@/lib/api/client';
+import { ApiError, apiRequest, getApiLocaleHeaders } from '@/lib/api/client';
 import { readAccessToken } from '@/features/auth/storage';
 import type {
   CreateQuestionPayload,
@@ -24,6 +24,7 @@ async function downloadBlob(path: string, filename: string) {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
+      ...getApiLocaleHeaders(),
     },
   });
 
@@ -33,6 +34,8 @@ async function downloadBlob(path: string, filename: string) {
       const payload = await response.json();
       if (payload && typeof payload.message === 'string') {
         message = payload.message;
+      } else if (payload && Array.isArray(payload.message) && typeof payload.message[0] === 'string') {
+        message = payload.message[0];
       }
     } catch {
       // ignore parse errors
