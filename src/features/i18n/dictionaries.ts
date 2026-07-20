@@ -735,7 +735,7 @@ export const dictionaries = {
         why: 'Vì sao tham gia',
         igeo: 'iGeo',
         structure: 'Cấu trúc',
-        faq: 'FAQ',
+        faq: 'Câu hỏi thường gặp',
         contact: 'Liên hệ',
         login: 'Đăng nhập',
         takeExam: 'Vào thi',
@@ -788,15 +788,15 @@ export const dictionaries = {
         testsTitle: 'Nội dung thi tại iGeo',
         tests: [
           {
-            title: 'Written Response Test',
+            title: 'Bài thi tự luận',
             body: 'Bài thi tự luận đánh giá kiến thức Địa lý, khả năng phân tích vấn đề, lập luận và trình bày giải pháp.',
           },
           {
-            title: 'Multimedia Test',
+            title: 'Bài thi đa phương tiện',
             body: 'Bài thi đa phương tiện đánh giá khả năng đọc hiểu bản đồ, biểu đồ, hình ảnh, video, dữ liệu và các tư liệu địa lý.',
           },
           {
-            title: 'Fieldwork Exercise',
+            title: 'Bài thi thực địa',
             body: 'Bài thi thực địa đánh giá kỹ năng quan sát, thu thập dữ liệu, phân tích không gian và đề xuất giải pháp dựa trên bối cảnh thực tế.',
           },
         ],
@@ -806,7 +806,7 @@ export const dictionaries = {
       structure: {
         title: 'Cấu trúc cuộc thi',
         intro: 'GEC được thiết kế theo lộ trình tuyển chọn rõ ràng, giúp phát hiện những học sinh có năng lực nổi bật.',
-        round1Title: 'Vòng 1: Vòng Sơ Khảo Online',
+        round1Title: 'Vòng 1: Vòng sơ khảo trực tuyến',
         round1Body: 'Vòng sơ khảo được tổ chức trực tuyến trên hệ thống của Ban Tổ chức.',
         round1EvalTitle: 'Nội dung đánh giá bao gồm:',
         round1Items: [
@@ -839,12 +839,12 @@ export const dictionaries = {
         ],
         pathTitle: 'Lộ trình tuyển chọn',
         path: [
-          'Online Qualifying Round',
-          'Top 10',
-          'Offline Final Round',
-          'Top 4',
-          'Training Camp',
-          'International Geography Olympiad (iGeo)',
+          'Vòng sơ khảo trực tuyến',
+          'Top 10 thí sinh',
+          'Vòng chung kết trực tiếp',
+          'Top 4 thí sinh',
+          'Chương trình đào tạo',
+          'Olympic Địa lý Quốc tế (iGeo)',
         ],
       },
       organizer: {
