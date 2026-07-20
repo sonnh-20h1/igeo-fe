@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className='relative flex min-h-screen w-full flex-col justify-between overflow-hidden bg-gradient-to-br from-[#f2e5d2] via-[#f8f1e6] to-white px-4 pt-24 text-foreground'>
+    <div className='relative flex min-h-screen w-full flex-col justify-between overflow-hidden bg-white px-4 pt-24 text-foreground'>
       <header className='absolute left-0 top-0 z-40 w-full border-b border-white/40 bg-white/82 backdrop-blur-sm'>
         <div className='mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
           <Link href='/' className='flex min-w-0 items-center gap-3'>

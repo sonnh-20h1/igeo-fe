@@ -7,7 +7,7 @@
      Cream #F2E5D2
      White #FFFFFF
     */
-  --background: #f2e5d2;
+  --background: #ffffff;
   --foreground: #022648;
   --card: #ffffff;
   --card-foreground: #022648;
@@ -17,14 +17,14 @@
   --primary-foreground: #ffffff;
   --secondary: #e0c389;
   --secondary-foreground: #022648;
-  --muted: #e8d7c0;
+  --muted: #ffffff;
   --muted-foreground: #4a6480;
   --accent: #e0c389;
   --accent-foreground: #022648;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
-  --border: #d4c0a4;
-  --input: #d4c0a4;
+  --border: #e8e8e8;
+  --input: #e8e8e8;
   --ring: #e0c389;
   --sidebar: #022648;
   --sidebar-foreground: #ffffff;
@@ -68,10 +68,7 @@
 }
 
 html {
-  background:
-    radial-gradient(circle at top left, rgba(224, 195, 137, 0.42), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(2, 38, 72, 0.12), transparent 30%),
-    var(--background);
+  background: var(--background);
   scroll-behavior: smooth;
 }
 
@@ -147,8 +144,7 @@ textarea {
 /* —— Homepage (GEC) —— */
 .home-page {
   font-family: var(--font-home-body);
-  background:
-    linear-gradient(180deg, #f7efe4 0%, #f2e5d2 40%, #ebe0d0 100%);
+  background: #ffffff;
 }
 
 .home-page h1,
@@ -254,7 +250,7 @@ textarea {
 }
 
 .home-section-muted {
-  background: rgba(2, 38, 72, 0.04);
+  background: #ffffff;
 }
 
 .home-path {

@@ -637,7 +637,7 @@ export default function AdminExamsPage() {
             <div className='grid gap-4 sm:grid-cols-3'>
               <div className='space-y-2'>
                 <Label>{copy.fieldDuration}</Label>
-                <div className='flex h-10 items-center rounded-sm border border-border/60 bg-[#faf8f5] px-3 text-sm text-foreground/80 sm:h-11'>
+                <div className='flex h-10 items-center rounded-sm border border-border/60 bg-white px-3 text-sm text-foreground/80 sm:h-11'>
                   {copy.minutes.replace('{n}', String(computeSuggestedDuration(form)))}
                 </div>
                 <p className='text-xs text-muted-foreground'>{copy.durationAutoHint}</p>

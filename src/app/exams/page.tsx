@@ -127,7 +127,7 @@ function formatDateTime(value: string | Date, locale: string) {
 
 function ExamPublicChrome({ children }: { children: ReactNode }) {
   return (
-    <div className='home-page min-h-screen bg-[#F2E5D2]/40 text-[#022648]'>
+    <div className='home-page min-h-screen bg-white text-[#022648]'>
       <HomeHeader hideAuth solid brandHref='/' sectionBase='/' />
       <div className='pt-20 sm:pt-24'>{children}</div>
     </div>

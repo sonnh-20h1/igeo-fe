@@ -524,7 +524,7 @@ export default function TakeAttemptPage() {
   return (
     <div
       className={cn(
-        'relative min-h-screen select-none bg-[linear-gradient(180deg,#f7efe4_0%,#f2e5d2_45%,#ebe0d0_100%)]',
+        'relative min-h-screen select-none bg-white',
         tabWarningOpen && 'pointer-events-none',
       )}
       onCopy={(event) => event.preventDefault()}
@@ -736,7 +736,7 @@ export default function TakeAttemptPage() {
             </p>
 
             {current.question?.imageUrl?.trim() ? (
-              <div className='overflow-hidden rounded-xl border border-[#022648]/15 bg-[#f7efe4]'>
+              <div className='overflow-hidden rounded-xl border border-[#022648]/15 bg-white'>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={current.question.imageUrl}
@@ -749,7 +749,7 @@ export default function TakeAttemptPage() {
             ) : null}
 
             {current.question?.audioUrl?.trim() ? (
-              <div className='rounded-xl border border-[#022648]/15 bg-[#f7efe4] p-3'>
+              <div className='rounded-xl border border-[#022648]/15 bg-white p-3'>
                 <audio controls className='w-full' src={current.question.audioUrl} preload='metadata'>
                   <track kind='captions' />
                 </audio>
@@ -776,7 +776,7 @@ export default function TakeAttemptPage() {
                         currentQuestionLocked ? 'cursor-not-allowed opacity-70' : 'cursor-pointer',
                         selected
                           ? 'border-[#022648] bg-[rgba(2,38,72,0.04)] shadow-sm'
-                          : 'border-[#022648]/20 bg-white hover:border-[#022648]/40 hover:bg-[#f7efe4]',
+                          : 'border-[#022648]/20 bg-white hover:border-[#022648]/40 hover:bg-white',
                       )}
                     >
                       <span
@@ -824,7 +824,7 @@ export default function TakeAttemptPage() {
                   }}
                   onDrop={(event) => event.preventDefault()}
                   placeholder={copy.essayPlaceholder}
-                  className='select-text border-[#022648]/20 bg-[#f7efe4] text-[#022648] placeholder:text-[#4a6480] focus-visible:ring-[#022648]/40'
+                  className='select-text border-[#022648]/20 bg-white text-[#022648] placeholder:text-[#4a6480] focus-visible:ring-[#022648]/40'
                 />
               </div>
             )}

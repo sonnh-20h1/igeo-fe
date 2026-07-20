@@ -1152,7 +1152,7 @@ export default function AdminQuestionsPage() {
                     src={previewQuestion.imageUrl}
                     alt=''
                     draggable={false}
-                    className='pointer-events-none max-h-80 w-full select-none rounded-xl border border-[#022648]/15 object-contain bg-[#f7efe4]'
+                    className='pointer-events-none max-h-80 w-full select-none rounded-xl border border-[#022648]/15 object-contain bg-white'
                   />
                 ) : null}
 
