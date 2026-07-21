@@ -9,7 +9,7 @@ import {
 } from '@/features/auth/storage';
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE_NAME } from '@/features/i18n/config';
 import { I18nProvider } from '@/features/i18n/provider';
-import { fontHomeBody, fontHomeDisplay, fontSans, fontVi } from '@/features/fonts/fonts';
+import { fontSans } from '@/features/fonts/fonts';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -37,10 +37,7 @@ export default async function RootLayout({
   const initialUser = parseStoredUserValue(userCookieRaw);
 
   return (
-    <html
-      lang={initialLocale}
-      className={`${fontSans.variable} ${fontHomeBody.variable} ${fontHomeDisplay.variable} ${fontVi.variable}`}
-    >
+    <html lang={initialLocale} className={fontSans.variable}>
       <body className={fontSans.className}>
         <I18nProvider initialLocale={initialLocale}>
           <AppShell initialSession={initialSession} initialUser={initialUser}>

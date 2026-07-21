@@ -30,9 +30,9 @@
   --sidebar-foreground: #ffffff;
   --sidebar-muted: #e0c389;
   --sidebar-border: rgba(224, 195, 137, 0.22);
-  /* next/font vars (--font-fraunces / --font-source-sans) + Vietnamese fallbacks */
-  --font-home-display: var(--font-fraunces), var(--font-be-vietnam), 'Segoe UI', Georgia, serif;
-  --font-home-body: var(--font-source-sans), var(--font-be-vietnam), 'Segoe UI', sans-serif;
+  /* next/font var (--font-lora) — site-wide Lora */
+  --font-home-display: var(--font-lora), Georgia, 'Times New Roman', serif;
+  --font-home-body: var(--font-lora), Georgia, 'Times New Roman', serif;
 }
 
 @theme inline {
@@ -55,7 +55,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: var(--font-inter), var(--font-be-vietnam), 'Segoe UI', 'Noto Sans', sans-serif;
+  --font-sans: var(--font-lora), Georgia, 'Times New Roman', serif;
   --font-mono: "SFMono-Regular", "Consolas", "Noto Sans Mono", monospace;
   --radius-sm: 0.75rem;
   --radius-md: 1rem;
