@@ -151,7 +151,7 @@ export function useExamAntiCheat({
     };
 
     // Inject print-hide style once
-    const styleId = 'irecs-exam-anti-print';
+    const styleId = 'igeo-exam-anti-print';
     let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
     if (!styleEl) {
       styleEl = document.createElement('style');

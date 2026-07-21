@@ -15,7 +15,7 @@ export const dictionaries = {
       admin: 'Quản trị viên',
       user: 'Người dùng',
       profile: 'Hồ sơ cá nhân',
-      supportEmailSubject: 'Hỗ trợ Irecs',
+      supportEmailSubject: 'Hỗ trợ Igeo',
       paginationEmpty: 'Chưa có {itemLabel}',
       paginationShowing: 'Hiển thị {start}-{end} / {total} {itemLabel}',
       paginationPerPage: 'Mỗi trang',
@@ -39,8 +39,8 @@ export const dictionaries = {
       navContacts: 'Quản lý liên hệ',
       navExamsUser: 'Đề thi',
       navMyAttempts: 'Bài làm của tôi',
-      sidebarAdmin: 'Irecs Admin',
-      sidebarUser: 'Irecs User',
+      sidebarAdmin: 'Igeo Admin',
+      sidebarUser: 'Igeo User',
       adminHub: 'Admin Hub',
       userHub: 'User Hub',
       adminSpace: 'Cổng quản trị',
@@ -51,7 +51,7 @@ export const dictionaries = {
       accountMenu: 'Tài khoản',
     },
     authHeader: {
-      subtitle: 'Hệ thống quản trị Irecs',
+      subtitle: 'Hệ thống quản trị Igeo',
       backToLogin: 'Về đăng nhập',
     },
     login: {
@@ -91,7 +91,7 @@ export const dictionaries = {
     adminDashboard: {
       eyebrow: 'Tổng quan',
       title: 'Dashboard quản trị',
-      description: 'Tổng quan hệ thống Irecs dành cho quản trị viên.',
+      description: 'Tổng quan hệ thống Igeo dành cho quản trị viên.',
       welcome: 'Xin chào, {name}',
       usersCardTitle: 'Người dùng',
       usersCardDescription: 'Tổng số tài khoản người dùng đang hoạt động trong hệ thống.',
@@ -744,15 +744,19 @@ export const dictionaries = {
         closeMenu: 'Đóng menu',
       },
       hero: {
-        headline: 'Cuộc thi tuyển chọn và đào tạo học sinh tham gia International Geography Olympiad (iGeo)',
+        tagline: 'Cuộc thi Địa lý và Môi trường',
+        headline:
+          'Cuộc thi tuyển chọn và đào tạo học sinh tham gia Olympiad Địa Lý Quốc Tế (iGeo)',
         description:
-          'Geography & Environment Challenge (GEC) là chương trình học thuật dành cho học sinh yêu thích Địa lý, Môi trường và Khoa học Trái Đất, được tổ chức nhằm phát hiện, bồi dưỡng và phát triển những tài năng trẻ có tư duy toàn cầu và trách nhiệm với các vấn đề phát triển bền vững.',
+          'Cuộc thi Địa lý và Môi trường (GEC) là chương trình học thuật dành cho học sinh yêu thích Địa lý, Môi trường và Khoa học Trái Đất, được tổ chức nhằm phát hiện, bồi dưỡng và phát triển những tài năng trẻ có tư duy toàn cầu và trách nhiệm với các vấn đề phát triển bền vững.',
+        description2:
+          'Thông qua các vòng tuyển chọn và chương trình đào tạo chuyên sâu, GEC mang đến cho học sinh cơ hội tiếp cận kiến thức địa lý hiện đại, rèn luyện tư duy không gian, kỹ năng nghiên cứu thực địa, năng lực phân tích dữ liệu và khả năng giải quyết các vấn đề toàn cầu. Trên cơ sở kết quả tuyển chọn và quá trình đào tạo, những học sinh xuất sắc sẽ được lựa chọn để tham gia Olympiad Địa Lý Quốc Tế (iGeo) theo quy định của Ban Tổ chức Chương trình và Ban Tổ chức iGeo.',
         ctaRegister: 'Đăng ký tham gia',
         ctaLearnMore: 'Tìm hiểu cuộc thi',
       },
       about: {
-        title: 'Giới thiệu về Geography & Environment Challenge',
-        p1: 'Geography & Environment Challenge (GEC) được xây dựng với sứ mệnh khơi dậy niềm đam mê khám phá thế giới, nuôi dưỡng tư duy địa lý và nâng cao nhận thức về tài nguyên, môi trường và phát triển bền vững cho thế hệ học sinh Việt Nam.',
+        title: 'Giới thiệu về Cuộc thi Địa lý và Môi trường (GEC)',
+        p1: 'GEC được xây dựng với sứ mệnh khơi dậy niềm đam mê khám phá thế giới, nuôi dưỡng tư duy địa lý và nâng cao nhận thức về tài nguyên, môi trường và phát triển bền vững cho thế hệ học sinh Việt Nam.',
         p2: 'Không chỉ là một cuộc thi, GEC là một hành trình học thuật gồm tuyển chọn, đào tạo và phát triển năng lực. Chương trình hướng tới việc tạo ra một môi trường nghiêm túc, chất lượng và mang tính định hướng quốc tế, nơi học sinh được thử sức với các vấn đề thực tiễn liên quan đến con người, không gian, tài nguyên, môi trường và các thách thức toàn cầu.',
         p3: 'Thông qua GEC, học sinh có cơ hội phát triển những năng lực quan trọng trong học tập và nghiên cứu hiện đại, bao gồm tư duy phản biện, tư duy không gian, phân tích bản đồ, đọc hiểu dữ liệu, nghiên cứu thực địa và trình bày giải pháp cho các vấn đề thực tế.',
       },
@@ -776,28 +780,31 @@ export const dictionaries = {
             body: 'GEC tạo ra một cộng đồng học thuật dành cho những học sinh có chung niềm đam mê khám phá thế giới. Tại đây, học sinh có thể trao đổi kiến thức, học hỏi lẫn nhau và cùng phát triển trong một môi trường tích cực, nghiêm túc và truyền cảm hứng.',
           },
           {
-            title: 'Cơ hội tham gia International Geography Olympiad',
-            body: 'Những học sinh có thành tích xuất sắc sẽ được xem xét lựa chọn vào chương trình đào tạo và tham gia International Geography Olympiad (iGeo) theo quy định của Ban Tổ chức Chương trình và Ban Tổ chức iGeo.',
+            title: 'Cơ hội trở thành thành viên đội tuyển Việt Nam tham dự Olympiad Địa lý Quốc tế (iGeo)',
+            body: 'Những học sinh có thành tích xuất sắc sẽ được xem xét lựa chọn vào chương trình đào tạo và tham gia Olympiad Địa Lý Quốc Tế (iGeo) theo quy định của Ban Tổ chức Chương trình và Ban Tổ chức iGeo.',
           },
         ],
       },
       igeo: {
-        title: 'Giới thiệu về International Geography Olympiad',
-        p1: 'International Geography Olympiad (iGeo) là kỳ thi Olympic Địa lý quốc tế dành cho học sinh trung học, được tổ chức hằng năm dưới sự bảo trợ của International Geographical Union (IGU). Kỳ thi quy tụ các học sinh đến từ hơn 50 quốc gia và vùng lãnh thổ, tạo nên một diễn đàn học thuật quốc tế nhằm thúc đẩy giáo dục Địa lý và tăng cường giao lưu giữa học sinh trên toàn thế giới.',
+        title: 'Giới thiệu về Olympiad Địa Lý Quốc Tế (iGeo)',
+        p1: 'Olympiad Địa Lý Quốc Tế (iGeo) là kỳ thi Olympic Địa lý quốc tế dành cho học sinh trung học, được tổ chức hằng năm dưới sự bảo trợ của Liên minh Địa lý Quốc tế (International Geographical Union – IGU). Kỳ thi quy tụ các học sinh đến từ hơn 50 quốc gia và vùng lãnh thổ, tạo nên một diễn đàn học thuật quốc tế nhằm thúc đẩy giáo dục Địa lý và tăng cường giao lưu giữa học sinh trên toàn thế giới.',
         p2: 'iGeo không chỉ đánh giá kiến thức Địa lý, mà còn chú trọng khả năng vận dụng kiến thức để phân tích, lý giải và giải quyết các vấn đề thực tiễn liên quan đến con người, tài nguyên, môi trường, đô thị, biến đổi khí hậu và phát triển bền vững.',
         testsTitle: 'Nội dung thi tại iGeo',
         tests: [
           {
             title: 'Bài thi tự luận',
-            body: 'Bài thi tự luận đánh giá kiến thức Địa lý, khả năng phân tích vấn đề, lập luận và trình bày giải pháp.',
+            weight: '40%',
+            body: 'Bài thi tự luận đánh giá khả năng vận dụng kiến thức địa lý để phân tích, lý giải và đề xuất giải pháp cho các vấn đề thực tiễn thông qua bản đồ, biểu đồ, số liệu, hình ảnh và các tư liệu địa lý.',
           },
           {
-            title: 'Bài thi đa phương tiện',
-            body: 'Bài thi đa phương tiện đánh giá khả năng đọc hiểu bản đồ, biểu đồ, hình ảnh, video, dữ liệu và các tư liệu địa lý.',
+            title: 'Bài thi trắc nghiệm',
+            weight: '20%',
+            body: 'Bài thi trắc nghiệm đánh giá kỹ năng đọc, phân tích và diễn giải các nguồn dữ liệu địa lý như bản đồ, ảnh vệ tinh, biểu đồ, video, hình ảnh và dữ liệu thống kê.',
           },
           {
             title: 'Bài thi thực địa',
-            body: 'Bài thi thực địa đánh giá kỹ năng quan sát, thu thập dữ liệu, phân tích không gian và đề xuất giải pháp dựa trên bối cảnh thực tế.',
+            weight: '40%',
+            body: 'Bài thi thực địa đánh giá năng lực quan sát thực địa, thu thập dữ liệu, lập bản đồ, phân tích không gian và xây dựng giải pháp cho các vấn đề thực tế dựa trên bối cảnh khảo sát.',
           },
         ],
         closing:
@@ -806,6 +813,7 @@ export const dictionaries = {
       structure: {
         title: 'Cấu trúc cuộc thi',
         intro: 'GEC được thiết kế theo lộ trình tuyển chọn rõ ràng, giúp phát hiện những học sinh có năng lực nổi bật.',
+        detailsTitle: 'Chi tiết',
         round1Title: 'Vòng 1: Vòng sơ khảo trực tuyến',
         round1Body: 'Vòng sơ khảo được tổ chức trực tuyến trên hệ thống của Ban Tổ chức.',
         round1EvalTitle: 'Nội dung đánh giá bao gồm:',
@@ -820,21 +828,19 @@ export const dictionaries = {
           'Căn cứ kết quả vòng sơ khảo, 10 thí sinh có kết quả cao nhất sẽ được lựa chọn tham gia vòng chung kết.',
         round2Title: 'Vòng 2: Vòng chung kết trực tiếp',
         round2Body:
-          'Vòng chung kết được tổ chức trực tiếp tại địa điểm do Ban Tổ chức công bố. Nội dung đánh giá được xây dựng theo định hướng của International Geography Olympiad (iGeo), chú trọng khả năng vận dụng kiến thức, tư duy không gian, kỹ năng phân tích dữ liệu và năng lực giải quyết các vấn đề thực tiễn.',
+          'Vòng chung kết được tổ chức trực tiếp tại địa điểm do Ban Tổ chức công bố. Nội dung đánh giá được xây dựng theo định hướng của Olympiad Địa Lý Quốc Tế (iGeo), chú trọng khả năng vận dụng kiến thức, tư duy không gian, kỹ năng phân tích dữ liệu và năng lực giải quyết các vấn đề thực tiễn.',
         round2Result:
           'Sau vòng chung kết, Ban Tổ chức sẽ lựa chọn 04 học sinh xuất sắc nhất để tham gia chương trình đào tạo.',
         trainingTitle: 'Đào tạo nâng cao',
         trainingBody:
-          'Các học sinh được lựa chọn sẽ tham gia chương trình đào tạo chuyên sâu nhằm chuẩn bị cho International Geography Olympiad (iGeo).',
+          'Các học sinh được lựa chọn sẽ tham gia chương trình đào tạo chuyên sâu nhằm chuẩn bị cho Olympiad Địa Lý Quốc Tế (iGeo). Nội dung đào tạo dự kiến bao gồm:',
         trainingEvalTitle: 'Nội dung đào tạo dự kiến bao gồm:',
         trainingItems: [
-          'Địa lý chuyên sâu',
           'Khoa học Trái Đất',
           'Môi trường và phát triển bền vững',
           'GIS và bản đồ',
-          'Kỹ năng thực địa',
           'Tiếng Anh học thuật',
-          'Kỹ năng trình bày và lập luận',
+          'Kỹ năng thực địa, trình bày và lập luận',
           'Thi thử theo định dạng iGeo',
         ],
         pathTitle: 'Lộ trình tuyển chọn',
@@ -843,14 +849,27 @@ export const dictionaries = {
           'Top 10 thí sinh',
           'Vòng chung kết trực tiếp',
           'Top 4 thí sinh',
-          'Chương trình đào tạo',
+          'Chương trình đào tạo nâng cao',
           'Olympic Địa lý Quốc tế (iGeo)',
         ],
+        finaleTitle: 'Olympiad Địa lý Quốc tế (iGeo)',
+        finaleBody: '04 học sinh xuất sắc sẽ cùng 02 trưởng đoàn cùng nhau tham dự kỳ thi iGeo 2027.',
       },
       organizer: {
         title: 'Đơn vị tổ chức',
         name: 'Viện Tài nguyên, Môi trường và An toàn Hóa chất (IRECS)',
-        body: 'Viện Tài nguyên, Môi trường và An toàn Hóa chất (IRECS) là đơn vị tổ chức Chương trình Geography & Environment Challenge (GEC). IRECS là tổ chức hoạt động trong lĩnh vực tài nguyên, môi trường, an toàn hóa chất, đào tạo, tư vấn, nghiên cứu và hợp tác phát triển. Với định hướng chuyên môn trong lĩnh vực tài nguyên và môi trường, IRECS tham gia xây dựng và triển khai GEC nhằm góp phần nâng cao nhận thức của học sinh về Địa lý, môi trường và phát triển bền vững.',
+        nameLines: [
+          'Viện Tài nguyên,',
+          'Môi trường và',
+          'An toàn Hóa chất (IRECS)',
+        ],
+        brand: 'IRECS',
+        body: 'Viện Tài nguyên, Môi trường và An toàn Hóa chất (IRECS) là đơn vị tổ chức Chương trình Cuộc thi Địa lý và Môi trường (GEC). IRECS là tổ chức hoạt động trong lĩnh vực tài nguyên, môi trường, an toàn hóa chất, đào tạo, tư vấn, nghiên cứu và hợp tác phát triển. Với định hướng chuyên môn trong lĩnh vực tài nguyên và môi trường, IRECS tham gia xây dựng và triển khai GEC nhằm góp phần nâng cao nhận thức của học sinh về Địa lý, môi trường và phát triển bền vững.',
+        pillars: [
+          { label: 'Tài nguyên' },
+          { label: 'Môi trường' },
+          { label: 'Phát triển bền vững' },
+        ],
       },
       faq: {
         title: 'Câu hỏi thường gặp',
@@ -869,7 +888,7 @@ export const dictionaries = {
           },
           {
             q: 'Bài thi được thực hiện bằng ngôn ngữ nào?',
-            a: 'Bài thi dự kiến được thực hiện bằng tiếng Anh nhằm giúp học sinh làm quen với định dạng và yêu cầu của International Geography Olympiad (iGeo).',
+            a: 'Bài thi dự kiến được thực hiện bằng tiếng Anh nhằm giúp học sinh làm quen với định dạng và yêu cầu của Olympiad Địa lý Quốc tế (iGeo).',
           },
           {
             q: 'Vòng sơ khảo được tổ chức như thế nào?',
@@ -895,16 +914,12 @@ export const dictionaries = {
             q: 'Có được sử dụng công cụ AI cho bài luận không?',
             a: 'Không. Thí sinh cần tự thực hiện bài thi và bài luận của mình. Ban Tổ chức có thể kiểm tra đạo văn và nội dung do AI tạo ra. Bài làm vi phạm quy định về trung thực học thuật có thể bị loại khỏi quá trình chấm điểm.',
           },
-          {
-            q: 'Có giấy chứng nhận cho thí sinh không?',
-            a: 'Có. Thí sinh tham gia cuộc thi có thể nhận giấy chứng nhận hoặc giấy khen theo quy định của Ban Tổ chức.',
-          },
         ],
       },
       contact: {
         title: 'Liên hệ',
         intro:
-          'Nếu cần thêm thông tin về Geography & Environment Challenge (GEC), vui lòng liên hệ Ban Điều hành Chương trình.',
+          'Nếu cần thêm thông tin về Cuộc thi Địa lý và Môi trường (GEC), vui lòng liên hệ Ban Điều hành Chương trình.',
         formName: 'Họ và tên',
         formEmail: 'Email của bạn',
         formMessage: 'Nội dung',
@@ -917,7 +932,12 @@ export const dictionaries = {
         formSubmitting: 'Đang gửi...',
       },
       footer: {
-        rights: 'Geography & Environment Challenge (GEC). All rights reserved.',
+        rights: '© Cuộc thi Địa lý và Môi trường (GEC). All rights reserved.',
+        organizedBy: 'Tổ chức bởi',
+        organizer: 'IRECS',
+        socialFacebook: 'Facebook',
+        socialYoutube: 'YouTube',
+        socialEmail: 'Email',
       },
     },
   },
@@ -935,7 +955,7 @@ export const dictionaries = {
       admin: 'Admin',
       user: 'User',
       profile: 'Profile',
-      supportEmailSubject: 'Irecs support',
+      supportEmailSubject: 'Igeo support',
       paginationEmpty: 'No {itemLabel} yet',
       paginationShowing: 'Showing {start}-{end} of {total} {itemLabel}',
       paginationPerPage: 'Per page',
@@ -959,8 +979,8 @@ export const dictionaries = {
       navContacts: 'Contacts',
       navExamsUser: 'Exams',
       navMyAttempts: 'My attempts',
-      sidebarAdmin: 'Irecs Admin',
-      sidebarUser: 'Irecs User',
+      sidebarAdmin: 'Igeo Admin',
+      sidebarUser: 'Igeo User',
       adminHub: 'Admin Hub',
       userHub: 'User Hub',
       adminSpace: 'Admin console',
@@ -971,7 +991,7 @@ export const dictionaries = {
       accountMenu: 'Account',
     },
     authHeader: {
-      subtitle: 'Irecs admin console',
+      subtitle: 'Igeo admin console',
       backToLogin: 'Back to login',
     },
     login: {
@@ -1011,7 +1031,7 @@ export const dictionaries = {
     adminDashboard: {
       eyebrow: 'Overview',
       title: 'Admin dashboard',
-      description: 'System overview for Irecs administrators.',
+      description: 'System overview for Igeo administrators.',
       welcome: 'Hello, {name}',
       usersCardTitle: 'Users',
       usersCardDescription: 'Total active user accounts in the system.',
@@ -1665,16 +1685,19 @@ export const dictionaries = {
         closeMenu: 'Close menu',
       },
       hero: {
+        tagline: 'Geography & Environment Challenge',
         headline:
           'A selection and training pathway for students aiming for the International Geography Olympiad (iGeo)',
         description:
           'Geography & Environment Challenge (GEC) is an academic programme for students passionate about Geography, Environment, and Earth Science. It is designed to discover, nurture, and develop young talent with global thinking and a sense of responsibility toward sustainable development.',
+        description2:
+          'Through selection rounds and intensive training, GEC gives students access to modern geographic knowledge, spatial thinking, fieldwork research, data analysis, and global problem-solving. Outstanding students may be selected to join the International Geography Olympiad (iGeo) under the regulations of the Programme Organising Committee and the iGeo Organising Committee.',
         ctaRegister: 'Register to join',
         ctaLearnMore: 'Learn about the challenge',
       },
       about: {
-        title: 'About Geography & Environment Challenge',
-        p1: 'Geography & Environment Challenge (GEC) was created to spark a passion for exploring the world, cultivate geographic thinking, and raise awareness of resources, the environment, and sustainable development among Vietnamese students.',
+        title: 'About the Geography & Environment Challenge (GEC)',
+        p1: 'GEC was created to spark a passion for exploring the world, cultivate geographic thinking, and raise awareness of resources, the environment, and sustainable development among Vietnamese students.',
         p2: 'More than a competition, GEC is an academic journey of selection, training, and capability development. The programme aims to build a serious, high-quality, internationally oriented environment where students engage with real-world issues related to people, space, resources, the environment, and global challenges.',
         p3: 'Through GEC, students develop essential modern learning and research competencies, including critical thinking, spatial thinking, map analysis, data literacy, fieldwork research, and presenting solutions to real problems.',
       },
@@ -1698,28 +1721,31 @@ export const dictionaries = {
             body: 'GEC builds an academic community for students who share a passion for exploring the world. Here, students exchange knowledge, learn from one another, and grow in a positive, serious, and inspiring environment.',
           },
           {
-            title: 'A pathway to the International Geography Olympiad',
+            title: 'A pathway to join Vietnam’s team at the International Geography Olympiad (iGeo)',
             body: 'Outstanding students may be considered for the training programme and participation in the International Geography Olympiad (iGeo), subject to the regulations of the Programme Organising Committee and the iGeo Organising Committee.',
           },
         ],
       },
       igeo: {
-        title: 'About the International Geography Olympiad',
+        title: 'About the International Geography Olympiad (iGeo)',
         p1: 'The International Geography Olympiad (iGeo) is an international geography olympiad for secondary school students, held annually under the auspices of the International Geographical Union (IGU). It brings together students from more than 50 countries and territories, creating an international academic forum that advances Geography education and strengthens exchange among young people worldwide.',
         p2: 'iGeo assesses more than geographic knowledge. It emphasises the ability to apply knowledge to analyse, explain, and solve practical issues related to people, resources, the environment, cities, climate change, and sustainable development.',
         testsTitle: 'iGeo contest components',
         tests: [
           {
             title: 'Written Response Test',
-            body: 'An essay-based test assessing geographic knowledge, problem analysis, reasoning, and solution presentation.',
+            weight: '40%',
+            body: 'The written response test assesses the ability to apply geographic knowledge to analyse, explain, and propose solutions to real-world issues using maps, charts, data, images, and other geographic materials.',
           },
           {
-            title: 'Multimedia Test',
-            body: 'A multimedia test assessing the ability to interpret maps, charts, images, video, data, and other geographic materials.',
+            title: 'Multiple Choice Test',
+            weight: '20%',
+            body: 'The multiple choice test assesses skills in reading, analysing, and interpreting geographic data sources such as maps, satellite imagery, charts, video, images, and statistical data.',
           },
           {
             title: 'Fieldwork Exercise',
-            body: 'A fieldwork exercise assessing observation, data collection, spatial analysis, and proposing solutions grounded in a real context.',
+            weight: '40%',
+            body: 'The fieldwork exercise assesses observation, data collection, mapping, spatial analysis, and building solutions based on the surveyed context.',
           },
         ],
         closing:
@@ -1728,6 +1754,7 @@ export const dictionaries = {
       structure: {
         title: 'Competition structure',
         intro: 'GEC follows a clear selection pathway designed to identify students with outstanding capability.',
+        detailsTitle: 'Details',
         round1Title: 'Round 1: Online Qualifying Round',
         round1Body: 'The qualifying round is held online on the Organising Committee’s system.',
         round1EvalTitle: 'Assessment areas include:',
@@ -1747,32 +1774,43 @@ export const dictionaries = {
           'After the final round, the Organising Committee selects the top 4 students for the training programme.',
         trainingTitle: 'Advanced training',
         trainingBody:
-          'Selected students join an intensive training programme to prepare for the International Geography Olympiad (iGeo).',
+          'Selected students join an intensive training programme to prepare for the International Geography Olympiad (iGeo). Expected training topics include:',
         trainingEvalTitle: 'Expected training topics include:',
         trainingItems: [
-          'Advanced geography',
           'Earth science',
           'Environment and sustainable development',
           'GIS and cartography',
-          'Fieldwork skills',
           'Academic English',
-          'Presentation and argumentation skills',
+          'Fieldwork, presentation, and argumentation skills',
           'Mock exams in the iGeo format',
         ],
         pathTitle: 'Selection pathway',
         path: [
           'Online Qualifying Round',
-          'Top 10',
-          'Offline Final Round',
-          'Top 4',
-          'Training Camp',
+          'Top 10 candidates',
+          'In-person Final Round',
+          'Top 4 candidates',
+          'Advanced training programme',
           'International Geography Olympiad (iGeo)',
         ],
+        finaleTitle: 'International Geography Olympiad (iGeo)',
+        finaleBody:
+          'Four outstanding students, together with two team leaders, will take part in iGeo 2027.',
       },
       organizer: {
         title: 'Organising body',
         name: 'Institute of Resources, Environment and Chemical Safety (IRECS)',
+        nameLines: [
+          'Institute of Resources, Environment',
+          'and Chemical Safety (IRECS)',
+        ],
+        brand: 'IRECS',
         body: 'The Institute of Resources, Environment and Chemical Safety (IRECS) organises the Geography & Environment Challenge (GEC). IRECS works in resources, environment, chemical safety, training, consulting, research, and development cooperation. With its professional focus on resources and the environment, IRECS designs and delivers GEC to help raise student awareness of Geography, the environment, and sustainable development.',
+        pillars: [
+          { label: 'Resources' },
+          { label: 'Environment' },
+          { label: 'Sustainable development' },
+        ],
       },
       faq: {
         title: 'Frequently asked questions',
@@ -1817,16 +1855,12 @@ export const dictionaries = {
             q: 'Can AI tools be used for essay responses?',
             a: 'No. Candidates must complete their own exam and essay work. The Organising Committee may check for plagiarism and AI-generated content. Work that violates academic integrity rules may be disqualified from scoring.',
           },
-          {
-            q: 'Are certificates provided?',
-            a: 'Yes. Participants may receive a certificate or commendation according to the Organising Committee’s regulations.',
-          },
         ],
       },
       contact: {
         title: 'Contact',
         intro:
-          'For more information about Geography & Environment Challenge (GEC), please contact the Programme Executive Board.',
+          'For more information about the Geography & Environment Challenge (GEC), please contact the Programme Executive Board.',
         formName: 'Full name',
         formEmail: 'Your email',
         formMessage: 'Message',
@@ -1840,7 +1874,12 @@ export const dictionaries = {
         formSubmitting: 'Sending...',
       },
       footer: {
-        rights: 'Geography & Environment Challenge (GEC). All rights reserved.',
+        rights: '© Geography & Environment Challenge (GEC). All rights reserved.',
+        organizedBy: 'Organized by',
+        organizer: 'IRECS',
+        socialFacebook: 'Facebook',
+        socialYoutube: 'YouTube',
+        socialEmail: 'Email',
       },
     },
   },

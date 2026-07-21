@@ -1,4 +1,4 @@
-const STORAGE_PREFIX = 'irecs.attempt.questionStarts.v1:';
+const STORAGE_PREFIX = 'igeo.attempt.questionStarts.v1:';
 
 export type QuestionStartMap = Record<string, number>;
 

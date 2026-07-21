@@ -1,10 +1,18 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import Image from 'next/image';
+import { Building2, Droplet, Feather, Globe, GraduationCap, Mail, Map, MapPin, MonitorPlay, Mountain, Sprout, Trophy, Users } from 'lucide-react';
 import { HomeContactForm } from '@/features/home/home-contact-form';
 import { HomeFaq } from '@/features/home/home-faq';
 import { HomeHeader } from '@/features/home/home-header';
 import { useI18n } from '@/features/i18n/provider';
+
+const IGEO_TEST_ICONS = [Feather, MonitorPlay, Mountain] as const;
+
+const STRUCTURE_PATH_ICONS = [MonitorPlay, Users, Map, Trophy, GraduationCap, Globe] as const;
+
+const ORGANIZER_PILLAR_ICONS = [Sprout, Droplet, Globe] as const;
 
 function SectionHeading({ children }: { children: ReactNode }) {
   return (
@@ -20,168 +28,326 @@ export function HomePage() {
 
   return (
     <div id='top' className='home-page min-h-screen text-[#022648]'>
-      <HomeHeader />
+      <HomeHeader light />
 
-      <section className='home-hero relative flex min-h-[100svh] items-end overflow-hidden pb-16 pt-28 sm:items-center sm:pb-24 sm:pt-32'>
-        <div className='home-hero-atmosphere' aria-hidden />
-        <div className='relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6'>
-          <p className='home-reveal font-[family-name:var(--font-home-display)] text-4xl leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl'>
-            {home.brand}
-          </p>
-          <h1 className='home-reveal home-reveal-delay-1 mt-6 max-w-3xl text-lg font-medium leading-relaxed text-[#F2E5D2] sm:text-xl'>
-            {home.hero.headline}
-          </h1>
-          <p className='home-reveal home-reveal-delay-2 mt-5 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg'>
-            {home.hero.description}
-          </p>
-          <div className='home-reveal home-reveal-delay-3 mt-8 flex flex-wrap gap-3'>
-            <a href='/exams' className='home-cta-primary'>
-              {home.hero.ctaRegister}
-            </a>
-            <a href='#about' className='home-cta-secondary'>
-              {home.hero.ctaLearnMore}
-            </a>
+      <section className='home-hero'>
+        <div className='home-hero-scene' aria-hidden>
+          <Image
+            src='/images/background_1.png'
+            alt=''
+            fill
+            priority
+            sizes='100vw'
+            className='home-hero-backdrop-image'
+          />
+          <Image
+            src='/images/hero.png'
+            alt=''
+            fill
+            priority
+            sizes='100vw'
+            className='home-hero-image'
+          />
+          <div className='home-hero-scene-fade' />
+        </div>
+
+        <div className='home-hero-inner mx-auto w-full max-w-6xl px-4 sm:px-6'>
+          <div className='home-hero-copy'>
+            <p className='home-reveal home-hero-brand'>{home.brand}</p>
+            <h1 className='home-reveal home-reveal-delay-1 home-hero-headline'>
+              {home.hero.headline}
+            </h1>
+            <p className='home-reveal home-reveal-delay-2 home-hero-description'>
+              {home.hero.description}
+            </p>
+            <div className='home-reveal home-reveal-delay-3 home-hero-actions'>
+              <a href='/exams' className='home-cta-primary'>
+                {home.hero.ctaRegister}
+              </a>
+              <a href='#about' className='home-cta-secondary home-cta-secondary--light'>
+                {home.hero.ctaLearnMore}
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id='about' className='home-section scroll-mt-24'>
-        <div className='mx-auto max-w-6xl px-4 sm:px-6'>
-          <SectionHeading>{home.about.title}</SectionHeading>
-          <div className='mt-8 max-w-3xl space-y-5 text-base leading-relaxed text-[#022648]/82 sm:text-lg'>
-            <p>{home.about.p1}</p>
-            <p>{home.about.p2}</p>
-            <p>{home.about.p3}</p>
+      <section id='about' className='home-section home-about scroll-mt-24'>
+        <div className='home-about-pattern home-about-pattern--tl' aria-hidden />
+        <div className='home-about-pattern home-about-pattern--br' aria-hidden />
+
+        <div className='home-about-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14'>
+          <div>
+            <h2 className='home-about-title'>{home.nav.about}</h2>
+            <span className='home-about-underline' aria-hidden />
+            <div className='home-about-body'>
+              <p>{home.about.p1}</p>
+              <p>{home.about.p2}</p>
+              <p>{home.about.p3}</p>
+            </div>
+          </div>
+
+          <div className='home-about-map'>
+            <Image
+              src='/images/vn.png'
+              alt=''
+              width={1400}
+              height={900}
+              className='home-about-map-image'
+              sizes='(max-width: 1024px) 100vw, 45vw'
+            />
           </div>
         </div>
       </section>
 
-      <section id='why' className='home-section home-section-muted scroll-mt-24'>
-        <div className='mx-auto max-w-6xl px-4 sm:px-6'>
-          <SectionHeading>{home.why.title}</SectionHeading>
-          <ul className='mt-10 grid gap-10 sm:grid-cols-2'>
-            {home.why.items.map((item, index) => (
-              <li key={item.title} className='border-t border-[#022648]/15 pt-6'>
-                <p className='font-mono text-xs uppercase tracking-[0.22em] text-[#022648]/45'>
-                  {String(index + 1).padStart(2, '0')}
-                </p>
-                <h3 className='mt-3 font-[family-name:var(--font-home-display)] text-xl text-[#022648] sm:text-2xl'>
-                  {item.title}
-                </h3>
-                <p className='mt-3 text-base leading-relaxed text-[#022648]/78'>{item.body}</p>
-              </li>
-            ))}
-          </ul>
+      <section id='why' className='home-section home-why scroll-mt-24'>
+        <div className='home-why-backdrop' aria-hidden>
+          <Image
+            src='/images/background_1.png'
+            alt=''
+            fill
+            sizes='100vw'
+            className='home-why-backdrop-image'
+          />
+        </div>
+
+        <div className='home-why-inner relative mx-auto max-w-6xl px-4 sm:px-6'>
+          <h2 className='home-why-title'>{home.why.title}</h2>
+
+          <div className='home-why-rows'>
+            {[0, 2, 4].map((start) => {
+              const rowItems = home.why.items.slice(start, start + 2);
+              return (
+                <div key={start} className='home-why-row'>
+                  {rowItems.map((item, offset) => {
+                    const index = start + offset;
+                    return (
+                      <article key={item.title} className='home-why-item'>
+                        <h3 className='home-why-item-heading'>
+                          <span className='home-why-index'>
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <span className='home-why-item-title'>{item.title}</span>
+                        </h3>
+                        <p className='home-why-item-body'>{item.body}</p>
+                      </article>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      <section id='igeo' className='home-section scroll-mt-24'>
-        <div className='mx-auto max-w-6xl px-4 sm:px-6'>
-          <SectionHeading>{home.igeo.title}</SectionHeading>
-          <div className='mt-8 max-w-3xl space-y-5 text-base leading-relaxed text-[#022648]/82 sm:text-lg'>
-            <p>{home.igeo.p1}</p>
-            <p>{home.igeo.p2}</p>
+      <section id='igeo' className='home-section home-igeo scroll-mt-24'>
+        <div className='home-igeo-backdrop' aria-hidden>
+          <Image
+            src='/images/background_1.png'
+            alt=''
+            fill
+            sizes='100vw'
+            className='home-igeo-backdrop-image'
+          />
+        </div>
+
+        <div className='home-igeo-inner relative mx-auto max-w-6xl px-4 sm:px-6'>
+          <div className='home-igeo-intro'>
+            <div className='home-igeo-copy'>
+              <h2 className='home-igeo-title'>{home.igeo.title}</h2>
+              <span className='home-igeo-underline' aria-hidden />
+              <div className='home-igeo-body'>
+                <p>{home.igeo.p1}</p>
+                <p>{home.igeo.p2}</p>
+              </div>
+            </div>
+
+            <div className='home-igeo-compass'>
+              <Image
+                src='/images/iGEO_website.png'
+                alt=''
+                width={900}
+                height={900}
+                className='home-igeo-compass-image'
+                sizes='(max-width: 1024px) 70vw, 380px'
+              />
+            </div>
           </div>
-          <h3 className='mt-12 font-[family-name:var(--font-home-display)] text-2xl text-[#022648]'>
-            {home.igeo.testsTitle}
-          </h3>
-          <ul className='mt-6 grid gap-8 md:grid-cols-3'>
-            {home.igeo.tests.map((test) => (
-              <li key={test.title} className='border-l-2 border-[#E0C389] pl-5'>
-                <h4 className='text-lg font-semibold text-[#022648]'>{test.title}</h4>
-                <p className='mt-3 text-base leading-relaxed text-[#022648]/75'>{test.body}</p>
-              </li>
-            ))}
-          </ul>
-          <p className='mt-10 max-w-3xl text-base leading-relaxed text-[#022648]/82 sm:text-lg'>
-            {home.igeo.closing}
-          </p>
+
+          <div className='home-igeo-tests'>
+            <div className='home-igeo-tests-heading'>
+              <span className='home-igeo-tests-rule' aria-hidden />
+              <h3 className='home-igeo-tests-title'>{home.igeo.testsTitle}</h3>
+              <span className='home-igeo-tests-rule' aria-hidden />
+            </div>
+
+            <ul className='home-igeo-cards'>
+              {home.igeo.tests.map((test, index) => {
+                const Icon = IGEO_TEST_ICONS[index] ?? Feather;
+                return (
+                  <li key={test.title} className='home-igeo-card'>
+                    <div className='home-igeo-card-icon'>
+                      {index === 2 ? (
+                        <span className='home-igeo-card-icon-stack'>
+                          <Mountain className='size-5' strokeWidth={1.75} />
+                          <MapPin className='size-3.5' strokeWidth={2} />
+                        </span>
+                      ) : (
+                        <Icon className='size-5' strokeWidth={1.75} />
+                      )}
+                    </div>
+                    <h4 className='home-igeo-card-title'>{test.title}</h4>
+                    <span className='home-igeo-card-line' aria-hidden />
+                    <p className='home-igeo-card-body'>{test.body}</p>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <p className='home-igeo-closing'>{home.igeo.closing}</p>
+          </div>
         </div>
       </section>
 
-      <section id='structure' className='home-section home-section-muted scroll-mt-24'>
-        <div className='mx-auto max-w-6xl px-4 sm:px-6'>
-          <SectionHeading>{home.structure.title}</SectionHeading>
-          <p className='mt-6 max-w-3xl text-base leading-relaxed text-[#022648]/82 sm:text-lg'>
-            {home.structure.intro}
-          </p>
-
-          <div className='mt-12 space-y-12'>
-            <article>
-              <h3 className='font-[family-name:var(--font-home-display)] text-2xl text-[#022648]'>
-                {home.structure.round1Title}
-              </h3>
-              <p className='mt-3 text-base leading-relaxed text-[#022648]/78'>
-                {home.structure.round1Body}
-              </p>
-              <p className='mt-5 text-sm font-semibold uppercase tracking-[0.14em] text-[#022648]/55'>
-                {home.structure.round1EvalTitle}
-              </p>
-              <ul className='mt-3 list-disc space-y-2 pl-5 text-base text-[#022648]/78'>
-                {home.structure.round1Items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <p className='mt-4 text-base leading-relaxed text-[#022648]/78'>
-                {home.structure.round1Result}
-              </p>
-            </article>
-
-            <article>
-              <h3 className='font-[family-name:var(--font-home-display)] text-2xl text-[#022648]'>
-                {home.structure.round2Title}
-              </h3>
-              <p className='mt-3 text-base leading-relaxed text-[#022648]/78'>
-                {home.structure.round2Body}
-              </p>
-              <p className='mt-4 text-base leading-relaxed text-[#022648]/78'>
-                {home.structure.round2Result}
-              </p>
-            </article>
-
-            <article>
-              <h3 className='font-[family-name:var(--font-home-display)] text-2xl text-[#022648]'>
-                {home.structure.trainingTitle}
-              </h3>
-              <p className='mt-3 text-base leading-relaxed text-[#022648]/78'>
-                {home.structure.trainingBody}
-              </p>
-              <p className='mt-5 text-sm font-semibold uppercase tracking-[0.14em] text-[#022648]/55'>
-                {home.structure.trainingEvalTitle}
-              </p>
-              <ul className='mt-3 list-disc space-y-2 pl-5 text-base text-[#022648]/78'>
-                {home.structure.trainingItems.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </article>
+      <section id='structure' className='home-section home-structure scroll-mt-24'>
+        <div className='home-structure-main'>
+          <div className='home-structure-backdrop' aria-hidden>
+            <Image
+              src='/images/background_1.png'
+              alt=''
+              fill
+              sizes='100vw'
+              className='home-structure-backdrop-image'
+            />
           </div>
 
-          <div className='mt-16'>
-            <h3 className='font-[family-name:var(--font-home-display)] text-2xl text-[#022648]'>
-              {home.structure.pathTitle}
-            </h3>
-            <ol className='home-path mt-8'>
-              {home.structure.path.map((step, index) => (
-                <li key={step} className='home-path-step'>
-                  <span className='home-path-index'>{String(index + 1).padStart(2, '0')}</span>
-                  <span className='home-path-label'>{step}</span>
-                </li>
-              ))}
+          <div className='home-structure-inner relative mx-auto max-w-6xl px-4 sm:px-6'>
+          <h2 className='home-structure-title'>{home.structure.title}:</h2>
+          <p className='home-structure-intro'>{home.structure.intro}</p>
+
+          <div className='home-structure-timeline'>
+            <ol className='home-structure-steps'>
+              {home.structure.path.map((step, index) => {
+                const Icon = STRUCTURE_PATH_ICONS[index] ?? Globe;
+                return (
+                  <li key={step} className='home-structure-step'>
+                    <div className='home-structure-step-top'>
+                      <div className='home-structure-icon'>
+                        <Icon className='size-5' strokeWidth={1.75} />
+                      </div>
+                      <span className='home-structure-caret' aria-hidden />
+                    </div>
+                    <p className='home-structure-number'>
+                      {String(index + 1).padStart(2, '0')}
+                    </p>
+                    <p className='home-structure-label'>{step}</p>
+                  </li>
+                );
+              })}
             </ol>
           </div>
+          </div>
+        </div>
+
+        <div className='home-structure-lower'>
+          <div className='home-structure-inner mx-auto max-w-6xl px-4 sm:px-6'>
+            <h3 className='home-structure-details-title'>{home.structure.detailsTitle}</h3>
+
+            <div className='home-structure-details'>
+              <article>
+                <h4 className='home-structure-article-title'>{home.structure.round1Title}</h4>
+                <p className='home-structure-article-body'>{home.structure.round1Body}</p>
+                <p className='home-structure-article-label'>{home.structure.round1EvalTitle}</p>
+                <ul className='home-structure-list'>
+                  {home.structure.round1Items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <p className='home-structure-article-body'>{home.structure.round1Result}</p>
+              </article>
+
+              <article>
+                <h4 className='home-structure-article-title'>{home.structure.round2Title}</h4>
+                <p className='home-structure-article-body'>{home.structure.round2Body}</p>
+                <p className='home-structure-article-body'>{home.structure.round2Result}</p>
+              </article>
+
+              <article>
+                <h4 className='home-structure-article-title'>{home.structure.trainingTitle}</h4>
+                <p className='home-structure-article-body'>{home.structure.trainingBody}</p>
+                <ul className='home-structure-list'>
+                  {home.structure.trainingItems.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+            </div>
+          </div>
+
+          <div className='home-finale'>
+          <div className='home-finale-inner mx-auto max-w-6xl px-4 sm:px-6'>
+            <h4 className='home-finale-title'>{home.structure.finaleTitle}</h4>
+            <p className='home-finale-body'>{home.structure.finaleBody}</p>
+          </div>
+          <div className='home-finale-visual'>
+            <Image
+              src='/images/mountain.png'
+              alt=''
+              width={1774}
+              height={887}
+              className='home-finale-image'
+              sizes='100vw'
+            />
+          </div>
+        </div>
         </div>
       </section>
 
-      <section id='organizer' className='home-section scroll-mt-24'>
-        <div className='mx-auto max-w-6xl px-4 sm:px-6'>
-          <SectionHeading>{home.organizer.title}</SectionHeading>
-          <p className='mt-4 font-[family-name:var(--font-home-display)] text-xl text-[#022648] sm:text-2xl'>
-            {home.organizer.name}
-          </p>
-          <p className='mt-6 max-w-3xl text-base leading-relaxed text-[#022648]/82 sm:text-lg'>
-            {home.organizer.body}
-          </p>
+      <section id='organizer' className='home-section home-organizer scroll-mt-24'>
+        <div className='home-organizer-inner mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16'>
+          <div className='home-organizer-copy'>
+            <div className='home-organizer-label'>
+              <span className='home-organizer-label-bar' aria-hidden />
+              <Building2 className='home-organizer-label-icon' strokeWidth={2} />
+              <span className='home-organizer-label-text'>{home.organizer.title}</span>
+            </div>
+            <h2 className='home-organizer-name'>
+              {home.organizer.nameLines.map((line) => (
+                <span key={line} className='home-organizer-name-line'>
+                  {line}
+                </span>
+              ))}
+            </h2>
+            <span className='home-organizer-underline' aria-hidden />
+            <p className='home-organizer-body'>{home.organizer.body}</p>
+          </div>
+
+          <div className='home-organizer-card'>
+            <div className='home-organizer-card-content'>
+              <div className='home-organizer-brand-block'>
+                <Image
+                  src='/images/logo_v4.svg'
+                  alt={home.organizer.brand}
+                  width={280}
+                  height={280}
+                  className='home-organizer-logo'
+                />
+              </div>
+              <ul className='home-organizer-pillars'>
+                {home.organizer.pillars.map((pillar, index) => {
+                  const Icon = ORGANIZER_PILLAR_ICONS[index] ?? Globe;
+                  return (
+                    <li key={pillar.label} className='home-organizer-pillar'>
+                      <span className='home-organizer-pillar-icon'>
+                        <Icon className='size-5' strokeWidth={1.75} />
+                      </span>
+                      <span className='home-organizer-pillar-label'>{pillar.label}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -206,10 +372,50 @@ export function HomePage() {
         </div>
       </section>
 
-      <footer className='border-t border-[#022648]/12 bg-[#022648] px-4 py-8 text-sm text-white/70 sm:px-6'>
-        <div className='mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
-          <p>{home.footer.rights}</p>
-          <p className='font-[family-name:var(--font-home-display)] text-white'>{home.brandShort}</p>
+      <footer className='home-footer'>
+        <div className='home-footer-inner'>
+          <div className='home-footer-left'>
+            <p className='home-footer-rights'>{home.footer.rights}</p>
+          </div>
+
+          <div className='home-footer-right'>
+            <p className='home-footer-organized'>
+              {home.footer.organizedBy}{' '}
+              <span className='home-footer-organizer'>{home.footer.organizer}</span>
+            </p>
+            <span className='home-footer-divider' aria-hidden />
+            <div className='home-footer-socials'>
+              <a
+                href='https://facebook.com'
+                target='_blank'
+                rel='noreferrer'
+                className='home-footer-social'
+                aria-label={home.footer.socialFacebook}
+              >
+                <svg viewBox='0 0 24 24' className='size-4' fill='currentColor' aria-hidden>
+                  <path d='M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v7h3v-7h2.6l.4-3H14V9z' />
+                </svg>
+              </a>
+              <a
+                href='https://youtube.com'
+                target='_blank'
+                rel='noreferrer'
+                className='home-footer-social'
+                aria-label={home.footer.socialYoutube}
+              >
+                <svg viewBox='0 0 24 24' className='size-4' fill='currentColor' aria-hidden>
+                  <path d='M21.6 7.2a2.7 2.7 0 0 0-1.9-1.9C18 5 12 5 12 5s-6 0-7.7.3A2.7 2.7 0 0 0 2.4 7.2 28.4 28.4 0 0 0 2 12a28.4 28.4 0 0 0 .4 4.8 2.7 2.7 0 0 0 1.9 1.9C6 19 12 19 12 19s6 0 7.7-.3a2.7 2.7 0 0 0 1.9-1.9A28.4 28.4 0 0 0 22 12a28.4 28.4 0 0 0-.4-4.8zM10 15.2V8.8L15.5 12 10 15.2z' />
+                </svg>
+              </a>
+              <a
+                href='mailto:contact@gec.vn'
+                className='home-footer-social'
+                aria-label={home.footer.socialEmail}
+              >
+                <Mail className='size-4' strokeWidth={1.75} />
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

@@ -12,10 +12,10 @@ export const APP_BUILD_VERSION =
 
 export const APP_VERSION_LABEL = ensureVersionPrefix(PACKAGE_VERSION);
 
-export const APP_NAME = 'Irecs';
+export const APP_NAME = 'Igeo';
 
 export const SUPPORT_EMAIL =
-  process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || 'support@irecs.local';
+  process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || 'support@igeo.local';
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://irecs.local';
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://igeo.local';

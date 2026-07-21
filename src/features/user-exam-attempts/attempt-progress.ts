@@ -4,7 +4,7 @@ import {
   type QuestionStartMap,
 } from './question-timer';
 
-const PROGRESS_PREFIX = 'irecs.attempt.progress.v1:';
+const PROGRESS_PREFIX = 'igeo.attempt.progress.v1:';
 
 export type AttemptProgress = {
   currentQuestionShortId: string | null;

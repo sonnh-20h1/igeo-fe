@@ -25,6 +25,8 @@ type HomeHeaderProps = {
   hideAuth?: boolean;
   /** Always use solid navy bar (for non-hero pages) */
   solid?: boolean;
+  /** Light hero: navy text on cream background when not scrolled */
+  light?: boolean;
   /** Logo / brand link target */
   brandHref?: string;
   /** Prefix for section anchors, e.g. "/" → "/#about" */
@@ -34,6 +36,7 @@ type HomeHeaderProps = {
 export function HomeHeader({
   hideAuth = false,
   solid = false,
+  light = false,
   brandHref = '#top',
   sectionBase = '',
 }: HomeHeaderProps) {
@@ -66,25 +69,37 @@ export function HomeHeader({
   }
 
   const BrandTag = brandHref.startsWith('#') ? 'a' : Link;
+  const onLightHero = light && !scrolled && !solid;
+  const onLightScrolled = light && scrolled && !solid;
 
   return (
     <header
       className={cn(
         'home-header fixed inset-x-0 top-0 z-50 transition-[background,box-shadow,border-color] duration-300',
-        scrolled || solid
-          ? 'border-b border-white/20 bg-[#022648]/92 shadow-lg shadow-[#022648]/20 backdrop-blur-md'
-          : 'border-b border-transparent bg-transparent',
+        onLightHero
+          ? 'border-b border-transparent bg-transparent'
+          : onLightScrolled
+            ? 'home-header--light-scrolled border-b'
+            : scrolled || solid
+              ? 'border-b border-white/20 bg-[#022648]/92 shadow-lg shadow-[#022648]/20 backdrop-blur-md'
+              : 'border-b border-transparent bg-transparent',
       )}
     >
       <div className='mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
-        <BrandTag href={brandHref} className='flex min-w-0 items-center gap-3 text-white'>
+        <BrandTag
+          href={brandHref}
+          className={cn(
+            'flex min-w-0 items-center gap-3',
+            onLightHero || onLightScrolled ? 'text-[#022648]' : 'text-white',
+          )}
+        >
           <Image
             src='/images/logo_v4.svg'
             alt={home.brandShort}
             className='shrink-0 object-contain'
             style={{ width: 'auto', height: '40px' }}
-            width={1023}
-            height={1024}
+            width={160}
+            height={40}
             priority
           />
           <span className='truncate font-[family-name:var(--font-home-display)] text-lg tracking-tight sm:text-xl'>
@@ -97,7 +112,12 @@ export function HomeHeader({
             <a
               key={link.href}
               href={sectionHref(link.href)}
-              className='rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white'
+              className={cn(
+                'rounded-lg px-3 py-2 text-sm font-medium transition',
+                onLightHero || onLightScrolled
+                  ? 'text-[#022648]/80 hover:bg-[#022648]/5 hover:text-[#022648]'
+                  : 'text-white/80 hover:bg-white/10 hover:text-white',
+              )}
             >
               {home.nav[link.key]}
             </a>
@@ -105,11 +125,25 @@ export function HomeHeader({
         </nav>
 
         <div className='flex items-center gap-2'>
-          <div className='home-lang-switcher'>
+          <div
+            className={cn(
+              'home-lang-switcher',
+              (onLightHero || onLightScrolled) && 'home-lang-switcher--light',
+            )}
+          >
             <LanguageSwitcher compact className='!h-full' />
           </div>
           {!hideAuth && ready ? (
-            <Button asChild size='sm' variant='secondary' className='hidden sm:inline-flex'>
+            <Button
+              asChild
+              size='sm'
+              variant={onLightHero || onLightScrolled ? 'default' : 'secondary'}
+              className={cn(
+                'hidden sm:inline-flex',
+                (onLightHero || onLightScrolled) &&
+                  'bg-[#E0C389] text-[#022648] hover:bg-[#ebd4a8]',
+              )}
+            >
               <Link href={authHref}>{authLabel}</Link>
             </Button>
           ) : null}
@@ -117,7 +151,12 @@ export function HomeHeader({
             type='button'
             variant='ghost'
             size='icon'
-            className='text-white hover:bg-white/10 lg:hidden'
+            className={cn(
+              'lg:hidden',
+              onLightHero || onLightScrolled
+                ? 'text-[#022648] hover:bg-[#022648]/5'
+                : 'text-white hover:bg-white/10',
+            )}
             onClick={() => setOpen((current) => !current)}
             aria-expanded={open}
             aria-label={open ? home.nav.closeMenu : home.nav.openMenu}
