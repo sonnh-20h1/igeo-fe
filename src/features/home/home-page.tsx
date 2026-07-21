@@ -123,12 +123,10 @@ export function HomePage() {
                     const index = start + offset;
                     return (
                       <article key={item.title} className='home-why-item'>
-                        <h3 className='home-why-item-heading'>
-                          <span className='home-why-index'>
-                            {String(index + 1).padStart(2, '0')}
-                          </span>
-                          <span className='home-why-item-title'>{item.title}</span>
-                        </h3>
+                        <span className='home-why-index'>
+                          {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <h3 className='home-why-item-title'>{item.title}</h3>
                         <p className='home-why-item-body'>{item.body}</p>
                       </article>
                     );
