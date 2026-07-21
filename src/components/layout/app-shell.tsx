@@ -105,7 +105,7 @@ function SidebarContent() {
           <div className='flex items-center gap-3'>
             <div className='flex size-10 items-center justify-center rounded-2xl'>
               <Image
-                src='/images/logo-light.png'
+                src='/images/logo_v4.svg'
                 alt={APP_NAME}
                 className='object-contain'
                 style={{ width: 'auto', height: '40px' }}
@@ -144,7 +144,7 @@ function SidebarContent() {
       <div className='border-t text-white border-[var(--sidebar-border)] px-6 py-5 text-sm text-sidebar-foreground/80'>
         <p className='font-semibold'>{getUserDisplayName(user)}</p>
         <p className='mt-1 text-xs uppercase tracking-[0.2em] text-white/60'>{roleLabel}</p>
-        <p className='mt-1 text-sidebar-muted'>{user?.email || 'admin@igeo.local'}</p>
+        <p className='mt-1 text-sidebar-muted'>{user?.email || 'admin@irecs.local'}</p>
         <div className='mt-4 lg:hidden'>
           <LanguageSwitcher compact className='border-white/15 bg-white/10' />
         </div>
@@ -320,7 +320,7 @@ export function AppShellInner({ children }: { children: React.ReactNode }) {
                       {roleLabel}
                     </p>
                     <p className='mt-2 break-all text-sm text-muted-foreground'>
-                      {user?.email || 'admin@igeo.local'}
+                      {user?.email || 'admin@irecs.local'}
                     </p>
                   </div>
                   <div className='mt-1 border-t border-border/70 pt-2'>

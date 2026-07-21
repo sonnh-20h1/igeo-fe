@@ -1,8 +1,8 @@
 import type { AuthSession, User } from './types';
 
-const SESSION_KEY = 'igeo:authSession';
-export const SESSION_COOKIE_NAME = 'igeo_auth_session';
-export const USER_COOKIE_NAME = 'igeo_auth_user';
+const SESSION_KEY = 'irecs:authSession';
+export const SESSION_COOKIE_NAME = 'irecs_auth_session';
+export const USER_COOKIE_NAME = 'irecs_auth_user';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 function mergeStoredUser(baseUser: User | null | undefined, overrideUser: User | null | undefined) {

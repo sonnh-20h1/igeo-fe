@@ -4,7 +4,7 @@ export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'vi';
 
-export const LOCALE_COOKIE_NAME = 'igeo_locale';
+export const LOCALE_COOKIE_NAME = 'irecs_locale';
 
 /** Backend nestjs-i18n languages: `vn` | `en` */
 export type ApiLang = 'vn' | 'en';

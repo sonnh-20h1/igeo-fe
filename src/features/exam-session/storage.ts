@@ -9,9 +9,9 @@ export type ExamCandidateProfile = {
   school: string;
 };
 
-const EXAM_SESSION_KEY = 'igeo:examSession';
-const EXAM_CANDIDATE_KEY = 'igeo:examCandidate';
-const EXAM_JUST_REGISTERED_KEY = 'igeo:examJustRegistered';
+const EXAM_SESSION_KEY = 'irecs:examSession';
+const EXAM_CANDIDATE_KEY = 'irecs:examCandidate';
+const EXAM_JUST_REGISTERED_KEY = 'irecs:examJustRegistered';
 
 export function readExamSessionToken(): string | null {
   if (typeof localStorage === 'undefined') return null;
