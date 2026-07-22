@@ -77,9 +77,9 @@ export function HomeHeader({
       className={cn(
         'home-header fixed inset-x-0 top-0 z-50 transition-[background,box-shadow,border-color] duration-300',
         onLightHero
-          ? 'border-b border-transparent bg-transparent'
+          ? 'home-header--light border-b border-transparent'
           : onLightScrolled
-            ? 'home-header--light-scrolled border-b'
+            ? 'home-header--light home-header--light-scrolled border-b'
             : scrolled || solid
               ? 'border-b border-white/20 bg-[#022648]/92 shadow-lg shadow-[#022648]/20 backdrop-blur-md'
               : 'border-b border-transparent bg-transparent',

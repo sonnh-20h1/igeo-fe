@@ -40,14 +40,16 @@ export function HomePage() {
             sizes='100vw'
             className='home-hero-backdrop-image'
           />
-          <Image
-            src='/images/hero.png'
-            alt=''
-            fill
-            priority
-            sizes='100vw'
-            className='home-hero-image'
-          />
+          <div className='home-hero-image-wrap'>
+            <Image
+              src='/images/hero.png'
+              alt=''
+              fill
+              priority
+              sizes='(max-width: 768px) 100vw, 60vw'
+              className='home-hero-image'
+            />
+          </div>
           <div className='home-hero-scene-fade' />
         </div>
 
@@ -73,8 +75,15 @@ export function HomePage() {
       </section>
 
       <section id='about' className='home-section home-about scroll-mt-24'>
-        <div className='home-about-pattern home-about-pattern--tl' aria-hidden />
-        <div className='home-about-pattern home-about-pattern--br' aria-hidden />
+        <div className='home-about-backdrop' aria-hidden>
+          <Image
+            src='/images/background_2.png'
+            alt=''
+            fill
+            sizes='100vw'
+            className='home-about-backdrop-image'
+          />
+        </div>
 
         <div className='home-about-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14'>
           <div>

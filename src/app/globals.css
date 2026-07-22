@@ -162,7 +162,13 @@ textarea {
   min-height: 100svh;
   padding: 7.5rem 0 4.5rem;
   overflow: hidden;
-  background: #f7f0e8;
+  background: linear-gradient(
+    to right,
+    #f7ede3 0%,
+    #f7ede3 46%,
+    #e4ebf2 62%,
+    #d5e0ea 100%
+  );
 }
 
 .home-hero-scene {
@@ -174,39 +180,31 @@ textarea {
 
 .home-hero-backdrop-image,
 .home-hero-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  object-fit: cover;
 }
 
 .home-hero-backdrop-image {
-  object-fit: cover;
   object-position: center;
   z-index: 0;
-  opacity: 0.35;
+  opacity: 0.18;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 40%, #000 70%, #000 100%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 40%, #000 70%, #000 100%);
+}
+
+.home-hero-image-wrap {
+  position: absolute;
+  top: 5.75rem;
+  right: 0;
+  bottom: 0;
+  left: 12%;
+  z-index: 1;
+  overflow: visible;
+  pointer-events: none;
 }
 
 .home-hero-image {
-  object-fit: cover;
-  object-position: right center;
-  z-index: 1;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(0, 0, 0, 0.15) 18%,
-    rgba(0, 0, 0, 0.65) 30%,
-    #000 42%,
-    #000 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(0, 0, 0, 0.15) 18%,
-    rgba(0, 0, 0, 0.65) 30%,
-    #000 42%,
-    #000 100%
-  );
+  object-fit: contain !important;
+  object-position: right center !important;
 }
 
 .home-hero-scene-fade {
@@ -214,22 +212,14 @@ textarea {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(247, 240, 232, 0.92) 0%,
-      rgba(247, 240, 232, 0.55) 14%,
-      rgba(247, 240, 232, 0.18) 28%,
-      transparent 42%
-    ),
-    linear-gradient(
-      to right,
-      rgba(247, 240, 232, 0.98) 0%,
-      rgba(247, 240, 232, 0.88) 18%,
-      rgba(247, 240, 232, 0.45) 34%,
-      rgba(247, 240, 232, 0.12) 46%,
-      transparent 56%
-    );
+  background: linear-gradient(
+    to right,
+    #f7ede3 0%,
+    #f7ede3 38%,
+    rgba(247, 237, 227, 0.7) 48%,
+    rgba(229, 236, 243, 0.25) 58%,
+    transparent 68%
+  );
 }
 
 .home-hero-inner {
@@ -246,6 +236,7 @@ textarea {
   font-size: clamp(2rem, 4.8vw, 3.35rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
+  font-weight: 700;
   color: #022648;
 }
 
@@ -284,41 +275,23 @@ textarea {
     padding: 6.5rem 0 2.5rem;
   }
 
+  .home-hero-image-wrap {
+    top: 5rem;
+    left: 0;
+  }
+
   .home-hero-image {
-    object-position: 72% center;
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(0, 0, 0, 0.2) 16%,
-      rgba(0, 0, 0, 0.7) 34%,
-      #000 48%,
-      #000 100%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(0, 0, 0, 0.2) 16%,
-      rgba(0, 0, 0, 0.7) 34%,
-      #000 48%,
-      #000 100%
-    );
+    object-position: center bottom !important;
   }
 
   .home-hero-scene-fade {
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(247, 240, 232, 0.96) 0%,
-        rgba(247, 240, 232, 0.7) 18%,
-        rgba(247, 240, 232, 0.3) 36%,
-        transparent 52%
-      ),
-      linear-gradient(
-        to right,
-        rgba(247, 240, 232, 0.9) 0%,
-        rgba(247, 240, 232, 0.45) 40%,
-        transparent 70%
-      );
+    background: linear-gradient(
+      to bottom,
+      #f7ede3 0%,
+      #f7ede3 42%,
+      rgba(247, 237, 227, 0.55) 58%,
+      transparent 78%
+    );
   }
 
   .home-hero-copy {
@@ -406,40 +379,28 @@ textarea {
   background: #ffffff;
 }
 
+.home-about-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.home-about-backdrop-image {
+  object-fit: cover;
+  object-position: center;
+}
+
 .home-about-inner {
   z-index: 1;
-}
-
-.home-about-pattern {
-  position: absolute;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.22;
-  background:
-    repeating-radial-gradient(circle at 22% 34%, transparent 0 30px, rgba(10, 58, 92, 0.55) 31px 32px),
-    repeating-radial-gradient(circle at 68% 62%, transparent 0 42px, rgba(10, 58, 92, 0.45) 43px 44px);
-}
-
-.home-about-pattern--tl {
-  top: -4%;
-  left: -6%;
-  width: 46%;
-  height: 42%;
-  mask-image: radial-gradient(ellipse 85% 80% at 18% 22%, #000 10%, transparent 72%);
-}
-
-.home-about-pattern--br {
-  right: -8%;
-  bottom: -10%;
-  width: 50%;
-  height: 46%;
-  mask-image: radial-gradient(ellipse 80% 75% at 78% 82%, #000 12%, transparent 74%);
+  text-align: left;
 }
 
 .home-about-title {
   font-family: var(--font-home-display);
   font-size: clamp(2rem, 3.8vw, 2.75rem);
   line-height: 1.15;
+  font-weight: 800;
   color: #022648;
 }
 
@@ -459,6 +420,8 @@ textarea {
   max-width: 34rem;
   font-size: clamp(0.95rem, 1.5vw, 1.05rem);
   line-height: 1.75;
+  text-align: justify;
+  text-justify: inter-word;
   color: rgba(2, 38, 72, 0.82);
 }
 
@@ -586,6 +549,8 @@ textarea {
   margin-top: 0.85rem;
   font-size: 0.95rem;
   line-height: 1.75;
+  text-align: justify;
+  text-justify: inter-word;
   color: rgba(55, 65, 75, 0.92);
 }
 
@@ -812,15 +777,15 @@ textarea {
     url('/images/background_1.png') center / cover no-repeat;
 }
 
-.home-structure {
+.home-structure.home-section {
   position: relative;
   background: #ffffff;
-  padding-top: 5.5rem;
-  padding-bottom: 0;
+  padding: 0;
 }
 
 .home-structure-main {
   position: relative;
+  padding-top: 5.5rem;
   padding-bottom: 3rem;
 }
 
@@ -857,10 +822,16 @@ textarea {
 
 .home-structure-intro {
   margin-top: 0.85rem;
-  max-width: 40rem;
+  max-width: none;
   font-size: clamp(0.95rem, 1.4vw, 1.05rem);
   line-height: 1.7;
   color: rgba(2, 38, 72, 0.72);
+}
+
+@media (min-width: 768px) {
+  .home-structure-intro {
+    white-space: nowrap;
+  }
 }
 
 .home-structure-timeline {
@@ -883,17 +854,6 @@ textarea {
   list-style: none;
 }
 
-.home-structure-steps::before {
-  content: '';
-  position: absolute;
-  top: 3.45rem;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: #d1d5db;
-  z-index: 0;
-}
-
 .home-structure-step {
   position: relative;
   z-index: 1;
@@ -904,19 +864,37 @@ textarea {
   padding: 0 0.35rem;
 }
 
+/* Connecting line from this step icon to the next */
+.home-structure-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 1.625rem;
+  left: 50%;
+  width: 100%;
+  height: 1.5px;
+  background: #c5cdd6;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+/* Gold midpoint dot on the connecting line */
 .home-structure-step:not(:last-child)::after {
   content: '';
   position: absolute;
-  top: 3.35rem;
-  right: -0.35rem;
-  width: 8px;
-  height: 8px;
+  top: 1.625rem;
+  left: 100%;
+  z-index: 2;
+  width: 9px;
+  height: 9px;
   border-radius: 999px;
   background: #e0c389;
-  transform: translateX(50%);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 3px #ffffff;
 }
 
 .home-structure-step-top {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1174,6 +1152,7 @@ textarea {
   border: 1px solid rgba(224, 195, 137, 0.7);
   background: #ffffff;
   color: #e0c389;
+  box-shadow: 0 6px 16px rgba(2, 38, 72, 0.12);
 }
 
 .home-organizer-pillar-label {
@@ -1210,12 +1189,9 @@ textarea {
     height: 2.85rem;
   }
 
-  .home-structure-steps::before {
-    top: 3.1rem;
-  }
-
+  .home-structure-step:not(:last-child)::before,
   .home-structure-step:not(:last-child)::after {
-    top: 3rem;
+    top: 1.425rem;
   }
 }
 
@@ -1314,9 +1290,25 @@ textarea {
   color: #022648;
 }
 
+.home-header--light {
+  background: linear-gradient(
+    to right,
+    #f7ede3 0%,
+    #f7ede3 46%,
+    #e4ebf2 62%,
+    #d5e0ea 100%
+  );
+}
+
 .home-header--light-scrolled {
   border-bottom-color: rgba(2, 38, 72, 0.1) !important;
-  background: rgba(255, 255, 255, 0.94) !important;
+  background: linear-gradient(
+    to right,
+    rgba(247, 237, 227, 0.96) 0%,
+    rgba(247, 237, 227, 0.96) 46%,
+    rgba(228, 235, 242, 0.96) 62%,
+    rgba(213, 224, 234, 0.96) 100%
+  ) !important;
   box-shadow: 0 8px 24px rgba(2, 38, 72, 0.06) !important;
   backdrop-filter: blur(12px);
 }
