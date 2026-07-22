@@ -932,9 +932,7 @@ textarea {
 .home-structure-label,
 .home-structure-number,
 .home-igeo-tests-title,
-.home-igeo-closing,
-.home-organizer-pillar,
-.home-organizer-pillar-label {
+.home-igeo-closing {
   text-align: center;
 }
 
@@ -1165,90 +1163,22 @@ textarea {
   color: rgba(2, 38, 72, 0.78);
 }
 
-.home-organizer-card {
-  border-radius: 1.35rem;
-  background: #ffffff;
-  box-shadow: 0 18px 42px rgba(2, 38, 72, 0.09);
-}
-
-.home-organizer-card-content {
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 2.25rem;
-  min-height: 23rem;
-  padding: 2.75rem 1.75rem 2rem;
-}
-
-.home-organizer-brand-block {
+.home-organizer-visual {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-top: 0.5rem;
 }
 
-.home-organizer-logo {
+.home-organizer-visual-image {
   display: block;
-  width: auto;
-  height: 12rem;
-}
-
-.home-organizer-pillars {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.25rem;
   width: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.home-organizer-pillar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0 0.25rem;
-  text-align: center;
-}
-
-.home-organizer-pillar:not(:last-child) {
-  border-right: 1px solid rgba(2, 38, 72, 0.1);
-}
-
-.home-organizer-pillar-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.85rem;
-  height: 2.85rem;
-  border-radius: 999px;
-  border: 1px solid rgba(224, 195, 137, 0.7);
-  background: #ffffff;
-  color: #e0c389;
-  box-shadow: 0 6px 16px rgba(2, 38, 72, 0.12);
-}
-
-.home-organizer-pillar-label {
-  font-size: 0.8rem;
-  line-height: 1.35;
-  font-weight: 600;
-  color: #022648;
+  max-width: 34rem;
+  height: auto;
 }
 
 @media (max-width: 767px) {
-  .home-organizer-card-content {
-    min-height: auto;
-    gap: 1.75rem;
-    padding: 2.25rem 1.25rem 1.75rem;
-  }
-
-  .home-organizer-logo {
-    height: 9.5rem;
-  }
-
-  .home-organizer-pillar-label {
-    font-size: 0.72rem;
+  .home-organizer-visual-image {
+    max-width: 26rem;
   }
 }
 
@@ -1304,6 +1234,42 @@ textarea {
 
 .home-header {
   animation: homeReveal 500ms ease forwards;
+}
+
+.home-header-brand-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+  .home-header-brand-text {
+    font-size: 1.2rem;
+  }
+}
+
+.home-header-brand-irecs {
+  color: #609a5d;
+  font-weight: 700;
+  -webkit-text-stroke: 0.35px #609a5d;
+}
+
+.home-header-brand-gec {
+  color: #173452;
+  font-weight: 700;
+  -webkit-text-stroke: 0.35px #173452;
+}
+
+.home-header:not(.home-header--light) .home-header-brand-irecs {
+  color: #e0c389;
+  -webkit-text-stroke-color: #e0c389;
+}
+
+.home-header:not(.home-header--light) .home-header-brand-gec {
+  color: #ffffff;
+  -webkit-text-stroke-color: #ffffff;
 }
 
 .home-lang-switcher {

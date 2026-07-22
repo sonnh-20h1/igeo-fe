@@ -94,16 +94,17 @@ export function HomeHeader({
           )}
         >
           <Image
-            src='/images/logo_v4.svg'
+            src='/images/logo_v2.png'
             alt={home.brandShort}
             className='shrink-0 object-contain'
             style={{ width: 'auto', height: '40px' }}
-            width={160}
-            height={40}
+            width={1070}
+            height={664}
             priority
           />
-          <span className='truncate font-[family-name:var(--font-home-display)] text-lg tracking-tight sm:text-xl'>
-            {home.brandShort}
+          <span className='home-header-brand-text truncate font-[family-name:var(--font-home-display)]'>
+            <span className='home-header-brand-irecs'>IRECS -</span>{' '}
+            <span className='home-header-brand-gec'>GEC</span>
           </span>
         </BrandTag>
 

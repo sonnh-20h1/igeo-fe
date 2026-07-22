@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Image from 'next/image';
-import { Building2, Droplet, Feather, Globe, GraduationCap, Mail, Map, MapPin, MonitorPlay, Mountain, Sprout, Trophy, Users } from 'lucide-react';
+import { Building2, Feather, Globe, GraduationCap, Mail, Map, MapPin, MonitorPlay, Mountain, Trophy, Users } from 'lucide-react';
 import { HomeContactForm } from '@/features/home/home-contact-form';
 import { HomeFaq } from '@/features/home/home-faq';
 import { HomeHeader } from '@/features/home/home-header';
@@ -11,8 +11,6 @@ import { useI18n } from '@/features/i18n/provider';
 const IGEO_TEST_ICONS = [Feather, MonitorPlay, Mountain] as const;
 
 const STRUCTURE_PATH_ICONS = [MonitorPlay, Users, Map, Trophy, GraduationCap, Globe] as const;
-
-const ORGANIZER_PILLAR_ICONS = [Sprout, Droplet, Globe] as const;
 
 function SectionHeading({ children }: { children: ReactNode }) {
   return (
@@ -171,7 +169,7 @@ export function HomePage() {
 
             <div className='home-igeo-compass'>
               <Image
-                src='/images/iGEO_website.png'
+                src='/images/igeo_v2.png'
                 alt=''
                 width={900}
                 height={900}
@@ -311,7 +309,7 @@ export function HomePage() {
       </section>
 
       <section id='organizer' className='home-section home-organizer scroll-mt-24'>
-        <div className='home-organizer-inner mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16'>
+        <div className='home-organizer-inner mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1fr] lg:gap-12'>
           <div className='home-organizer-copy'>
             <div className='home-organizer-label'>
               <span className='home-organizer-label-bar' aria-hidden />
@@ -329,31 +327,15 @@ export function HomePage() {
             <p className='home-organizer-body'>{home.organizer.body}</p>
           </div>
 
-          <div className='home-organizer-card'>
-            <div className='home-organizer-card-content'>
-              <div className='home-organizer-brand-block'>
-                <Image
-                  src='/images/logo_v4.svg'
-                  alt={home.organizer.brand}
-                  width={280}
-                  height={280}
-                  className='home-organizer-logo'
-                />
-              </div>
-              <ul className='home-organizer-pillars'>
-                {home.organizer.pillars.map((pillar, index) => {
-                  const Icon = ORGANIZER_PILLAR_ICONS[index] ?? Globe;
-                  return (
-                    <li key={pillar.label} className='home-organizer-pillar'>
-                      <span className='home-organizer-pillar-icon'>
-                        <Icon className='size-5' strokeWidth={1.75} />
-                      </span>
-                      <span className='home-organizer-pillar-label'>{pillar.label}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+          <div className='home-organizer-visual'>
+            <Image
+              src='/images/don_vi.png'
+              alt={home.organizer.brand}
+              width={5167}
+              height={5167}
+              className='home-organizer-visual-image'
+              sizes='(max-width: 1024px) 90vw, 420px'
+            />
           </div>
         </div>
       </section>
