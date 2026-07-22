@@ -31,28 +31,6 @@ export function HomePage() {
       <HomeHeader light />
 
       <section className='home-hero'>
-        <div className='home-hero-scene' aria-hidden>
-          <Image
-            src='/images/background_1.png'
-            alt=''
-            fill
-            priority
-            sizes='100vw'
-            className='home-hero-backdrop-image'
-          />
-          <div className='home-hero-image-wrap'>
-            <Image
-              src='/images/hero.png'
-              alt=''
-              fill
-              priority
-              sizes='(max-width: 768px) 100vw, 60vw'
-              className='home-hero-image'
-            />
-          </div>
-          <div className='home-hero-scene-fade' />
-        </div>
-
         <div className='home-hero-inner mx-auto w-full max-w-6xl px-4 sm:px-6'>
           <div className='home-hero-copy'>
             <p className='home-reveal home-hero-brand'>{home.brand}</p>
@@ -71,6 +49,28 @@ export function HomePage() {
               </a>
             </div>
           </div>
+        </div>
+
+        <div className='home-hero-scene' aria-hidden>
+          <Image
+            src='/images/background_1.png'
+            alt=''
+            fill
+            priority
+            sizes='100vw'
+            className='home-hero-backdrop-image'
+          />
+          <div className='home-hero-image-wrap'>
+            <Image
+              src='/images/hero.png'
+              alt=''
+              fill
+              priority
+              sizes='(max-width: 1024px) 100vw, 60vw'
+              className='home-hero-image'
+            />
+          </div>
+          <div className='home-hero-scene-fade' />
         </div>
       </section>
 

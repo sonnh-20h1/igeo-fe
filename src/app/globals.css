@@ -147,20 +147,28 @@ textarea {
   background: #ffffff;
 }
 
+.home-page p,
+.home-page li {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
 .home-page h1,
 .home-page h2,
 .home-page h3,
 .home-page h4 {
   margin-bottom: 0;
   font-weight: 600;
+  text-align: left;
 }
 
 .home-hero {
   position: relative;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   min-height: 100svh;
-  padding: 7.5rem 0 4.5rem;
+  padding: 7.5rem 0 0;
   overflow: hidden;
   background: linear-gradient(
     to right,
@@ -171,11 +179,24 @@ textarea {
   );
 }
 
+.home-hero-inner {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding-bottom: 2rem;
+}
+
 .home-hero-scene {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: clamp(16rem, 48vw, 28rem);
+  flex-shrink: 0;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .home-hero-backdrop-image,
@@ -187,24 +208,19 @@ textarea {
   object-position: center;
   z-index: 0;
   opacity: 0.18;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 40%, #000 70%, #000 100%);
-  mask-image: linear-gradient(to right, transparent 0%, transparent 40%, #000 70%, #000 100%);
 }
 
 .home-hero-image-wrap {
   position: absolute;
-  top: 5.75rem;
-  right: 0;
-  bottom: 0;
-  left: 12%;
+  inset: 0;
   z-index: 1;
-  overflow: visible;
+  overflow: hidden;
   pointer-events: none;
 }
 
 .home-hero-image {
   object-fit: contain !important;
-  object-position: right center !important;
+  object-position: center bottom !important;
 }
 
 .home-hero-scene-fade {
@@ -213,30 +229,24 @@ textarea {
   z-index: 2;
   pointer-events: none;
   background: linear-gradient(
-    to right,
+    to bottom,
     #f7ede3 0%,
-    #f7ede3 38%,
-    rgba(247, 237, 227, 0.7) 48%,
-    rgba(229, 236, 243, 0.25) 58%,
-    transparent 68%
+    rgba(247, 237, 227, 0.65) 22%,
+    transparent 48%
   );
-}
-
-.home-hero-inner {
-  position: relative;
-  z-index: 2;
 }
 
 .home-hero-copy {
   max-width: 34rem;
 }
 
-.home-hero-brand {
+.home-page p.home-hero-brand {
   font-family: var(--font-home-display);
   font-size: clamp(2rem, 4.8vw, 3.35rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
   font-weight: 700;
+  text-align: left;
   color: #022648;
 }
 
@@ -263,39 +273,97 @@ textarea {
   margin-top: 2rem;
 }
 
+/* Desktop: text left, image floats on the right without covering copy */
+@media (min-width: 1024px) {
+  .home-hero {
+    display: block;
+    padding: 7.5rem 0 4.5rem;
+    background: linear-gradient(
+      to right,
+      #f7ede3 0%,
+      #f7ede3 46%,
+      #e4ebf2 62%,
+      #d5e0ea 100%
+    );
+  }
+
+  .home-hero-inner {
+    display: block;
+    padding-bottom: 0;
+  }
+
+  .home-hero-scene {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    overflow: visible;
+  }
+
+  .home-hero-backdrop-image {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 40%, #000 70%, #000 100%);
+    mask-image: linear-gradient(to right, transparent 0%, transparent 40%, #000 70%, #000 100%);
+  }
+
+  .home-hero-image-wrap {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 10%;
+    height: min(82%, 46rem);
+    overflow: visible;
+  }
+
+  .home-hero-image {
+    object-fit: contain !important;
+    object-position: right bottom !important;
+  }
+
+  .home-hero-scene-fade {
+    background: linear-gradient(
+      to right,
+      #f7ede3 0%,
+      #f7ede3 38%,
+      rgba(247, 237, 227, 0.7) 48%,
+      rgba(229, 236, 243, 0.25) 58%,
+      transparent 68%
+    );
+  }
+}
+
 @media (max-width: 1023px) {
+  .home-hero {
+    min-height: auto;
+    padding-top: 6.5rem;
+    background: linear-gradient(
+      to bottom,
+      #f7ede3 0%,
+      #f7ede3 55%,
+      #e4ebf2 78%,
+      #d5e0ea 100%
+    );
+  }
+
+  .home-hero-inner {
+    align-items: flex-start;
+    padding-bottom: 1.5rem;
+  }
+
   .home-hero-copy {
-    max-width: 30rem;
+    max-width: none;
+  }
+
+  .home-hero-backdrop-image {
+    opacity: 0.12;
   }
 }
 
 @media (max-width: 767px) {
   .home-hero {
-    align-items: flex-end;
-    padding: 6.5rem 0 2.5rem;
+    padding-top: 5.75rem;
   }
 
-  .home-hero-image-wrap {
-    top: 5rem;
-    left: 0;
-  }
-
-  .home-hero-image {
-    object-position: center bottom !important;
-  }
-
-  .home-hero-scene-fade {
-    background: linear-gradient(
-      to bottom,
-      #f7ede3 0%,
-      #f7ede3 42%,
-      rgba(247, 237, 227, 0.55) 58%,
-      transparent 78%
-    );
-  }
-
-  .home-hero-copy {
-    max-width: none;
+  .home-hero-scene {
+    height: clamp(14rem, 72vw, 20rem);
   }
 }
 
@@ -420,8 +488,6 @@ textarea {
   max-width: 34rem;
   font-size: clamp(0.95rem, 1.5vw, 1.05rem);
   line-height: 1.75;
-  text-align: justify;
-  text-justify: inter-word;
   color: rgba(2, 38, 72, 0.82);
 }
 
@@ -549,8 +615,6 @@ textarea {
   margin-top: 0.85rem;
   font-size: 0.95rem;
   line-height: 1.75;
-  text-align: justify;
-  text-justify: inter-word;
   color: rgba(55, 65, 75, 0.92);
 }
 
@@ -862,6 +926,16 @@ textarea {
   align-items: center;
   text-align: center;
   padding: 0 0.35rem;
+}
+
+.home-structure-step p,
+.home-structure-label,
+.home-structure-number,
+.home-igeo-tests-title,
+.home-igeo-closing,
+.home-organizer-pillar,
+.home-organizer-pillar-label {
+  text-align: center;
 }
 
 /* Connecting line from this step icon to the next */
@@ -1300,17 +1374,23 @@ textarea {
   );
 }
 
+/* At top of page: transparent so header inherits exact hero background */
+.home-header--light-top {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
 .home-header--light-scrolled {
   border-bottom-color: rgba(2, 38, 72, 0.1) !important;
   background: linear-gradient(
     to right,
-    rgba(247, 237, 227, 0.96) 0%,
-    rgba(247, 237, 227, 0.96) 46%,
-    rgba(228, 235, 242, 0.96) 62%,
-    rgba(213, 224, 234, 0.96) 100%
+    #f7ede3 0%,
+    #f7ede3 46%,
+    #e4ebf2 62%,
+    #d5e0ea 100%
   ) !important;
   box-shadow: 0 8px 24px rgba(2, 38, 72, 0.06) !important;
-  backdrop-filter: blur(12px);
 }
 
 .home-footer {
