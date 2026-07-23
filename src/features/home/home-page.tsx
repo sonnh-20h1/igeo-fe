@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import { Building2, Feather, Globe, GraduationCap, Mail, Map, MapPin, MonitorPlay, Mountain, Trophy, Users } from 'lucide-react';
+import { boldGecName } from '@/features/home/bold-gec-name';
 import { HomeContactForm } from '@/features/home/home-contact-form';
 import { HomeFaq } from '@/features/home/home-faq';
 import { HomeHeader } from '@/features/home/home-header';
@@ -31,12 +32,18 @@ export function HomePage() {
       <section className='home-hero'>
         <div className='home-hero-inner mx-auto w-full max-w-6xl px-4 sm:px-6'>
           <div className='home-hero-copy'>
-            <p className='home-reveal home-hero-brand'>{home.brand}</p>
+            <p className='home-reveal home-hero-brand'>{boldGecName(home.brand)}</p>
+            <p className='home-reveal home-reveal-delay-1 home-hero-tagline'>
+              {home.hero.tagline}
+            </p>
             <h1 className='home-reveal home-reveal-delay-1 home-hero-headline'>
               {home.hero.headline}
             </h1>
             <p className='home-reveal home-reveal-delay-2 home-hero-description'>
-              {home.hero.description}
+              {boldGecName(home.hero.description)}
+            </p>
+            <p className='home-reveal home-reveal-delay-2 home-hero-description'>
+              {boldGecName(home.hero.description2)}
             </p>
             <div className='home-reveal home-reveal-delay-3 home-hero-actions'>
               <a href='/exams' className='home-cta-primary'>
@@ -75,7 +82,7 @@ export function HomePage() {
       <section id='about' className='home-section home-about scroll-mt-24'>
         <div className='home-about-backdrop' aria-hidden>
           <Image
-            src='/images/background_2.png'
+            src='/images/white_background_1.png'
             alt=''
             fill
             sizes='100vw'
@@ -85,12 +92,12 @@ export function HomePage() {
 
         <div className='home-about-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14'>
           <div>
-            <h2 className='home-about-title'>{home.nav.about}</h2>
+            <h2 className='home-about-title'>{boldGecName(home.about.title)}</h2>
             <span className='home-about-underline' aria-hidden />
             <div className='home-about-body'>
-              <p>{home.about.p1}</p>
-              <p>{home.about.p2}</p>
-              <p>{home.about.p3}</p>
+              <p>{boldGecName(home.about.p1)}</p>
+              <p>{boldGecName(home.about.p2)}</p>
+              <p>{boldGecName(home.about.p3)}</p>
             </div>
           </div>
 
@@ -110,7 +117,7 @@ export function HomePage() {
       <section id='why' className='home-section home-why scroll-mt-24'>
         <div className='home-why-backdrop' aria-hidden>
           <Image
-            src='/images/background_1.png'
+            src='/images/blue_background_1.png'
             alt=''
             fill
             sizes='100vw'
@@ -148,7 +155,7 @@ export function HomePage() {
       <section id='igeo' className='home-section home-igeo scroll-mt-24'>
         <div className='home-igeo-backdrop' aria-hidden>
           <Image
-            src='/images/background_1.png'
+            src='/images/white_background_1.png'
             alt=''
             fill
             sizes='100vw'
@@ -201,7 +208,9 @@ export function HomePage() {
                         <Icon className='size-5' strokeWidth={1.75} />
                       )}
                     </div>
-                    <h4 className='home-igeo-card-title'>{test.title}</h4>
+                    <h4 className='home-igeo-card-title'>
+                      {test.title} ({test.weight})
+                    </h4>
                     <span className='home-igeo-card-line' aria-hidden />
                     <p className='home-igeo-card-body'>{test.body}</p>
                   </li>
@@ -215,17 +224,17 @@ export function HomePage() {
       </section>
 
       <section id='structure' className='home-section home-structure scroll-mt-24'>
-        <div className='home-structure-main'>
-          <div className='home-structure-backdrop' aria-hidden>
-            <Image
-              src='/images/background_1.png'
-              alt=''
-              fill
-              sizes='100vw'
-              className='home-structure-backdrop-image'
-            />
-          </div>
+        <div className='home-structure-backdrop' aria-hidden>
+          <Image
+            src='/images/blue_background_1.png'
+            alt=''
+            fill
+            sizes='100vw'
+            className='home-structure-backdrop-image'
+          />
+        </div>
 
+        <div className='home-structure-main'>
           <div className='home-structure-inner relative mx-auto max-w-6xl px-4 sm:px-6'>
           <h2 className='home-structure-title'>{home.structure.title}:</h2>
           <p className='home-structure-intro'>{home.structure.intro}</p>
@@ -309,7 +318,7 @@ export function HomePage() {
       </section>
 
       <section id='organizer' className='home-section home-organizer scroll-mt-24'>
-        <div className='home-organizer-inner mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1fr] lg:gap-12'>
+        <div className='home-organizer-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14'>
           <div className='home-organizer-copy'>
             <div className='home-organizer-label'>
               <span className='home-organizer-label-bar' aria-hidden />
@@ -324,18 +333,28 @@ export function HomePage() {
               ))}
             </h2>
             <span className='home-organizer-underline' aria-hidden />
-            <p className='home-organizer-body'>{home.organizer.body}</p>
+            <div className='home-organizer-body'>
+              <p>{boldGecName(home.organizer.body)}</p>
+              <p>{boldGecName(home.organizer.body2)}</p>
+            </div>
           </div>
 
           <div className='home-organizer-visual'>
             <Image
-              src='/images/don_vi.png'
+              src='/images/dvtc.png'
               alt={home.organizer.brand}
               width={5167}
               height={5167}
               className='home-organizer-visual-image'
-              sizes='(max-width: 1024px) 90vw, 420px'
+              sizes='(max-width: 1024px) 100vw, 45vw'
             />
+            <ul className='home-organizer-pillars'>
+              {home.organizer.pillars.map((pillar) => (
+                <li key={pillar.label} className='home-organizer-pillar'>
+                  {pillar.label}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
@@ -354,7 +373,7 @@ export function HomePage() {
           <div>
             <SectionHeading>{home.contact.title}</SectionHeading>
             <p className='mt-6 max-w-xl text-base leading-relaxed text-[#022648]/82 sm:text-lg'>
-              {home.contact.intro}
+              {boldGecName(home.contact.intro)}
             </p>
           </div>
           <HomeContactForm copy={home.contact} />
@@ -364,7 +383,7 @@ export function HomePage() {
       <footer className='home-footer'>
         <div className='home-footer-inner'>
           <div className='home-footer-left'>
-            <p className='home-footer-rights'>{home.footer.rights}</p>
+            <p className='home-footer-rights'>{boldGecName(home.footer.rights)}</p>
           </div>
 
           <div className='home-footer-right'>
@@ -381,8 +400,13 @@ export function HomePage() {
                 className='home-footer-social'
                 aria-label={home.footer.socialFacebook}
               >
-                <svg viewBox='0 0 24 24' className='size-4' fill='currentColor' aria-hidden>
-                  <path d='M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v7h3v-7h2.6l.4-3H14V9z' />
+                <svg
+                  viewBox='0 0 24 24'
+                  className='home-footer-social-facebook'
+                  fill='currentColor'
+                  aria-hidden
+                >
+                  <path d='M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036c-1.934 0-2.525.931-2.525 2.666v1.305h3.701l-.594 3.667h-3.107v7.98H9.101z' />
                 </svg>
               </a>
               <a

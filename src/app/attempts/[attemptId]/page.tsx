@@ -576,12 +576,12 @@ export default function TakeAttemptPage() {
       <header className='sticky top-0 z-40 border-b border-[#022648]/15 bg-[#022648] text-white shadow-lg shadow-[#022648]/20'>
         <div className='mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8'>
           <Image
-            src='/images/logo-light.png'
+            src='/images/logo_v2.png'
             alt={APP_NAME}
             className='shrink-0 object-contain'
             style={{ width: 'auto', height: '40px' }}
-            width={1023}
-            height={1024}
+            width={1070}
+            height={664}
             priority
           />
           <div className='min-w-0 flex-1'>

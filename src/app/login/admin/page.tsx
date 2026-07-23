@@ -44,12 +44,12 @@ export default function AdminLoginPage() {
         <div className='mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
           <Link href='/' className='flex min-w-0 items-center gap-3'>
             <Image
-              src='/images/logo.png'
+              src='/images/logo_v2.png'
               alt={APP_NAME}
               className='shrink-0 object-contain'
               style={{ width: 'auto', height: '40px' }}
-              width={1023}
-              height={1024}
+              width={1070}
+              height={664}
             />
             <div className='min-w-0'>
               <p className='text-sm font-semibold text-foreground'>{APP_NAME}</p>

@@ -105,12 +105,12 @@ function SidebarContent() {
           <div className='flex items-center gap-3'>
             <div className='flex size-10 items-center justify-center rounded-2xl'>
               <Image
-                src='/images/logo-light.png'
+                src='/images/logo_v2.png'
                 alt={APP_NAME}
                 className='object-contain'
                 style={{ width: 'auto', height: '40px' }}
-                width={1023}
-                height={1024}
+                width={1070}
+                height={664}
               />
             </div>
             <p className='font-mono text-xs uppercase tracking-[0.24em] text-white/70'>

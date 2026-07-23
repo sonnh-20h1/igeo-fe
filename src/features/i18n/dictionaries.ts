@@ -746,7 +746,7 @@ export const dictionaries = {
       hero: {
         tagline: 'Cuộc thi Địa lý và Môi trường',
         headline:
-          'Cuộc thi tuyển chọn và đào tạo học sinh tham gia Olympiad Địa Lý Quốc Tế (iGeo)',
+          'Cuộc thi tuyển chọn và đào tạo học sinh tham gia International Geography Olympiad (iGeo) - Olympiad Địa Lý Quốc Tế',
         description:
           'Cuộc thi Địa lý và Môi trường (GEC) là chương trình học thuật dành cho học sinh yêu thích Địa lý, Môi trường và Khoa học Trái Đất, được tổ chức nhằm phát hiện, bồi dưỡng và phát triển những tài năng trẻ có tư duy toàn cầu và trách nhiệm với các vấn đề phát triển bền vững.',
         description2:
@@ -813,8 +813,8 @@ export const dictionaries = {
       structure: {
         title: 'Cấu trúc cuộc thi',
         intro: 'GEC được thiết kế theo lộ trình tuyển chọn rõ ràng, giúp phát hiện những học sinh có năng lực nổi bật.',
-        detailsTitle: 'Chi tiết',
-        round1Title: 'Vòng 1: Vòng sơ khảo trực tuyến',
+        detailsTitle: 'Chi Tiết:',
+        round1Title: 'Vòng 1: Vòng Sơ Khảo Online',
         round1Body: 'Vòng sơ khảo được tổ chức trực tuyến trên hệ thống của Ban Tổ chức.',
         round1EvalTitle: 'Nội dung đánh giá bao gồm:',
         round1Items: [
@@ -845,15 +845,15 @@ export const dictionaries = {
         ],
         pathTitle: 'Lộ trình tuyển chọn',
         path: [
-          'Vòng sơ khảo trực tuyến',
+          'Vòng Sơ khảo Trực tuyến',
           'Top 10 thí sinh',
-          'Vòng chung kết trực tiếp',
+          'Vòng Chung kết Trực tiếp',
           'Top 4 thí sinh',
-          'Chương trình đào tạo nâng cao',
+          'Chương trình Đào tạo nâng cao',
           'Olympic Địa lý Quốc tế (iGeo)',
         ],
         finaleTitle: 'Olympiad Địa lý Quốc tế (iGeo)',
-        finaleBody: '04 học sinh xuất sắc sẽ cùng 02 trưởng đoàn cùng nhau tham dự kỳ thi iGeo 2027.',
+        finaleBody: '04 học sinh xuất sắc sẽ cùng 02 trưởng đoàn cùng nhau tham dự kì thi iGEO 2027.',
       },
       organizer: {
         title: 'Đơn vị tổ chức',
@@ -864,11 +864,13 @@ export const dictionaries = {
           'An toàn Hóa chất (IRECS)',
         ],
         brand: 'IRECS',
-        body: 'Viện Tài nguyên, Môi trường và An toàn Hóa chất (IRECS) là đơn vị tổ chức Chương trình Cuộc thi Địa lý và Môi trường (GEC). IRECS là tổ chức hoạt động trong lĩnh vực tài nguyên, môi trường, an toàn hóa chất, đào tạo, tư vấn, nghiên cứu và hợp tác phát triển. Với định hướng chuyên môn trong lĩnh vực tài nguyên và môi trường, IRECS tham gia xây dựng và triển khai GEC nhằm góp phần nâng cao nhận thức của học sinh về Địa lý, môi trường và phát triển bền vững.',
+        body: 'Viện Tài nguyên, Môi trường và An toàn Hóa chất (IRECS) là đơn vị tổ chức Chương trình Cuộc thi Địa lý và Môi trường (GEC).',
+        body2:
+          'IRECS là tổ chức hoạt động trong lĩnh vực tài nguyên, môi trường, an toàn hóa chất, đào tạo, tư vấn, nghiên cứu và hợp tác phát triển. Với định hướng chuyên môn trong lĩnh vực tài nguyên và môi trường, IRECS tham gia xây dựng và triển khai GEC nhằm góp phần nâng cao nhận thức của học sinh về Địa lý, môi trường và phát triển bền vững.',
         pillars: [
           { label: 'Tài nguyên' },
           { label: 'Môi trường' },
-          { label: 'Phát triển bền vững' },
+          { label: 'Phát triển\nbền vững' },
         ],
       },
       faq: {
@@ -1691,7 +1693,7 @@ export const dictionaries = {
         description:
           'Geography & Environment Challenge (GEC) is an academic programme for students passionate about Geography, Environment, and Earth Science. It is designed to discover, nurture, and develop young talent with global thinking and a sense of responsibility toward sustainable development.',
         description2:
-          'Through selection rounds and intensive training, GEC gives students access to modern geographic knowledge, spatial thinking, fieldwork research, data analysis, and global problem-solving. Outstanding students may be selected to join the International Geography Olympiad (iGeo) under the regulations of the Programme Organising Committee and the iGeo Organising Committee.',
+          'Through selection rounds and intensive training, GEC gives students access to modern geographic knowledge, spatial thinking, fieldwork research skills, data analysis, and the ability to address global challenges. Based on selection results and the training process, outstanding students may be chosen to join the International Geography Olympiad (iGeo) under the regulations of the Programme Organising Committee and the iGeo Organising Committee.',
         ctaRegister: 'Register to join',
         ctaLearnMore: 'Learn about the challenge',
       },
@@ -1754,7 +1756,7 @@ export const dictionaries = {
       structure: {
         title: 'Competition structure',
         intro: 'GEC follows a clear selection pathway designed to identify students with outstanding capability.',
-        detailsTitle: 'Details',
+        detailsTitle: 'Details:',
         round1Title: 'Round 1: Online Qualifying Round',
         round1Body: 'The qualifying round is held online on the Organising Committee’s system.',
         round1EvalTitle: 'Assessment areas include:',
@@ -1805,11 +1807,13 @@ export const dictionaries = {
           'and Chemical Safety (IRECS)',
         ],
         brand: 'IRECS',
-        body: 'The Institute of Resources, Environment and Chemical Safety (IRECS) organises the Geography & Environment Challenge (GEC). IRECS works in resources, environment, chemical safety, training, consulting, research, and development cooperation. With its professional focus on resources and the environment, IRECS designs and delivers GEC to help raise student awareness of Geography, the environment, and sustainable development.',
+        body: 'The Institute of Resources, Environment and Chemical Safety (IRECS) organises the Geography & Environment Challenge (GEC).',
+        body2:
+          'IRECS works in resources, environment, chemical safety, training, consulting, research, and development cooperation. With its professional focus on resources and the environment, IRECS designs and delivers GEC to help raise student awareness of Geography, the environment, and sustainable development.',
         pillars: [
           { label: 'Resources' },
           { label: 'Environment' },
-          { label: 'Sustainable development' },
+          { label: 'Sustainable\ndevelopment' },
         ],
       },
       faq: {

@@ -153,6 +153,10 @@ textarea {
   text-justify: inter-word;
 }
 
+.home-page .home-gec-name {
+  font-weight: 700;
+}
+
 .home-page h1,
 .home-page h2,
 .home-page h3,
@@ -250,6 +254,15 @@ textarea {
   color: #022648;
 }
 
+.home-page p.home-hero-tagline {
+  margin-top: 0.65rem;
+  font-size: clamp(0.95rem, 1.7vw, 1.1rem);
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  color: rgba(2, 38, 72, 0.72);
+}
+
 .home-hero-headline {
   margin-top: 1.25rem;
   font-size: clamp(1.05rem, 2.1vw, 1.35rem);
@@ -264,6 +277,10 @@ textarea {
   font-size: clamp(0.95rem, 1.6vw, 1.05rem);
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.82);
+}
+
+.home-hero-description + .home-hero-description {
+  margin-top: 0.85rem;
 }
 
 .home-hero-actions {
@@ -444,7 +461,7 @@ textarea {
   align-items: center;
   min-height: 100svh;
   overflow: hidden;
-  background: #ffffff;
+  background: transparent;
 }
 
 .home-about-backdrop {
@@ -468,8 +485,12 @@ textarea {
   font-family: var(--font-home-display);
   font-size: clamp(2rem, 3.8vw, 2.75rem);
   line-height: 1.15;
-  font-weight: 800;
+  font-weight: 600;
   color: #022648;
+}
+
+.home-about-title .home-gec-name {
+  font-weight: 800;
 }
 
 .home-about-underline {
@@ -535,7 +556,7 @@ textarea {
 .home-why {
   position: relative;
   overflow: hidden;
-  background: #f4f7fa;
+  background: transparent;
   padding-top: 5.5rem;
   padding-bottom: 5.5rem;
 }
@@ -550,7 +571,6 @@ textarea {
 .home-why-backdrop-image {
   object-fit: cover;
   object-position: center;
-  opacity: 0.9;
 }
 
 .home-why-inner {
@@ -626,7 +646,7 @@ textarea {
 .home-igeo {
   position: relative;
   overflow: hidden;
-  background: #ffffff;
+  background: transparent;
   padding-top: 5.5rem;
   padding-bottom: 5.5rem;
 }
@@ -640,8 +660,7 @@ textarea {
 
 .home-igeo-backdrop-image {
   object-fit: cover;
-  object-position: left center;
-  opacity: 0.55;
+  object-position: center;
 }
 
 .home-igeo-inner {
@@ -836,25 +855,27 @@ textarea {
 }
 
 .home-section-structure {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.96)),
-    url('/images/background_1.png') center / cover no-repeat;
+  background: transparent;
 }
 
 .home-structure.home-section {
   position: relative;
-  background: #ffffff;
+  overflow: hidden;
+  background: transparent;
   padding: 0;
 }
 
 .home-structure-main {
   position: relative;
+  z-index: 1;
   padding-top: 5.5rem;
   padding-bottom: 3rem;
 }
 
 .home-structure-lower {
-  background: #ffffff;
+  position: relative;
+  z-index: 1;
+  background: transparent;
   padding-top: 2.5rem;
 }
 
@@ -867,8 +888,7 @@ textarea {
 
 .home-structure-backdrop-image {
   object-fit: cover;
-  object-position: left top;
-  opacity: 0.45;
+  object-position: center;
 }
 
 .home-structure-inner {
@@ -1061,7 +1081,7 @@ textarea {
   position: relative;
   z-index: 2;
   margin-top: 0;
-  background: #ffffff;
+  background: transparent;
   padding-bottom: 0;
 }
 
@@ -1098,9 +1118,17 @@ textarea {
 }
 
 .home-organizer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  overflow: hidden;
   background: #ffffff;
-  padding-top: 5rem;
-  padding-bottom: 5rem;
+}
+
+.home-organizer-inner {
+  width: 100%;
+  z-index: 1;
 }
 
 .home-organizer-label {
@@ -1158,12 +1186,17 @@ textarea {
 .home-organizer-body {
   margin-top: 1.75rem;
   max-width: 34rem;
-  font-size: 0.98rem;
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.78);
 }
 
+.home-organizer-body p + p {
+  margin-top: 0.85rem;
+}
+
 .home-organizer-visual {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1172,13 +1205,78 @@ textarea {
 .home-organizer-visual-image {
   display: block;
   width: 100%;
-  max-width: 34rem;
+  max-width: 40rem;
   height: auto;
 }
 
-@media (max-width: 767px) {
+.home-organizer-pillars {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 6.5%;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-page li.home-organizer-pillar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 0.35rem;
+  text-align: center;
+  text-justify: auto;
+  color: #022648;
+  font-family: var(--font-home-body);
+  font-size: clamp(0.72rem, 1.7vw, 0.95rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  white-space: pre-line;
+}
+
+@media (max-width: 1023px) {
   .home-organizer-visual-image {
-    max-width: 26rem;
+    max-width: 30rem;
+  }
+
+  .home-organizer-pillars {
+    bottom: 6.25%;
+    left: 5.5%;
+    right: 5.5%;
+  }
+
+  .home-page li.home-organizer-pillar {
+    font-size: clamp(0.68rem, 2vw, 0.85rem);
+  }
+}
+
+@media (max-width: 767px) {
+  .home-organizer {
+    min-height: auto;
+  }
+
+  .home-organizer-visual-image {
+    max-width: 22rem;
+  }
+
+  .home-organizer-pillars {
+    bottom: 6%;
+    left: 4.5%;
+    right: 4.5%;
+  }
+
+  .home-page li.home-organizer-pillar {
+    font-size: 0.62rem;
+    padding: 0 0.2rem;
+  }
+
+  .home-organizer-body {
+    max-width: none;
   }
 }
 
@@ -1430,6 +1528,11 @@ textarea {
   border: 1.5px solid #022648;
   color: #022648;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+.home-footer-social-facebook {
+  width: 0.95rem;
+  height: 0.95rem;
 }
 
 .home-footer-social:hover {
