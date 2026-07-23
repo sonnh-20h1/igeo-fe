@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Image from 'next/image';
-import { Building2, Feather, Globe, GraduationCap, Mail, Map, MapPin, MonitorPlay, Mountain, Trophy, Users } from 'lucide-react';
+import { Building2, Droplet, Feather, Globe, GraduationCap, Mail, Map, MapPin, MonitorPlay, Mountain, Sprout, Trophy, Users } from 'lucide-react';
 import { boldGecName } from '@/features/home/bold-gec-name';
 import { HomeContactForm } from '@/features/home/home-contact-form';
 import { HomeFaq } from '@/features/home/home-faq';
@@ -12,6 +12,8 @@ import { useI18n } from '@/features/i18n/provider';
 const IGEO_TEST_ICONS = [Feather, MonitorPlay, Mountain] as const;
 
 const STRUCTURE_PATH_ICONS = [MonitorPlay, Users, Map, Trophy, GraduationCap, Globe] as const;
+
+const ORGANIZER_PILLAR_ICONS = [Sprout, Droplet, Globe] as const;
 
 function SectionHeading({ children }: { children: ReactNode }) {
   return (
@@ -41,9 +43,6 @@ export function HomePage() {
             </h1>
             <p className='home-reveal home-reveal-delay-2 home-hero-description'>
               {boldGecName(home.hero.description)}
-            </p>
-            <p className='home-reveal home-reveal-delay-2 home-hero-description'>
-              {boldGecName(home.hero.description2)}
             </p>
             <div className='home-reveal home-reveal-delay-3 home-hero-actions'>
               <a href='/exams' className='home-cta-primary'>
@@ -318,7 +317,7 @@ export function HomePage() {
       </section>
 
       <section id='organizer' className='home-section home-organizer scroll-mt-24'>
-        <div className='home-organizer-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14'>
+        <div className='home-organizer-inner relative mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.15fr] lg:gap-12'>
           <div className='home-organizer-copy'>
             <div className='home-organizer-label'>
               <span className='home-organizer-label-bar' aria-hidden />
@@ -339,21 +338,28 @@ export function HomePage() {
             </div>
           </div>
 
-          <div className='home-organizer-visual'>
-            <Image
-              src='/images/dvtc.png'
-              alt={home.organizer.brand}
-              width={5167}
-              height={5167}
-              className='home-organizer-visual-image'
-              sizes='(max-width: 1024px) 100vw, 45vw'
-            />
+          <div className='home-organizer-visual' role='img' aria-label={home.organizer.brand}>
+            <div className='home-organizer-visual-backdrop' aria-hidden>
+              <Image
+                src='/images/dvtc_v1.png'
+                alt=''
+                fill
+                sizes='(max-width: 1024px) 100vw, 45vw'
+                className='home-organizer-visual-image'
+              />
+            </div>
             <ul className='home-organizer-pillars'>
-              {home.organizer.pillars.map((pillar) => (
-                <li key={pillar.label} className='home-organizer-pillar'>
-                  {pillar.label}
-                </li>
-              ))}
+              {home.organizer.pillars.map((pillar, index) => {
+                const Icon = ORGANIZER_PILLAR_ICONS[index] ?? Globe;
+                return (
+                  <li key={pillar.label} className='home-organizer-pillar'>
+                    <span className='home-organizer-pillar-icon' aria-hidden>
+                      <Icon className='size-[1.15em]' strokeWidth={1.75} />
+                    </span>
+                    <span className='home-organizer-pillar-label'>{pillar.label}</span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

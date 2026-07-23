@@ -749,8 +749,6 @@ export const dictionaries = {
           'Cuộc thi tuyển chọn và đào tạo học sinh tham gia International Geography Olympiad (iGeo) - Olympiad Địa Lý Quốc Tế',
         description:
           'Cuộc thi Địa lý và Môi trường (GEC) là chương trình học thuật dành cho học sinh yêu thích Địa lý, Môi trường và Khoa học Trái Đất, được tổ chức nhằm phát hiện, bồi dưỡng và phát triển những tài năng trẻ có tư duy toàn cầu và trách nhiệm với các vấn đề phát triển bền vững.',
-        description2:
-          'Thông qua các vòng tuyển chọn và chương trình đào tạo chuyên sâu, GEC mang đến cho học sinh cơ hội tiếp cận kiến thức địa lý hiện đại, rèn luyện tư duy không gian, kỹ năng nghiên cứu thực địa, năng lực phân tích dữ liệu và khả năng giải quyết các vấn đề toàn cầu. Trên cơ sở kết quả tuyển chọn và quá trình đào tạo, những học sinh xuất sắc sẽ được lựa chọn để tham gia Olympiad Địa Lý Quốc Tế (iGeo) theo quy định của Ban Tổ chức Chương trình và Ban Tổ chức iGeo.',
         ctaRegister: 'Đăng ký tham gia',
         ctaLearnMore: 'Tìm hiểu cuộc thi',
       },
@@ -780,8 +778,8 @@ export const dictionaries = {
             body: 'GEC tạo ra một cộng đồng học thuật dành cho những học sinh có chung niềm đam mê khám phá thế giới. Tại đây, học sinh có thể trao đổi kiến thức, học hỏi lẫn nhau và cùng phát triển trong một môi trường tích cực, nghiêm túc và truyền cảm hứng.',
           },
           {
-            title: 'Cơ hội trở thành thành viên đội tuyển Việt Nam tham dự Olympiad Địa lý Quốc tế (iGeo)',
-            body: 'Những học sinh có thành tích xuất sắc sẽ được xem xét lựa chọn vào chương trình đào tạo và tham gia Olympiad Địa Lý Quốc Tế (iGeo) theo quy định của Ban Tổ chức Chương trình và Ban Tổ chức iGeo.',
+            title: 'Cơ hội để tham dự Olympiad Địa lý Quốc tế (iGeo)',
+            body: 'Những học sinh có thành tích xuất sắc sẽ được lựa chọn vào chương trình đào tạo và tham gia Olympiad Địa Lý Quốc Tế (iGeo) theo quy định của Ban Tổ chức Chương trình và Ban Tổ chức iGeo.',
           },
         ],
       },
@@ -1692,8 +1690,6 @@ export const dictionaries = {
           'A selection and training pathway for students aiming for the International Geography Olympiad (iGeo)',
         description:
           'Geography & Environment Challenge (GEC) is an academic programme for students passionate about Geography, Environment, and Earth Science. It is designed to discover, nurture, and develop young talent with global thinking and a sense of responsibility toward sustainable development.',
-        description2:
-          'Through selection rounds and intensive training, GEC gives students access to modern geographic knowledge, spatial thinking, fieldwork research skills, data analysis, and the ability to address global challenges. Based on selection results and the training process, outstanding students may be chosen to join the International Geography Olympiad (iGeo) under the regulations of the Programme Organising Committee and the iGeo Organising Committee.',
         ctaRegister: 'Register to join',
         ctaLearnMore: 'Learn about the challenge',
       },
@@ -1723,8 +1719,8 @@ export const dictionaries = {
             body: 'GEC builds an academic community for students who share a passion for exploring the world. Here, students exchange knowledge, learn from one another, and grow in a positive, serious, and inspiring environment.',
           },
           {
-            title: 'A pathway to join Vietnam’s team at the International Geography Olympiad (iGeo)',
-            body: 'Outstanding students may be considered for the training programme and participation in the International Geography Olympiad (iGeo), subject to the regulations of the Programme Organising Committee and the iGeo Organising Committee.',
+            title: 'An opportunity to take part in the International Geography Olympiad (iGeo)',
+            body: 'Outstanding students will be selected for the training programme and participation in the International Geography Olympiad (iGeo), subject to the regulations of the Programme Organising Committee and the iGeo Organising Committee.',
           },
         ],
       },
