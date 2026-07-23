@@ -31,7 +31,7 @@ function formatDateTime(value: string | Date, locale: string) {
 function WelcomeChrome({ children }: { children: ReactNode }) {
   return (
     <div className='home-page min-h-screen bg-white text-[#022648]'>
-      <HomeHeader hideAuth solid brandHref='/' sectionBase='/' />
+      <HomeHeader hideAuth solid light brandHref='/' sectionBase='/' />
       <div className='pt-20 sm:pt-24'>{children}</div>
     </div>
   );

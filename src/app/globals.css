@@ -597,20 +597,27 @@ textarea {
   padding: 0;
 }
 
-@media (min-width: 768px) {
-  .home-why-row {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
 .home-why-item {
   padding: 1.75rem 0 1.9rem;
   border-top: 1px solid #e0c389;
 }
 
-.home-why-row:first-child .home-why-item {
+/* Phone: only item 01 has no top border */
+.home-why-row:first-child .home-why-item:first-child {
   border-top: none;
   padding-top: 0.35rem;
+}
+
+/* Desktop+: items 01 and 02 (first row) have no top border */
+@media (min-width: 768px) {
+  .home-why-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .home-why-row:first-child .home-why-item {
+    border-top: none;
+    padding-top: 0.35rem;
+  }
 }
 
 .home-why-index {

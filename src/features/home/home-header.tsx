@@ -23,9 +23,9 @@ const NAV_LINKS = [
 type HomeHeaderProps = {
   /** Hide login / dashboard button */
   hideAuth?: boolean;
-  /** Always use solid navy bar (for non-hero pages) */
+  /** Always use solid bar (for non-hero pages) */
   solid?: boolean;
-  /** Light hero: navy text on cream background when not scrolled */
+  /** Light brand colors (green IRECS / navy GEC), including with solid */
   light?: boolean;
   /** Logo / brand link target */
   brandHref?: string;
@@ -69,8 +69,10 @@ export function HomeHeader({
   }
 
   const BrandTag = brandHref.startsWith('#') ? 'a' : Link;
+  const onLightSolid = light && solid;
   const onLightHero = light && !scrolled && !solid;
-  const onLightScrolled = light && scrolled && !solid;
+  const onLightScrolled = (light && scrolled && !solid) || onLightSolid;
+  const onLight = onLightHero || onLightScrolled;
 
   return (
     <header
@@ -90,7 +92,7 @@ export function HomeHeader({
           href={brandHref}
           className={cn(
             'flex min-w-0 items-center gap-3',
-            onLightHero || onLightScrolled ? 'text-[#022648]' : 'text-white',
+            onLight ? 'text-[#022648]' : 'text-white',
           )}
         >
           <Image
@@ -115,7 +117,7 @@ export function HomeHeader({
               href={sectionHref(link.href)}
               className={cn(
                 'rounded-lg px-3 py-2 text-sm font-medium transition',
-                onLightHero || onLightScrolled
+                onLight
                   ? 'text-[#022648]/80 hover:bg-[#022648]/5 hover:text-[#022648]'
                   : 'text-white/80 hover:bg-white/10 hover:text-white',
               )}
@@ -129,7 +131,7 @@ export function HomeHeader({
           <div
             className={cn(
               'home-lang-switcher',
-              (onLightHero || onLightScrolled) && 'home-lang-switcher--light',
+              onLight && 'home-lang-switcher--light',
             )}
           >
             <LanguageSwitcher compact className='!h-full' />
@@ -138,11 +140,10 @@ export function HomeHeader({
             <Button
               asChild
               size='sm'
-              variant={onLightHero || onLightScrolled ? 'default' : 'secondary'}
+              variant={onLight ? 'default' : 'secondary'}
               className={cn(
                 'hidden sm:inline-flex',
-                (onLightHero || onLightScrolled) &&
-                  'bg-[#E0C389] text-[#022648] hover:bg-[#ebd4a8]',
+                onLight && 'bg-[#E0C389] text-[#022648] hover:bg-[#ebd4a8]',
               )}
             >
               <Link href={authHref}>{authLabel}</Link>
@@ -154,7 +155,7 @@ export function HomeHeader({
             size='icon'
             className={cn(
               'lg:hidden',
-              onLightHero || onLightScrolled
+              onLight
                 ? 'text-[#022648] hover:bg-[#022648]/5'
                 : 'text-white hover:bg-white/10',
             )}
@@ -168,13 +169,25 @@ export function HomeHeader({
       </div>
 
       {open ? (
-        <div className='border-t border-white/15 bg-[#022648] px-4 py-4 lg:hidden'>
+        <div
+          className={cn(
+            'border-t px-4 py-4 lg:hidden',
+            onLight
+              ? 'border-[#022648]/10 bg-white'
+              : 'border-white/15 bg-[#022648]',
+          )}
+        >
           <nav className='flex flex-col gap-1'>
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
                 href={sectionHref(link.href)}
-                className='rounded-lg px-3 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10'
+                className={cn(
+                  'rounded-lg px-3 py-3 text-sm font-medium transition',
+                  onLight
+                    ? 'text-[#022648]/90 hover:bg-[#022648]/5'
+                    : 'text-white/90 hover:bg-white/10',
+                )}
                 onClick={() => setOpen(false)}
               >
                 {home.nav[link.key]}

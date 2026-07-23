@@ -35,9 +35,11 @@ export function HomePage() {
         <div className='home-hero-inner mx-auto w-full max-w-6xl px-4 sm:px-6'>
           <div className='home-hero-copy'>
             <p className='home-reveal home-hero-brand'>{boldGecName(home.brand)}</p>
-            <p className='home-reveal home-reveal-delay-1 home-hero-tagline'>
-              {home.hero.tagline}
-            </p>
+            {home.hero.tagline ? (
+              <p className='home-reveal home-reveal-delay-1 home-hero-tagline'>
+                {home.hero.tagline}
+              </p>
+            ) : null}
             <h1 className='home-reveal home-reveal-delay-1 home-hero-headline'>
               {home.hero.headline}
             </h1>
