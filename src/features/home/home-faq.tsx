@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 type FaqItem = {
   q: string;
   a?: string;
-  aLines?: string[];
+  aLines?: readonly string[];
 };
 
 export function HomeFaq({ items }: { items: readonly FaqItem[] }) {

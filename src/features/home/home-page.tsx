@@ -13,7 +13,7 @@ const IGEO_TEST_ICONS = [Feather, MonitorPlay, Mountain] as const;
 
 const STRUCTURE_PATH_ICONS = [MonitorPlay, Users, Map, Trophy, GraduationCap, Globe] as const;
 
-function AboutBodyParagraph({ lines }: { lines: string[] }) {
+function AboutBodyParagraph({ lines }: { lines: readonly string[] }) {
   return (
     <p>
       {lines.map((line, index) => (
@@ -25,7 +25,7 @@ function AboutBodyParagraph({ lines }: { lines: string[] }) {
   );
 }
 
-function WhyItemBody({ body, bodyLines }: { body?: string; bodyLines?: string[] }) {
+function WhyItemBody({ body, bodyLines }: { body?: string; bodyLines?: readonly string[] }) {
   const lines = bodyLines ?? (body ? [body] : []);
 
   return (
@@ -39,7 +39,7 @@ function WhyItemBody({ body, bodyLines }: { body?: string; bodyLines?: string[] 
   );
 }
 
-function IgeoBodyParagraph({ lines }: { lines: string[] }) {
+function IgeoBodyParagraph({ lines }: { lines: readonly string[] }) {
   return (
     <p>
       {lines.map((line, index) => (
@@ -51,7 +51,7 @@ function IgeoBodyParagraph({ lines }: { lines: string[] }) {
   );
 }
 
-function IgeoCardBody({ body, bodyLines }: { body?: string; bodyLines?: string[] }) {
+function IgeoCardBody({ body, bodyLines }: { body?: string; bodyLines?: readonly string[] }) {
   const lines = bodyLines ?? (body ? [body] : []);
 
   return (
@@ -65,7 +65,7 @@ function IgeoCardBody({ body, bodyLines }: { body?: string; bodyLines?: string[]
   );
 }
 
-function OrganizerBodyParagraph({ body, bodyLines }: { body?: string; bodyLines?: string[] }) {
+function OrganizerBodyParagraph({ body, bodyLines }: { body?: string; bodyLines?: readonly string[] }) {
   const lines = bodyLines ?? (body ? [body] : []);
 
   return (
@@ -219,7 +219,10 @@ export function HomePage() {
                           {String(index + 1).padStart(2, '0')}
                         </span>
                         <h3 className='home-why-item-title'>{item.title}</h3>
-                        <WhyItemBody body={item.body} bodyLines={item.bodyLines} />
+                        <WhyItemBody
+                          body={'body' in item ? item.body : undefined}
+                          bodyLines={'bodyLines' in item ? item.bodyLines : undefined}
+                        />
                       </article>
                     );
                   })}
@@ -290,7 +293,10 @@ export function HomePage() {
                       {test.title} ({test.weight})
                     </h4>
                     <span className='home-igeo-card-line' aria-hidden />
-                    <IgeoCardBody body={test.body} bodyLines={test.bodyLines} />
+                    <IgeoCardBody
+                      body={'body' in test ? test.body : undefined}
+                      bodyLines={'bodyLines' in test ? test.bodyLines : undefined}
+                    />
                   </li>
                 );
               })}
@@ -419,7 +425,10 @@ export function HomePage() {
             <span className='home-organizer-underline' aria-hidden />
             <div className='home-organizer-body'>
               <OrganizerBodyParagraph body={home.organizer.body} />
-              <OrganizerBodyParagraph body={home.organizer.body2} bodyLines={home.organizer.body2Lines} />
+              <OrganizerBodyParagraph
+                body={'body2' in home.organizer ? home.organizer.body2 : undefined}
+                bodyLines={'body2Lines' in home.organizer ? home.organizer.body2Lines : undefined}
+              />
             </div>
           </div>
 
