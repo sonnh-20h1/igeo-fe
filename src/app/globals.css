@@ -157,6 +157,10 @@ textarea {
   font-weight: 700;
 }
 
+.home-faq-answer-line {
+  display: block;
+}
+
 .home-page h1,
 .home-page h2,
 .home-page h3,
@@ -489,6 +493,10 @@ textarea {
   color: #022648;
 }
 
+.home-about-title-line {
+  display: block;
+}
+
 .home-about-title .home-gec-name {
   font-weight: 800;
 }
@@ -506,10 +514,14 @@ textarea {
   margin-top: 2rem;
   display: grid;
   gap: 1.35rem;
-  max-width: 34rem;
+  max-width: 38rem;
   font-size: clamp(0.95rem, 1.5vw, 1.05rem);
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.82);
+}
+
+.home-about-body-line {
+  display: block;
 }
 
 .home-about-map {
@@ -593,12 +605,12 @@ textarea {
 
 .home-why-row {
   display: grid;
-  gap: 2.5rem 4rem;
+  gap: 1.25rem 1.5rem;
   padding: 0;
 }
 
 .home-why-item {
-  padding: 1.75rem 0 1.9rem;
+  padding: 0.9rem 0 1.15rem;
   border-top: 1px solid #e0c389;
 }
 
@@ -618,11 +630,24 @@ textarea {
     border-top: none;
     padding-top: 0.35rem;
   }
+
+  .home-why-row--centered {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .home-why-row--centered .home-why-item {
+    width: calc((100% - 1.5rem) / 2);
+  }
+}
+
+.home-why-row--centered .home-why-item {
+  text-align: center;
 }
 
 .home-why-index {
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #c9a96a;
@@ -632,7 +657,7 @@ textarea {
 .home-why-item-title {
   margin: 0.45rem 0 0;
   font-family: var(--font-home-display);
-  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  font-size: clamp(1.1rem, 1.9vw, 1.28rem);
   font-weight: 700;
   line-height: 1.35;
   color: #022648;
@@ -640,9 +665,13 @@ textarea {
 
 .home-why-item-body {
   margin-top: 0.85rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.75;
   color: rgba(55, 65, 75, 0.92);
+}
+
+.home-why-item-body-line {
+  display: block;
 }
 
 .home-section-dark {
@@ -712,6 +741,10 @@ textarea {
   font-size: clamp(0.95rem, 1.4vw, 1.05rem);
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.8);
+}
+
+.home-igeo-body-line {
+  display: block;
 }
 
 .home-igeo-compass {
@@ -846,9 +879,18 @@ textarea {
 
 .home-igeo-card-body {
   margin-top: 0.85rem;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   line-height: 1.7;
   color: rgba(55, 65, 75, 0.9);
+}
+
+.home-page .home-igeo-card-body {
+  text-align: left;
+  text-justify: auto;
+}
+
+.home-igeo-card-body-line {
+  display: block;
 }
 
 .home-igeo-closing {
@@ -856,9 +898,14 @@ textarea {
   max-width: 48rem;
   margin-inline: auto;
   text-align: center;
+  text-justify: auto;
   font-size: 0.98rem;
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.78);
+}
+
+.home-page .home-igeo-closing {
+  text-align: center;
 }
 
 .home-section-structure {
@@ -959,7 +1006,7 @@ textarea {
 .home-structure-label,
 .home-structure-number,
 .home-igeo-tests-title,
-.home-igeo-closing {
+.home-page .home-igeo-closing {
   text-align: center;
 }
 
@@ -1030,10 +1077,14 @@ textarea {
 
 .home-structure-label {
   margin-top: 0.35rem;
-  max-width: 8.5rem;
+  max-width: 9.5rem;
   font-size: 0.82rem;
   line-height: 1.45;
   color: rgba(2, 38, 72, 0.82);
+}
+
+.home-structure-label-line {
+  display: block;
 }
 
 .home-structure-details-title {
@@ -1193,13 +1244,17 @@ textarea {
 .home-organizer-body {
   margin-top: 1.75rem;
   max-width: 34rem;
-  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+  font-size: clamp(0.88rem, 1.35vw, 0.98rem);
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.78);
 }
 
 .home-organizer-body p + p {
   margin-top: 0.85rem;
+}
+
+.home-organizer-body-line {
+  display: block;
 }
 
 .home-organizer-visual {

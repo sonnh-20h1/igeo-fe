@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 
 type FaqItem = {
   q: string;
-  a: string;
+  a?: string;
+  aLines?: string[];
 };
 
 export function HomeFaq({ items }: { items: readonly FaqItem[] }) {
@@ -41,7 +42,13 @@ export function HomeFaq({ items }: { items: readonly FaqItem[] }) {
               )}
             >
               <div className='overflow-hidden'>
-                <p className='pb-5 text-base leading-relaxed text-[#022648]/78'>{item.a}</p>
+                <p className='home-faq-answer pb-5 text-base leading-relaxed text-[#022648]/78'>
+                  {(item.aLines ?? (item.a ? [item.a] : [])).map((line, lineIndex) => (
+                    <span key={lineIndex} className='home-faq-answer-line'>
+                      {line}
+                    </span>
+                  ))}
+                </p>
               </div>
             </div>
           </div>

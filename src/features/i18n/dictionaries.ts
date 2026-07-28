@@ -308,14 +308,18 @@ export const dictionaries = {
         'Chọn mã quốc gia, rồi nhập số điện thoại bỏ số 0 ở đầu. Ví dụ: 0912 345 678 → chọn +84 và nhập 912345678.',
       fieldCccd: 'CCCD / CMND',
       fieldDob: 'Ngày sinh',
-      fieldDobHint:
-        'Điều kiện thi 16–19 tuổi (tính đến 01/08/{year}). Ngày sinh hợp lệ: từ {min} đến {max}.',
-      fieldDobInvalid:
-        'Ngày sinh phải nằm trong khoảng {min} đến {max} (16–19 tuổi tính đến 01/08/{year}).',
+      fieldDobHint: 'Nhập ngày sinh theo CCCD/CMND.',
       fieldClassName: 'Lớp',
       fieldSchool: 'Trường',
+      fieldParentConsent:
+        'Tôi xác nhận đã có sự đồng thuận của phụ huynh/người giám hộ đối với việc tham gia cuộc thi Cuộc thi Địa lý và Môi trường (GEC)',
+      fieldSignature: 'Chữ ký',
+      fieldSignatureHint: 'Vui lòng ghi đầy đủ Họ và Tên',
       entrySubmit: 'Tiếp tục',
       entryRequired: 'Vui lòng điền đầy đủ thông tin.',
+      entryParentConsentRequired:
+        'Vui lòng xác nhận sự đồng thuận của phụ huynh/người giám hộ.',
+      entrySignatureRequired: 'Vui lòng ghi đầy đủ Họ và Tên vào ô chữ ký.',
       entryFailed: 'Không gửi được thông tin thí sinh',
       entrySuccess: 'Đã lưu thông tin thí sinh.',
       welcomeBack: 'Chào mừng bạn quay lại.',
@@ -746,17 +750,33 @@ export const dictionaries = {
       hero: {
         tagline: 'Cuộc thi Địa lý và Môi trường',
         headline:
-          'Cuộc thi tuyển chọn và đào tạo học sinh tham gia International Geography Olympiad (iGeo) - Olympiad Địa Lý Quốc Tế',
+          'Chương trình tuyển chọn và đào tạo học sinh tham gia International Geography Olympiad (iGeo) - Olympiad Địa Lý Quốc Tế',
         description:
           'Cuộc thi Địa lý và Môi trường (GEC) là chương trình học thuật dành cho học sinh yêu thích Địa lý, Môi trường và Khoa học Trái Đất, được tổ chức nhằm phát hiện, bồi dưỡng và phát triển những tài năng trẻ có tư duy toàn cầu và trách nhiệm với các vấn đề phát triển bền vững.',
         ctaRegister: 'Đăng ký tham gia',
         ctaLearnMore: 'Tìm hiểu cuộc thi',
       },
       about: {
-        title: 'Giới thiệu về Cuộc thi Địa lý và Môi trường (GEC)',
-        p1: 'GEC được xây dựng với sứ mệnh khơi dậy niềm đam mê khám phá thế giới, nuôi dưỡng tư duy địa lý và nâng cao nhận thức về tài nguyên, môi trường và phát triển bền vững cho thế hệ học sinh Việt Nam.',
-        p2: 'Không chỉ là một cuộc thi, GEC là một hành trình học thuật gồm tuyển chọn, đào tạo và phát triển năng lực. Chương trình hướng tới việc tạo ra một môi trường nghiêm túc, chất lượng và mang tính định hướng quốc tế, nơi học sinh được thử sức với các vấn đề thực tiễn liên quan đến con người, không gian, tài nguyên, môi trường và các thách thức toàn cầu.',
-        p3: 'Thông qua GEC, học sinh có cơ hội phát triển những năng lực quan trọng trong học tập và nghiên cứu hiện đại, bao gồm tư duy phản biện, tư duy không gian, phân tích bản đồ, đọc hiểu dữ liệu, nghiên cứu thực địa và trình bày giải pháp cho các vấn đề thực tế.',
+        titleLines: ['Giới thiệu về Cuộc thi', 'Địa lý và Môi trường (GEC)'],
+        p1Lines: [
+          'GEC được xây dựng với sứ mệnh khơi dậy niềm đam mê khám phá',
+          'thế giới, nuôi dưỡng tư duy địa lý và nâng cao nhận thức về tài nguyên,',
+          'môi trường và phát triển bền vững cho thế hệ học sinh Việt Nam.',
+        ],
+        p2Lines: [
+          'Không chỉ là một cuộc thi, GEC là một hành trình học thuật gồm',
+          'tuyển chọn, đào tạo và phát triển năng lực. Chương trình hướng tới',
+          'việc tạo ra một môi trường nghiêm túc, chất lượng và mang tính',
+          'định hướng quốc tế, nơi học sinh được thử sức với các vấn đề',
+          'thực tiễn liên quan đến con người, không gian, tài nguyên, môi trường',
+          'và các thách thức toàn cầu.',
+        ],
+        p3Lines: [
+          'Thông qua GEC, học sinh có cơ hội phát triển những năng lực quan trọng',
+          'trong học tập và nghiên cứu hiện đại, bao gồm tư duy phản biện,',
+          'tư duy không gian, phân tích bản đồ, đọc hiểu dữ liệu, nghiên cứu thực địa',
+          'và trình bày giải pháp cho các vấn đề thực tế.',
+        ],
       },
       why: {
         title: 'Vì sao nên tham gia?',
@@ -771,11 +791,21 @@ export const dictionaries = {
           },
           {
             title: 'Học hỏi từ chuyên gia',
-            body: 'Những học sinh được tuyển chọn sẽ có cơ hội tham gia chương trình đào tạo chuyên sâu, workshop và các hoạt động học thuật với sự đồng hành của chuyên gia, giảng viên và cố vấn trong lĩnh vực Địa lý, Môi trường, Khoa học Trái Đất và phát triển bền vững.',
+            bodyLines: [
+              'Những học sinh được tuyển chọn sẽ có cơ hội tham gia chương trình',
+              'đào tạo chuyên sâu, workshop và các hoạt động học thuật với sự đồng hành',
+              'của chuyên gia, giảng viên và cố vấn trong lĩnh vực Địa lý, Môi trường,',
+              'Khoa học Trái Đất và phát triển bền vững.',
+            ],
           },
           {
             title: 'Kết nối với cộng đồng học sinh yêu thích Địa lý',
-            body: 'GEC tạo ra một cộng đồng học thuật dành cho những học sinh có chung niềm đam mê khám phá thế giới. Tại đây, học sinh có thể trao đổi kiến thức, học hỏi lẫn nhau và cùng phát triển trong một môi trường tích cực, nghiêm túc và truyền cảm hứng.',
+            bodyLines: [
+              'GEC tạo ra một cộng đồng học thuật dành cho những học sinh có',
+              'chung niềm đam mê khám phá thế giới. Tại đây, học sinh có thể trao đổi',
+              'kiến thức, học hỏi lẫn nhau và cùng phát triển trong một môi trường tích cực,',
+              'nghiêm túc và truyền cảm hứng.',
+            ],
           },
           {
             title: 'Cơ hội để tham dự Olympiad Địa lý Quốc tế (iGeo)',
@@ -786,18 +816,34 @@ export const dictionaries = {
       igeo: {
         title: 'Giới thiệu về Olympiad Địa Lý Quốc Tế (iGeo)',
         p1: 'Olympiad Địa Lý Quốc Tế (iGeo) là kỳ thi Olympic Địa lý quốc tế dành cho học sinh trung học, được tổ chức hằng năm dưới sự bảo trợ của Liên minh Địa lý Quốc tế (International Geographical Union – IGU). Kỳ thi quy tụ các học sinh đến từ hơn 50 quốc gia và vùng lãnh thổ, tạo nên một diễn đàn học thuật quốc tế nhằm thúc đẩy giáo dục Địa lý và tăng cường giao lưu giữa học sinh trên toàn thế giới.',
-        p2: 'iGeo không chỉ đánh giá kiến thức Địa lý, mà còn chú trọng khả năng vận dụng kiến thức để phân tích, lý giải và giải quyết các vấn đề thực tiễn liên quan đến con người, tài nguyên, môi trường, đô thị, biến đổi khí hậu và phát triển bền vững.',
+        p2Lines: [
+          'iGeo không chỉ đánh giá kiến thức Địa lý, mà còn chú trọng khả năng',
+          'vận dụng kiến thức để phân tích, lý giải và giải quyết các vấn đề thực tiễn',
+          'liên quan đến con người, tài nguyên, môi trường, đô thị, biến đổi khí hậu',
+          'và phát triển bền vững.',
+        ],
         testsTitle: 'Nội dung thi tại iGeo',
         tests: [
           {
             title: 'Bài thi tự luận',
             weight: '40%',
-            body: 'Bài thi tự luận đánh giá khả năng vận dụng kiến thức địa lý để phân tích, lý giải và đề xuất giải pháp cho các vấn đề thực tiễn thông qua bản đồ, biểu đồ, số liệu, hình ảnh và các tư liệu địa lý.',
+            bodyLines: [
+              'Bài thi tự luận đánh giá khả năng vận dụng',
+              'kiến thức địa lý để phân tích, lý giải',
+              'và đề xuất giải pháp cho các vấn đề thực tiễn',
+              'thông qua bản đồ, biểu đồ, số liệu, hình ảnh',
+              'và các tư liệu địa lý.',
+            ],
           },
           {
             title: 'Bài thi trắc nghiệm',
             weight: '20%',
-            body: 'Bài thi trắc nghiệm đánh giá kỹ năng đọc, phân tích và diễn giải các nguồn dữ liệu địa lý như bản đồ, ảnh vệ tinh, biểu đồ, video, hình ảnh và dữ liệu thống kê.',
+            bodyLines: [
+              'Bài thi trắc nghiệm đánh giá kỹ năng đọc,',
+              'phân tích và diễn giải các nguồn dữ liệu',
+              'địa lý như bản đồ, ảnh vệ tinh, biểu đồ,',
+              'video, hình ảnh và dữ liệu thống kê.',
+            ],
           },
           {
             title: 'Bài thi thực địa',
@@ -812,7 +858,7 @@ export const dictionaries = {
         title: 'Cấu trúc cuộc thi',
         intro: 'GEC được thiết kế theo lộ trình tuyển chọn rõ ràng, giúp phát hiện những học sinh có năng lực nổi bật.',
         detailsTitle: 'Chi Tiết:',
-        round1Title: 'Vòng 1: Vòng Sơ Khảo Online',
+        round1Title: 'Vòng 1: Vòng Sơ khảo Trực tuyến',
         round1Body: 'Vòng sơ khảo được tổ chức trực tuyến trên hệ thống của Ban Tổ chức.',
         round1EvalTitle: 'Nội dung đánh giá bao gồm:',
         round1Items: [
@@ -829,7 +875,7 @@ export const dictionaries = {
           'Vòng chung kết được tổ chức trực tiếp tại địa điểm do Ban Tổ chức công bố. Nội dung đánh giá được xây dựng theo định hướng của Olympiad Địa Lý Quốc Tế (iGeo), chú trọng khả năng vận dụng kiến thức, tư duy không gian, kỹ năng phân tích dữ liệu và năng lực giải quyết các vấn đề thực tiễn.',
         round2Result:
           'Sau vòng chung kết, Ban Tổ chức sẽ lựa chọn 04 học sinh xuất sắc nhất để tham gia chương trình đào tạo.',
-        trainingTitle: 'Đào tạo nâng cao',
+        trainingTitle: 'Chương trình Đào tạo nâng cao',
         trainingBody:
           'Các học sinh được lựa chọn sẽ tham gia chương trình đào tạo chuyên sâu nhằm chuẩn bị cho Olympiad Địa Lý Quốc Tế (iGeo). Nội dung đào tạo dự kiến bao gồm:',
         trainingEvalTitle: 'Nội dung đào tạo dự kiến bao gồm:',
@@ -843,12 +889,12 @@ export const dictionaries = {
         ],
         pathTitle: 'Lộ trình tuyển chọn',
         path: [
-          'Vòng Sơ khảo Trực tuyến',
-          'Top 10 thí sinh',
-          'Vòng Chung kết Trực tiếp',
-          'Top 4 thí sinh',
-          'Chương trình Đào tạo nâng cao',
-          'Olympic Địa lý Quốc tế (iGeo)',
+          { lines: ['Vòng Sơ khảo', 'Hình thức: Trực tuyến'] },
+          { lines: ['Lựa chọn', 'TOP 10 thí sinh'] },
+          { lines: ['Vòng Chung kết', 'Hình thức: Trực tiếp'] },
+          { lines: ['Lựa chọn', 'TOP 4 thí sinh'] },
+          { lines: ['Chương trình Đào tạo', 'nâng cao'] },
+          { lines: ['Tham gia Olympic Địa lý', 'Quốc tế (iGEO)'] },
         ],
         finaleTitle: 'Olympiad Địa lý Quốc tế (iGeo)',
         finaleBody: '04 học sinh xuất sắc sẽ cùng 02 trưởng đoàn cùng nhau tham dự kì thi iGEO 2027.',
@@ -863,8 +909,14 @@ export const dictionaries = {
         ],
         brand: 'IRECS',
         body: 'Viện Tài nguyên, Môi trường và An toàn Hóa chất (IRECS) là đơn vị tổ chức Chương trình Cuộc thi Địa lý và Môi trường (GEC).',
-        body2:
-          'IRECS là tổ chức hoạt động trong lĩnh vực tài nguyên, môi trường, an toàn hóa chất, đào tạo, tư vấn, nghiên cứu và hợp tác phát triển. Với định hướng chuyên môn trong lĩnh vực tài nguyên và môi trường, IRECS tham gia xây dựng và triển khai GEC nhằm góp phần nâng cao nhận thức của học sinh về Địa lý, môi trường và phát triển bền vững.',
+        body2Lines: [
+          'IRECS là tổ chức hoạt động trong lĩnh vực tài nguyên, môi trường,',
+          'an toàn hóa chất, đào tạo, tư vấn, nghiên cứu và hợp tác phát triển.',
+          'Với định hướng chuyên môn trong lĩnh vực tài nguyên',
+          'và môi trường, IRECS tham gia xây dựng và triển khai GEC nhằm',
+          'góp phần nâng cao nhận thức của học sinh về Địa lý, môi trường',
+          'và phát triển bền vững.',
+        ],
         pillars: [
           { label: 'Tài nguyên' },
           { label: 'Môi trường' },
@@ -876,11 +928,11 @@ export const dictionaries = {
         items: [
           {
             q: 'Ai có thể tham gia GEC?',
-            a: 'Học sinh từ lớp 9 đến lớp 12 và phải từ 16 đến 19 tuổi (tính cả hai đầu tuổi) vào ngày 1 tháng 8 của năm diễn ra kỳ thi, đang theo học tại các cơ sở giáo dục ở Việt Nam có thể đăng ký tham gia. Học sinh nhỏ tuổi hơn cũng có thể tham gia để tích lũy kinh nghiệm cho các năm tiếp theo.',
+            a: 'Học sinh từ 16 đến 19 tuổi (tính đủ cả 16 và 19 tuổi) tính đến ngày 1 tháng 8 của năm tổ chức kỳ thi, đang theo học từ lớp 9 đến lớp 12 tại các cơ sở giáo dục ở Việt Nam đều có thể đăng ký tham gia. Ngoài ra, học sinh dưới 16 tuổi cũng được khuyến khích đăng ký tham gia để tích lũy kinh nghiệm cho các kỳ thi trong những năm tiếp theo.',
           },
           {
             q: 'Học sinh quốc tế đang học tại Việt Nam có được tham gia không?',
-            a: 'Có. Học sinh đang theo học tại các cơ sở giáo dục ở Việt Nam có thể đăng ký tham gia nếu đáp ứng các điều kiện của cuộc thi và quy định về độ tuổi. Học sinh phải từ 16 đến 19 tuổi (tính cả hai đầu tuổi) vào ngày 1 tháng 8 của năm diễn ra kỳ thi.',
+            a: 'Có. Học sinh đang theo học tại các cơ sở giáo dục ở Việt Nam có thể đăng ký tham gia nếu đáp ứng các điều kiện của cuộc thi và quy định về độ tuổi. Học sinh phải từ 16 đến 19 tuổi (tính đủ cả 16 và 19 tuổi) tính đến ngày 1 tháng 8 của năm diễn ra kỳ thi.',
           },
           {
             q: 'Cuộc thi diễn ra khi nào?',
@@ -892,7 +944,10 @@ export const dictionaries = {
           },
           {
             q: 'Vòng sơ khảo được tổ chức như thế nào?',
-            a: 'Vòng sơ khảo được tổ chức trực tuyến trên hệ thống của Ban Tổ chức. Thí sinh làm bài trong thời gian quy định và cần tuân thủ đầy đủ các yêu cầu về trung thực học thuật.',
+            aLines: [
+              'Vòng sơ khảo được tổ chức trực tuyến trên hệ thống của Ban Tổ chức. Thí sinh làm bài trong',
+              'thời gian quy định và cần tuân thủ đầy đủ các yêu cầu về trung thực học thuật.',
+            ],
           },
           {
             q: 'Vòng chung kết được tổ chức ở đâu?',
@@ -908,23 +963,31 @@ export const dictionaries = {
           },
           {
             q: 'Học sinh cần chuẩn bị gì trước khi tham gia?',
-            a: 'Học sinh nên ôn tập kiến thức nền tảng về Địa lý tự nhiên, Địa lý kinh tế - xã hội, môi trường, bản đồ, dữ liệu địa lý và các vấn đề toàn cầu. Ngoài ra, học sinh nên rèn luyện kỹ năng đọc hiểu tiếng Anh học thuật và khả năng phân tích tình huống.',
+            aLines: [
+              'Học sinh nên ôn tập kiến thức nền tảng về Địa lý tự nhiên, Địa lý kinh tế - xã hội, môi trường,',
+              'bản đồ, dữ liệu địa lý và các vấn đề toàn cầu. Ngoài ra, học sinh nên rèn luyện kỹ năng',
+              'đọc hiểu tiếng Anh học thuật và khả năng phân tích tình huống.',
+            ],
           },
           {
             q: 'Có được sử dụng công cụ AI cho bài luận không?',
-            a: 'Không. Thí sinh cần tự thực hiện bài thi và bài luận của mình. Ban Tổ chức có thể kiểm tra đạo văn và nội dung do AI tạo ra. Bài làm vi phạm quy định về trung thực học thuật có thể bị loại khỏi quá trình chấm điểm.',
+            aLines: [
+              'Không. Thí sinh cần tự thực hiện bài thi và bài luận của mình. Ban Tổ chức có thể kiểm tra',
+              'đạo văn và nội dung do AI tạo ra. Bài làm có dấu hiệu vi phạm quy định về trung thực học thuật',
+              'sẽ không được chấm điểm hoặc có thể bị hủy kết quả.',
+            ],
           },
         ],
       },
       contact: {
         title: 'Liên hệ',
         intro:
-          'Nếu cần thêm thông tin về Cuộc thi Địa lý và Môi trường (GEC), vui lòng liên hệ Ban Điều hành Chương trình.',
+          'Mọi thắc mắc hoặc yêu cầu cung cấp thêm thông tin về Cuộc thi Địa lý và Môi trường (GEC), vui lòng liên hệ Ban Tổ chức Chương trình.',
         formName: 'Họ và tên',
         formEmail: 'Email của bạn',
         formMessage: 'Nội dung',
         formSubmit: 'Gửi liên hệ',
-        formHint: 'Thông tin của bạn sẽ được gửi tới Ban Điều hành Chương trình.',
+        formHint: 'Thông tin của bạn sẽ được gửi tới Ban Tổ chức Chương trình.',
         formSuccessTitle: 'Gửi thành công',
         formSuccess: 'Cảm ơn bạn đã liên hệ. Ban Điều hành Chương trình sẽ phản hồi sớm nhất có thể.',
         formSuccessClose: 'Đóng',
@@ -1249,14 +1312,17 @@ export const dictionaries = {
         'Select the country code, then enter the number without the leading 0. Example: 0912 345 678 → choose +84 and enter 912345678.',
       fieldCccd: 'National ID',
       fieldDob: 'Date of birth',
-      fieldDobHint:
-        'Eligible ages are 16–19 (as of 01/08/{year}). Allowed date of birth: {min} to {max}.',
-      fieldDobInvalid:
-        'Date of birth must be between {min} and {max} (ages 16–19 as of 01/08/{year}).',
+      fieldDobHint: 'Enter your date of birth as shown on your ID card.',
       fieldClassName: 'Class',
       fieldSchool: 'School',
+      fieldParentConsent:
+        'I confirm that I have parental/guardian consent to participate in the Geography & Environment Challenge (GEC).',
+      fieldSignature: 'Signature',
+      fieldSignatureHint: 'Please enter your full name',
       entrySubmit: 'Continue',
       entryRequired: 'Please fill in all required fields.',
+      entryParentConsentRequired: 'Please confirm parental/guardian consent.',
+      entrySignatureRequired: 'Please enter your full name in the signature field.',
       entryFailed: 'Failed to submit candidate info',
       entrySuccess: 'Candidate info saved.',
       welcomeBack: 'Welcome back.',
@@ -1694,10 +1760,16 @@ export const dictionaries = {
         ctaLearnMore: 'Learn More',
       },
       about: {
-        title: 'About the Geography & Environment Challenge',
-        p1: 'The Geography & Environment Challenge (GEC) was established with the mission of inspiring students to explore the world, fostering geographical thinking, and promoting awareness of natural resources, environmental issues, and sustainable development among Vietnamese students.',
-        p2: 'More than just a competition, GEC is an academic journey of selection, training, and talent development. The program seeks to create a rigorous, high-quality learning environment with an international orientation, where students are challenged to engage with real-world issues related to people, places, natural resources, the environment, and global challenges.',
-        p3: 'Through GEC, students have the opportunity to develop essential competencies for modern learning and research, including critical thinking, spatial thinking, map interpretation, data analysis, fieldwork research, and the ability to propose solutions to real-world problems.',
+        titleLines: ['About the', 'Geography & Environment Challenge'],
+        p1Lines: [
+          'The Geography & Environment Challenge (GEC) was established with the mission of inspiring students to explore the world, fostering geographical thinking, and promoting awareness of natural resources, environmental issues, and sustainable development among Vietnamese students.',
+        ],
+        p2Lines: [
+          'More than just a competition, GEC is an academic journey of selection, training, and talent development. The program seeks to create a rigorous, high-quality learning environment with an international orientation, where students are challenged to engage with real-world issues related to people, places, natural resources, the environment, and global challenges.',
+        ],
+        p3Lines: [
+          'Through GEC, students have the opportunity to develop essential competencies for modern learning and research, including critical thinking, spatial thinking, map interpretation, data analysis, fieldwork research, and the ability to propose solutions to real-world problems.',
+        ],
       },
       why: {
         title: 'Why Join GEC?',
@@ -1727,7 +1799,9 @@ export const dictionaries = {
       igeo: {
         title: 'About the International Geography Olympiad (iGeo)',
         p1: 'The International Geography Olympiad (iGeo) is an annual international competition in Geography for secondary school students, held under the auspices of the International Geographical Union (IGU). The Olympiad brings together students from more than 50 countries and territories, providing an international academic platform that promotes geographical education and fosters cultural exchange among young people worldwide.',
-        p2: "iGeo assesses not only geographical knowledge but also students' ability to apply that knowledge to analyze, interpret, and solve real-world issues related to people, natural resources, the environment, urbanization, climate change, and sustainable development.",
+        p2Lines: [
+          "iGeo assesses not only geographical knowledge but also students' ability to apply that knowledge to analyze, interpret, and solve real-world issues related to people, natural resources, the environment, urbanization, climate change, and sustainable development.",
+        ],
         testsTitle: 'Competition Components',
         tests: [
           {
@@ -1750,7 +1824,7 @@ export const dictionaries = {
           'Through iGeo, students develop global perspectives, strengthen research capabilities, enhance fieldwork skills, and connect with talented young geographers from around the world.',
       },
       structure: {
-        title: 'Competition Structure',
+        title: 'Program Structure',
         intro:
           'GEC follows a structured selection pathway designed to identify students with exceptional potential.',
         detailsTitle: 'Details',
@@ -1788,12 +1862,12 @@ export const dictionaries = {
         ],
         pathTitle: 'Selection pathway',
         path: [
-          'Online Preliminary Round',
-          'Top 10 Finalists',
-          'On-site Final Round',
-          'Top 4 Students',
-          'Advanced Training Program',
-          'International Geography Olympiad (iGeo)',
+          { lines: ['Online Preliminary Round'] },
+          { lines: ['Top 10 Finalists'] },
+          { lines: ['On-site Final Round'] },
+          { lines: ['Top 4 Students'] },
+          { lines: ['Advanced Training Program'] },
+          { lines: ['International Geography Olympiad (iGeo)'] },
         ],
         finaleTitle: 'International Geography Olympiad (iGeo)',
         finaleBody:
@@ -1864,12 +1938,12 @@ export const dictionaries = {
       contact: {
         title: 'Contact',
         intro:
-          'If you would like more information about the Geography & Environment Challenge (GEC), please contact the Program Management Office.',
+          'For any inquiries or requests for additional information regarding the Geography and Environment Competition (GEC), please contact the Organizing Committee.',
         formName: 'Full name',
         formEmail: 'Your email',
         formMessage: 'Message',
         formSubmit: 'Send message',
-        formHint: 'Your message will be sent to the Program Management Office.',
+        formHint: 'Your message will be sent to the Organizing Committee.',
         formSuccessTitle: 'Message sent',
         formSuccess:
           'Thank you for contacting us. The Program Management Office will respond as soon as possible.',

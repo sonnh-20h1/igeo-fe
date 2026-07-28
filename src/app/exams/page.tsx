@@ -22,6 +22,7 @@ import {
 import { userExamAttemptsApi } from '@/features/user-exam-attempts/api';
 import type { ExamAttemptStatus, ExamAttemptSummary } from '@/features/user-exam-attempts/types';
 import { HomeHeader } from '@/features/home/home-header';
+import { boldGecName } from '@/features/home/bold-gec-name';
 import { useI18n } from '@/features/i18n/provider';
 import { formatMessage } from '@/features/i18n/format';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,8 @@ type EntryForm = {
   dob: string;
   className: string;
   school: string;
+  parentConsent: boolean;
+  signature: string;
 };
 
 const PHONE_COUNTRY_OPTIONS = [
@@ -84,6 +87,8 @@ const emptyEntryForm = (): EntryForm => ({
   dob: '',
   className: '',
   school: '',
+  parentConsent: false,
+  signature: '',
 });
 
 function normalizePhoneLocal(value: string) {
@@ -96,14 +101,6 @@ function buildInternationalPhone(countryCode: string, local: string) {
   return `${countryCode}${digits}`;
 }
 
-/** Age 16–19 as of Aug 1 of the current year; range shifts +1 year each calendar year. */
-function getEligibleDobRange(reference = new Date()) {
-  const year = reference.getFullYear();
-  const min = `${year - 19}-08-01`;
-  const max = `${year - 16}-08-01`;
-  return { min, max, year };
-}
-
 function formatDobDisplay(ymd: string, locale: string) {
   const [y, m, d] = ymd.split('-').map(Number);
   if (!y || !m || !d) return ymd;
@@ -112,10 +109,6 @@ function formatDobDisplay(ymd: string, locale: string) {
     month: '2-digit',
     year: 'numeric',
   });
-}
-
-function isDobInEligibleRange(dobYmd: string, range = getEligibleDobRange()) {
-  return Boolean(dobYmd) && dobYmd >= range.min && dobYmd <= range.max;
 }
 
 function formatDateTime(value: string | Date, locale: string) {
@@ -144,17 +137,6 @@ function UserExamsPageContent() {
   const attemptsCopy = dictionary.userAttempts;
   const { error: notifyError, success } = useNotification();
   const router = useRouter();
-  const dobRange = getEligibleDobRange();
-  const dobHint = formatMessage(examsCopy.fieldDobHint, {
-    year: dobRange.year,
-    min: formatDobDisplay(dobRange.min, locale),
-    max: formatDobDisplay(dobRange.max, locale),
-  });
-  const dobInvalid = formatMessage(examsCopy.fieldDobInvalid, {
-    year: dobRange.year,
-    min: formatDobDisplay(dobRange.min, locale),
-    max: formatDobDisplay(dobRange.max, locale),
-  });
 
   const [ready, setReady] = useState(false);
   const [candidate, setCandidate] = useState<ExamCandidateProfile | null>(null);
@@ -230,14 +212,19 @@ function UserExamsPageContent() {
       !entryForm.cccd.trim() ||
       !entryForm.dob ||
       !entryForm.className.trim() ||
-      !entryForm.school.trim()
+      !entryForm.school.trim() ||
+      !entryForm.parentConsent ||
+      !entryForm.signature.trim()
     ) {
+      if (!entryForm.parentConsent) {
+        setEntryError(examsCopy.entryParentConsentRequired);
+        return;
+      }
+      if (!entryForm.signature.trim()) {
+        setEntryError(examsCopy.entrySignatureRequired);
+        return;
+      }
       setEntryError(examsCopy.entryRequired);
-      return;
-    }
-
-    if (!isDobInEligibleRange(entryForm.dob, dobRange)) {
-      setEntryError(dobInvalid);
       return;
     }
 
@@ -251,6 +238,8 @@ function UserExamsPageContent() {
         dob: new Date(entryForm.dob).toISOString(),
         className: entryForm.className.trim(),
         school: entryForm.school.trim(),
+        parentConsent: entryForm.parentConsent,
+        signature: entryForm.signature.trim(),
       });
 
       const profile: ExamCandidateProfile = {
@@ -451,14 +440,12 @@ function UserExamsPageContent() {
                   <Input
                     id='dob'
                     type='date'
-                    min={dobRange.min}
-                    max={dobRange.max}
                     value={entryForm.dob}
                     onChange={(event) =>
                       setEntryForm((current) => ({ ...current, dob: event.target.value }))
                     }
                   />
-                  <p className='text-xs text-muted-foreground'>{dobHint}</p>
+                  <p className='text-xs text-muted-foreground'>{examsCopy.fieldDobHint}</p>
                 </div>
                 <div className='grid gap-4 sm:grid-cols-2'>
                   <div className='space-y-1'>
@@ -480,6 +467,34 @@ function UserExamsPageContent() {
                         setEntryForm((current) => ({ ...current, school: event.target.value }))
                       }
                     />
+                  </div>
+                </div>
+                <div className='space-y-3'>
+                  <label className='flex items-start gap-3 text-sm leading-relaxed text-[#022648]/85'>
+                    <input
+                      id='parentConsent'
+                      type='checkbox'
+                      checked={entryForm.parentConsent}
+                      onChange={(event) =>
+                        setEntryForm((current) => ({
+                          ...current,
+                          parentConsent: event.target.checked,
+                        }))
+                      }
+                      className='mt-1 size-4 shrink-0 accent-[#022648]'
+                    />
+                    <span>{boldGecName(examsCopy.fieldParentConsent)}</span>
+                  </label>
+                  <div className='space-y-1'>
+                    <Label htmlFor='signature'>{examsCopy.fieldSignature}</Label>
+                    <Input
+                      id='signature'
+                      value={entryForm.signature}
+                      onChange={(event) =>
+                        setEntryForm((current) => ({ ...current, signature: event.target.value }))
+                      }
+                    />
+                    <p className='text-xs text-muted-foreground'>{examsCopy.fieldSignatureHint}</p>
                   </div>
                 </div>
                 {entryError ? <p className='text-sm text-red-600'>{entryError}</p> : null}

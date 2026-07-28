@@ -1,11 +1,14 @@
 import { Fragment, type ReactNode } from 'react';
 
 const GEC_NAME_RE =
-  /(Geography & Environment Challenge \(GEC\)|Cuộc thi Địa lý và Môi trường \(GEC\))/g;
+  /(Cuộc thi Địa lý và Môi trường \(GEC\)|Địa lý và Môi trường \(GEC\)|Geography and Environment Competition \(GEC\)|Geography & Environment Challenge \(GEC\)|Geography & Environment Challenge)/g;
 
 const GEC_NAMES = new Set([
-  'Geography & Environment Challenge (GEC)',
   'Cuộc thi Địa lý và Môi trường (GEC)',
+  'Địa lý và Môi trường (GEC)',
+  'Geography and Environment Competition (GEC)',
+  'Geography & Environment Challenge (GEC)',
+  'Geography & Environment Challenge',
 ]);
 
 /** Bold the full GEC programme name wherever it appears in copy. */

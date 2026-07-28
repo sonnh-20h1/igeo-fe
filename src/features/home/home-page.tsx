@@ -13,6 +13,72 @@ const IGEO_TEST_ICONS = [Feather, MonitorPlay, Mountain] as const;
 
 const STRUCTURE_PATH_ICONS = [MonitorPlay, Users, Map, Trophy, GraduationCap, Globe] as const;
 
+function AboutBodyParagraph({ lines }: { lines: string[] }) {
+  return (
+    <p>
+      {lines.map((line, index) => (
+        <span key={index} className='home-about-body-line'>
+          {boldGecName(line)}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function WhyItemBody({ body, bodyLines }: { body?: string; bodyLines?: string[] }) {
+  const lines = bodyLines ?? (body ? [body] : []);
+
+  return (
+    <p className='home-why-item-body'>
+      {lines.map((line, index) => (
+        <span key={index} className='home-why-item-body-line'>
+          {line}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function IgeoBodyParagraph({ lines }: { lines: string[] }) {
+  return (
+    <p>
+      {lines.map((line, index) => (
+        <span key={index} className='home-igeo-body-line'>
+          {line}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function IgeoCardBody({ body, bodyLines }: { body?: string; bodyLines?: string[] }) {
+  const lines = bodyLines ?? (body ? [body] : []);
+
+  return (
+    <p className='home-igeo-card-body'>
+      {lines.map((line, index) => (
+        <span key={index} className='home-igeo-card-body-line'>
+          {line}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function OrganizerBodyParagraph({ body, bodyLines }: { body?: string; bodyLines?: string[] }) {
+  const lines = bodyLines ?? (body ? [body] : []);
+
+  return (
+    <p>
+      {lines.map((line, index) => (
+        <span key={index} className='home-organizer-body-line'>
+          {boldGecName(line)}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 const ORGANIZER_PILLAR_ICONS = [Sprout, Droplet, Globe] as const;
 
 function SectionHeading({ children }: { children: ReactNode }) {
@@ -91,14 +157,20 @@ export function HomePage() {
           />
         </div>
 
-        <div className='home-about-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14'>
+        <div className='home-about-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14'>
           <div>
-            <h2 className='home-about-title'>{boldGecName(home.about.title)}</h2>
+            <h2 className='home-about-title'>
+              {home.about.titleLines.map((line, index) => (
+                <span key={index} className='home-about-title-line'>
+                  {boldGecName(line)}
+                </span>
+              ))}
+            </h2>
             <span className='home-about-underline' aria-hidden />
             <div className='home-about-body'>
-              <p>{boldGecName(home.about.p1)}</p>
-              <p>{boldGecName(home.about.p2)}</p>
-              <p>{boldGecName(home.about.p3)}</p>
+              <AboutBodyParagraph lines={home.about.p1Lines} />
+              <AboutBodyParagraph lines={home.about.p2Lines} />
+              <AboutBodyParagraph lines={home.about.p3Lines} />
             </div>
           </div>
 
@@ -133,7 +205,12 @@ export function HomePage() {
             {[0, 2, 4].map((start) => {
               const rowItems = home.why.items.slice(start, start + 2);
               return (
-                <div key={start} className='home-why-row'>
+                <div
+                  key={start}
+                  className={
+                    rowItems.length === 1 ? 'home-why-row home-why-row--centered' : 'home-why-row'
+                  }
+                >
                   {rowItems.map((item, offset) => {
                     const index = start + offset;
                     return (
@@ -142,7 +219,7 @@ export function HomePage() {
                           {String(index + 1).padStart(2, '0')}
                         </span>
                         <h3 className='home-why-item-title'>{item.title}</h3>
-                        <p className='home-why-item-body'>{item.body}</p>
+                        <WhyItemBody body={item.body} bodyLines={item.bodyLines} />
                       </article>
                     );
                   })}
@@ -171,7 +248,7 @@ export function HomePage() {
               <span className='home-igeo-underline' aria-hidden />
               <div className='home-igeo-body'>
                 <p>{home.igeo.p1}</p>
-                <p>{home.igeo.p2}</p>
+                <IgeoBodyParagraph lines={home.igeo.p2Lines} />
               </div>
             </div>
 
@@ -213,7 +290,7 @@ export function HomePage() {
                       {test.title} ({test.weight})
                     </h4>
                     <span className='home-igeo-card-line' aria-hidden />
-                    <p className='home-igeo-card-body'>{test.body}</p>
+                    <IgeoCardBody body={test.body} bodyLines={test.bodyLines} />
                   </li>
                 );
               })}
@@ -245,7 +322,7 @@ export function HomePage() {
               {home.structure.path.map((step, index) => {
                 const Icon = STRUCTURE_PATH_ICONS[index] ?? Globe;
                 return (
-                  <li key={step} className='home-structure-step'>
+                  <li key={index} className='home-structure-step'>
                     <div className='home-structure-step-top'>
                       <div className='home-structure-icon'>
                         <Icon className='size-5' strokeWidth={1.75} />
@@ -255,7 +332,13 @@ export function HomePage() {
                     <p className='home-structure-number'>
                       {String(index + 1).padStart(2, '0')}
                     </p>
-                    <p className='home-structure-label'>{step}</p>
+                    <p className='home-structure-label'>
+                      {step.lines.map((line, lineIndex) => (
+                        <span key={lineIndex} className='home-structure-label-line'>
+                          {line}
+                        </span>
+                      ))}
+                    </p>
                   </li>
                 );
               })}
@@ -335,8 +418,8 @@ export function HomePage() {
             </h2>
             <span className='home-organizer-underline' aria-hidden />
             <div className='home-organizer-body'>
-              <p>{boldGecName(home.organizer.body)}</p>
-              <p>{boldGecName(home.organizer.body2)}</p>
+              <OrganizerBodyParagraph body={home.organizer.body} />
+              <OrganizerBodyParagraph body={home.organizer.body2} bodyLines={home.organizer.body2Lines} />
             </div>
           </div>
 

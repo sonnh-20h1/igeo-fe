@@ -88,6 +88,8 @@ export type SubmitExamEntryPayload = {
   dob: string;
   className: string;
   school: string;
+  parentConsent: boolean;
+  signature: string;
 };
 
 export type ExamEntryResponse = {
