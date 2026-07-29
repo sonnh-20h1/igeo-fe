@@ -515,13 +515,29 @@ textarea {
   display: grid;
   gap: 1.35rem;
   max-width: 38rem;
-  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+  width: 100%;
+  font-size: clamp(0.88rem, 1.35vw, 0.98rem);
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.82);
 }
 
+.home-page .home-about-body p,
+.home-page .home-about-body-paragraph {
+  margin: 0;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
 .home-about-body-line {
   display: block;
+  width: 100%;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-word;
+}
+
+.home-about-body-line:last-child {
+  text-align-last: left;
 }
 
 .home-about-map {
@@ -535,7 +551,7 @@ textarea {
 .home-about-map-image {
   display: block;
   width: 100%;
-  max-width: 40rem;
+  max-width: 44rem;
   height: auto;
   margin-inline: auto;
   mix-blend-mode: screen;
@@ -543,7 +559,7 @@ textarea {
 
 @media (max-width: 1023px) {
   .home-about-map-image {
-    max-width: 30rem;
+    max-width: 32rem;
   }
 }
 
@@ -642,7 +658,7 @@ textarea {
 }
 
 .home-why-row--centered .home-why-item {
-  text-align: center;
+  text-align: left;
 }
 
 .home-why-index {
@@ -652,6 +668,7 @@ textarea {
   letter-spacing: 0.02em;
   color: #c9a96a;
   line-height: 1.3;
+  text-align: left;
 }
 
 .home-why-item-title {
@@ -661,6 +678,7 @@ textarea {
   font-weight: 700;
   line-height: 1.35;
   color: #022648;
+  text-align: left;
 }
 
 .home-why-item-body {
@@ -670,8 +688,21 @@ textarea {
   color: rgba(55, 65, 75, 0.92);
 }
 
+.home-page .home-why-item-body {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
 .home-why-item-body-line {
   display: block;
+  width: 100%;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-word;
+}
+
+.home-why-item-body-line:last-child {
+  text-align-last: left;
 }
 
 .home-section-dark {
@@ -885,12 +916,20 @@ textarea {
 }
 
 .home-page .home-igeo-card-body {
-  text-align: left;
-  text-justify: auto;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .home-igeo-card-body-line {
   display: block;
+  width: 100%;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-word;
+}
+
+.home-igeo-card-body-line:last-child {
+  text-align-last: left;
 }
 
 .home-igeo-closing {
@@ -1159,10 +1198,17 @@ textarea {
 
 .home-finale-body {
   margin-top: 1rem;
-  max-width: 42rem;
+  max-width: none;
   font-size: 0.98rem;
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.78);
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .home-finale-body {
+    white-space: normal;
+  }
 }
 
 .home-finale-visual {
@@ -1244,9 +1290,15 @@ textarea {
 .home-organizer-body {
   margin-top: 1.75rem;
   max-width: 34rem;
+  width: 100%;
   font-size: clamp(0.88rem, 1.35vw, 0.98rem);
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.78);
+}
+
+.home-page .home-organizer-body p {
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .home-organizer-body p + p {
@@ -1255,6 +1307,14 @@ textarea {
 
 .home-organizer-body-line {
   display: block;
+  width: 100%;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-word;
+}
+
+.home-organizer-body-line:last-child {
+  text-align-last: left;
 }
 
 .home-organizer-visual {

@@ -312,7 +312,7 @@ export const dictionaries = {
       fieldClassName: 'Lớp',
       fieldSchool: 'Trường',
       fieldParentConsent:
-        'Tôi xác nhận đã có sự đồng thuận của phụ huynh/người giám hộ đối với việc tham gia cuộc thi Cuộc thi Địa lý và Môi trường (GEC)',
+        'Tôi xác nhận đã có sự đồng thuận của phụ huynh/người giám hộ đối với việc tham gia Cuộc thi Địa lý và Môi trường (GEC)',
       fieldSignature: 'Chữ ký',
       fieldSignatureHint: 'Vui lòng ghi đầy đủ Họ và Tên',
       entrySubmit: 'Tiếp tục',
@@ -1871,7 +1871,7 @@ export const dictionaries = {
         ],
         finaleTitle: 'International Geography Olympiad (iGeo)',
         finaleBody:
-          'The four selected students, together with two Team Leaders, will represent Vietnam at the International Geography Olympiad (iGeo) 2027.',
+          'The four selected students, together with two Team Leaders will participate in the International Geography Olympiad (iGeo) 2027.',
       },
       organizer: {
         title: 'Organizing Institution',

@@ -15,7 +15,7 @@ const STRUCTURE_PATH_ICONS = [MonitorPlay, Users, Map, Trophy, GraduationCap, Gl
 
 function AboutBodyParagraph({ lines }: { lines: readonly string[] }) {
   return (
-    <p>
+    <p className='home-about-body-paragraph'>
       {lines.map((line, index) => (
         <span key={index} className='home-about-body-line'>
           {boldGecName(line)}
@@ -157,7 +157,7 @@ export function HomePage() {
           />
         </div>
 
-        <div className='home-about-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14'>
+        <div className='home-about-inner relative mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14'>
           <div>
             <h2 className='home-about-title'>
               {home.about.titleLines.map((line, index) => (
