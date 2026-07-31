@@ -780,8 +780,7 @@ textarea {
   .home-igeo-body-line,
   .home-igeo-card-body-line,
   .home-organizer-body-line,
-  .home-faq-answer-line,
-  .home-structure-label-line {
+  .home-faq-answer-line {
     display: inline !important;
     width: auto !important;
     text-align: inherit !important;
@@ -793,8 +792,7 @@ textarea {
   .home-igeo-body-line:not(:last-child)::after,
   .home-igeo-card-body-line:not(:last-child)::after,
   .home-organizer-body-line:not(:last-child)::after,
-  .home-faq-answer-line:not(:last-child)::after,
-  .home-structure-label-line:not(:last-child)::after {
+  .home-faq-answer-line:not(:last-child)::after {
     content: ' ';
   }
 
@@ -1673,7 +1671,12 @@ textarea {
   font-size: 0.98rem;
   line-height: 1.75;
   color: rgba(2, 38, 72, 0.78);
-  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .home-finale-body {
+    white-space: nowrap;
+  }
 }
 
 .home-finale-visual {
@@ -1994,11 +1997,7 @@ textarea {
   }
 
   .home-structure-label-line {
-    display: block;
-  }
-
-  .home-structure-label-line:not(:last-child)::after {
-    content: none;
+    display: block !important;
   }
 }
 
