@@ -323,32 +323,37 @@ export function HomePage() {
           <h2 className='home-structure-title'>{home.structure.title}:</h2>
           <p className='home-structure-intro'>{home.structure.intro}</p>
 
-          <div className='home-structure-timeline'>
-            <ol className='home-structure-steps'>
-              {home.structure.path.map((step, index) => {
-                const Icon = STRUCTURE_PATH_ICONS[index] ?? Globe;
-                return (
-                  <li key={index} className='home-structure-step'>
-                    <div className='home-structure-step-top'>
-                      <div className='home-structure-icon'>
-                        <Icon className='size-5' strokeWidth={1.75} />
-                      </div>
-                      <span className='home-structure-caret' aria-hidden />
-                    </div>
-                    <p className='home-structure-number'>
-                      {String(index + 1).padStart(2, '0')}
-                    </p>
-                    <p className='home-structure-label'>
-                      {step.lines.map((line, lineIndex) => (
-                        <span key={lineIndex} className='home-structure-label-line'>
-                          {line}
-                        </span>
-                      ))}
-                    </p>
-                  </li>
-                );
-              })}
-            </ol>
+          <div className='home-structure-timeline-wrap'>
+            {[0, 3].map((start) => (
+              <div key={start} className='home-structure-timeline'>
+                <ol className='home-structure-steps'>
+                  {home.structure.path.slice(start, start + 3).map((step, offset) => {
+                    const index = start + offset;
+                    const Icon = STRUCTURE_PATH_ICONS[index] ?? Globe;
+                    return (
+                      <li key={index} className='home-structure-step'>
+                        <div className='home-structure-step-top'>
+                          <div className='home-structure-icon'>
+                            <Icon className='size-5' strokeWidth={1.75} />
+                          </div>
+                          <span className='home-structure-caret' aria-hidden />
+                        </div>
+                        <p className='home-structure-number'>
+                          {String(index + 1).padStart(2, '0')}
+                        </p>
+                        <p className='home-structure-label'>
+                          {step.lines.map((line, lineIndex) => (
+                            <span key={lineIndex} className='home-structure-label-line'>
+                              {line}
+                            </span>
+                          ))}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            ))}
           </div>
           </div>
         </div>
@@ -462,7 +467,7 @@ export function HomePage() {
       <section id='faq' className='home-section home-section-muted scroll-mt-24'>
         <div className='mx-auto max-w-3xl px-4 sm:px-6'>
           <SectionHeading>{home.faq.title}</SectionHeading>
-          <div className='mt-10'>
+          <div className='home-faq-list mt-10'>
             <HomeFaq items={home.faq.items} />
           </div>
         </div>

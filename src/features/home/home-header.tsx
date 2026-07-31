@@ -87,7 +87,7 @@ export function HomeHeader({
               : 'border-b border-transparent bg-transparent',
       )}
     >
-      <div className='mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
+      <div className='home-header-bar mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6'>
         <BrandTag
           href={brandHref}
           className={cn(
@@ -98,8 +98,7 @@ export function HomeHeader({
           <Image
             src='/images/logo_v2.png'
             alt={home.brandShort}
-            className='shrink-0 object-contain'
-            style={{ width: 'auto', height: '40px' }}
+            className='home-header-logo shrink-0 object-contain'
             width={1070}
             height={664}
             priority
