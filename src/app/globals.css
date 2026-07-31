@@ -403,8 +403,8 @@ textarea {
 
   .home-hero-image {
     inset: auto 0 0 auto !important;
-    width: min(180%, 175vw) !important;
-    height: 132% !important;
+    width: min(172%, 168vw) !important;
+    height: 125% !important;
     max-height: none !important;
     max-width: none !important;
     object-fit: contain !important;
@@ -462,8 +462,8 @@ textarea {
 
   .home-hero-image {
     inset: auto 0 0 auto !important;
-    width: clamp(165%, 180vw, 210%) !important;
-    height: 150% !important;
+    width: clamp(155%, 170vw, 200%) !important;
+    height: 140% !important;
     max-height: none !important;
     max-width: none !important;
     object-fit: contain !important;
