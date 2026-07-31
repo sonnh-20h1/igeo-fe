@@ -399,7 +399,8 @@ textarea {
   }
 
   .home-hero-scene {
-    height: clamp(14rem, 72vw, 20rem);
+    height: clamp(18rem, 92vw, 26rem);
+    overflow: hidden;
     background: linear-gradient(
       to bottom,
       #f7ede3 0%,
@@ -409,13 +410,24 @@ textarea {
     );
   }
 
+  .home-hero-image-wrap {
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .home-hero-image {
+    object-fit: contain !important;
+    object-position: right bottom !important;
+    transform: scale(1.7);
+    transform-origin: right bottom;
+  }
+
   .home-hero-scene-fade {
     background: linear-gradient(
       to bottom,
       #f7ede3 0%,
-      rgba(247, 237, 227, 0.9) 16%,
-      rgba(228, 235, 242, 0.3) 42%,
-      transparent 65%
+      rgba(247, 237, 227, 0.55) 12%,
+      transparent 36%
     );
   }
 
