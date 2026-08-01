@@ -324,9 +324,10 @@ export function HomePage() {
           <p className='home-structure-intro'>{home.structure.intro}</p>
 
           <div className='home-structure-timeline-wrap'>
+            {/* Mobile: 2 cards (01–03 / 04–06). Desktop: 1 continuous row via CSS. */}
             {[0, 3].map((start) => (
               <div key={start} className='home-structure-timeline'>
-                <ol className='home-structure-steps'>
+                <ol className='home-structure-steps' start={start + 1}>
                   {home.structure.path.slice(start, start + 3).map((step, offset) => {
                     const index = start + offset;
                     const Icon = STRUCTURE_PATH_ICONS[index] ?? Globe;

@@ -1455,48 +1455,64 @@ textarea {
   list-style: none;
 }
 
+/* Desktop: gộp 2 nhóm thành 1 lưới 6 cột — đường nối 03→04 liền mạch */
 @media (min-width: 768px) {
   .home-structure-timeline-wrap {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 0;
-    overflow-x: auto;
+    overflow: visible;
     border-radius: 1.35rem;
     border: 1px solid #e0c389;
     background: #ffffff;
     box-shadow: 0 12px 32px rgba(2, 38, 72, 0.05);
+    padding: 2rem 1.25rem 2.75rem;
   }
 
   .home-structure-timeline {
-    flex: 1 1 0;
-    min-width: 0;
-    overflow: visible;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+    display: contents;
   }
 
   .home-structure-steps {
-    grid-template-columns: repeat(3, minmax(8.5rem, 1fr));
-    min-width: 28rem;
-    padding: 2rem 0.75rem 2.25rem;
+    display: contents;
+    padding: 0;
   }
 
-  .home-structure-timeline:first-child .home-structure-steps {
-    padding-left: 1.25rem;
-  }
-
-  .home-structure-timeline:last-child .home-structure-steps {
-    padding-right: 1.25rem;
-  }
-
-  /* Bridge connector between step 03 and 04 across the two groups */
+  /* Bước 03 vẫn là :last-child trong ol riêng — phải vẽ nối sang 04 */
   .home-structure-timeline:first-child .home-structure-step:last-child::before {
-    width: calc(100% + 0.75rem);
+    content: '';
+    position: absolute;
+    top: 1.625rem;
+    left: 50%;
+    width: 100%;
+    height: 1.5px;
+    background: #c5cdd6;
+    transform: translateY(-50%);
+    z-index: 0;
   }
 
   .home-structure-timeline:first-child .home-structure-step:last-child::after {
-    left: calc(100% + 0.375rem);
+    content: '';
+    position: absolute;
+    top: 1.625rem;
+    left: 100%;
+    z-index: 2;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: #e0c389;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 3px #ffffff;
+  }
+
+  .home-structure-label {
+    max-width: 10.5rem;
+    overflow: visible;
+  }
+
+  .home-structure-step {
+    min-width: 0;
+    padding: 0 0.35rem;
   }
 }
 
@@ -1589,6 +1605,7 @@ textarea {
   font-size: 0.82rem;
   line-height: 1.45;
   color: rgba(2, 38, 72, 0.82);
+  overflow: visible;
 }
 
 .home-structure-label-line {
