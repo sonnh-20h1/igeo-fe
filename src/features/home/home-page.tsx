@@ -343,11 +343,22 @@ export function HomePage() {
                           {String(index + 1).padStart(2, '0')}
                         </p>
                         <p className='home-structure-label'>
-                          {step.lines.map((line, lineIndex) => (
-                            <span key={lineIndex} className='home-structure-label-line'>
-                              {line}
+                          <span className='home-structure-label-desktop'>
+                            {step.lines.map((line, lineIndex) => (
+                              <span key={lineIndex} className='home-structure-label-line'>
+                                {line}
+                              </span>
+                            ))}
+                          </span>
+                          {'mobileLines' in step && step.mobileLines ? (
+                            <span className='home-structure-label-mobile'>
+                              {step.mobileLines.map((line, lineIndex) => (
+                                <span key={lineIndex} className='home-structure-label-line'>
+                                  {line}
+                                </span>
+                              ))}
                             </span>
-                          ))}
+                          ) : null}
                         </p>
                       </li>
                     );

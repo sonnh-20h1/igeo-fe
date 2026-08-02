@@ -1612,6 +1612,14 @@ textarea {
   display: block;
 }
 
+.home-structure-label-mobile {
+  display: none;
+}
+
+.home-structure-label-desktop {
+  display: contents;
+}
+
 .home-structure-details-title {
   margin-top: 0;
   font-family: var(--font-home-display);
@@ -1985,12 +1993,13 @@ textarea {
   }
 
   .home-structure-timeline {
-    overflow: visible;
+    overflow: hidden;
   }
 
   .home-structure-steps {
     min-width: 0;
-    padding: 1.35rem 0.65rem 1.5rem;
+    width: 100%;
+    padding: 1.25rem 0.45rem 1.4rem;
   }
 
   .home-structure-icon {
@@ -2004,17 +2013,49 @@ textarea {
   }
 
   .home-structure-step {
-    padding: 0 0.15rem;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0 0.1rem;
   }
 
   .home-structure-label {
-    max-width: none;
-    font-size: 0.72rem;
-    line-height: 1.4;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    font-size: clamp(0.58rem, 2.7vw, 0.7rem);
+    line-height: 1.35;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .home-structure-label-line {
     display: block !important;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .home-structure-label:has(.home-structure-label-mobile) .home-structure-label-desktop {
+    display: none;
+  }
+
+  .home-structure-label-mobile {
+    display: contents;
+  }
+}
+
+@media (max-width: 380px) {
+  .home-structure-steps {
+    padding: 1.15rem 0.35rem 1.3rem;
+  }
+
+  .home-structure-number {
+    font-size: 0.85rem;
+  }
+
+  .home-structure-label {
+    font-size: 0.56rem;
+    line-height: 1.3;
   }
 }
 

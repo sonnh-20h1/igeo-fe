@@ -894,7 +894,10 @@ export const dictionaries = {
           { lines: ['Vòng Chung kết', 'Hình thức: Trực tiếp'] },
           { lines: ['Lựa chọn', 'TOP 4 thí sinh'] },
           { lines: ['Chương trình Đào tạo', 'nâng cao'] },
-          { lines: ['Tham gia Olympic Địa lý', 'Quốc tế (iGEO)'] },
+          {
+            lines: ['Tham gia Olympic Địa lý', 'Quốc tế (iGEO)'],
+            mobileLines: ['Tham gia Olympic Địa', 'lý Quốc tế (iGEO)'],
+          },
         ],
         finaleTitle: 'Olympiad Địa lý Quốc tế (iGeo)',
         finaleBody: '04 học sinh xuất sắc sẽ cùng 02 trưởng đoàn cùng nhau tham dự kì thi iGEO 2027.',
