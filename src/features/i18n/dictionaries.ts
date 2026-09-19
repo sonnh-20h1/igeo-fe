@@ -734,6 +734,12 @@ export const dictionaries = {
     home: {
       brand: 'Geography & Environment Challenge (GEC)',
       brandShort: 'GEC',
+      maintenance: {
+        title: 'Thông báo bảo trì hệ thống',
+        message:
+          'Hệ thống đang được bảo trì để nâng cấp. Một số chức năng (đăng ký / vào thi) có thể tạm thời gián đoạn. Vui lòng quay lại sau.',
+        timeNote: 'Thời gian dự kiến: sẽ cập nhật sớm.',
+      },
       nav: {
         about: 'Giới thiệu',
         why: 'Vì sao tham gia',
@@ -1740,6 +1746,12 @@ export const dictionaries = {
     home: {
       brand: 'Geography & Environment Challenge (GEC)',
       brandShort: 'GEC',
+      maintenance: {
+        title: 'System maintenance notice',
+        message:
+          'The system is undergoing maintenance. Some features (registration / taking exams) may be temporarily unavailable. Please check back later.',
+        timeNote: 'Expected schedule: to be announced.',
+      },
       nav: {
         about: 'About',
         why: 'Why join',

@@ -7,11 +7,15 @@ import { boldGecName } from '@/features/home/bold-gec-name';
 import { HomeContactForm } from '@/features/home/home-contact-form';
 import { HomeFaq } from '@/features/home/home-faq';
 import { HomeHeader } from '@/features/home/home-header';
+import { HomeMaintenanceScreen } from '@/features/home/home-maintenance-screen';
 import { useI18n } from '@/features/i18n/provider';
 
 const IGEO_TEST_ICONS = [Feather, MonitorPlay, Mountain] as const;
 
 const STRUCTURE_PATH_ICONS = [MonitorPlay, Users, Map, Trophy, GraduationCap, Globe] as const;
+
+/** Bật màn bảo trì full-screen. Tắt = false hoặc comment import + early return bên dưới. */
+const SHOW_HOME_MAINTENANCE = true;
 
 function AboutBodyParagraph({ lines }: { lines: readonly string[] }) {
   return (
@@ -92,6 +96,12 @@ function SectionHeading({ children }: { children: ReactNode }) {
 export function HomePage() {
   const { dictionary } = useI18n();
   const home = dictionary.home;
+
+  // === Bảo trì hệ thống: đặt SHOW_HOME_MAINTENANCE = false khi không cần ===
+  if (SHOW_HOME_MAINTENANCE) {
+    return <HomeMaintenanceScreen />;
+  }
+  // === /Bảo trì hệ thống ===
 
   return (
     <div id='top' className='home-page min-h-screen text-[#022648]'>
